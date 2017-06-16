@@ -1,0 +1,70 @@
+use PRPL;
+select * from EVENT_RESULT_ITEM where EVENT_RESULT_ID = 160;
+
+insert into EVENT (NAME, TITLE) values ('miltonkeynes', 'Milton Keynes');
+
+select count(*) from EVENT_RESULT;
+select count(*) from EVENT_RESULT_ITEM;
+-- select max(EVENT_RESULT_ID) from EVENT_RESULT_ITEM;
+select count(*) from ATHLETE;
+select count(*) from EVENT_LEAGUE;
+
+select * from EVENT;
+select * from EVENT_RESULT;
+select * from EVENT_RESULT_ITEM;
+-- select max(EVENT_RESULT_ID) from EVENT_RESULT_ITEM;
+select * from ATHLETE;
+select * from EVENT_LEAGUE ORDER BY EVENT_ID ASC, YEAR DESC;
+select * from EVENT_LEAGUE where YEAR = 2016 order by EVENT_ID, YEAR DESC, POINTS DESC, RUN_COUNT DESC;
+select ELI.* from EVENT_LEAGUE_ITEM ELI, EVENT_LEAGUE EL WHERE EL.ID = ELI.EVENT_LEAGUE_ID AND EL.YEAR = 2016 AND EL.EVENT_ID = 2 ORDER BY POSITION ASC;
+
+
+select EVENT_ID, YEAR, ATHLETE_ID, (SELECT CONCAT(FIRST_NAME, ' ', LAST_NAME) FROM ATHLETE WHERE ID = ATHLETE_ID), POINTS, RUN_COUNT 
+from EVENT_LEAGUE 
+where YEAR = 2015 
+order by EVENT_ID, YEAR DESC, POINTS DESC, RUN_COUNT DESC;
+
+USE PRPL;
+select distinct(RESULT_NUMBER) from EVENT_RESULT WHERE EVENT_ID = 2 ORDER BY RESULT_NUMBER DESC;
+select distinct(EVENT_RESULT_ID) from EVENT_RESULT_ITEM ORDER BY EVENT_RESULT_ID DESC;
+select ER.EVENT_ID, ER.RESULT_NUMBER, ERI.* from EVENT_RESULT_ITEM ERI, EVENT_RESULT ER WHERE ERI.EVENT_RESULT_ID = ER.ID AND ER.EVENT_ID = 2 ORDER BY EVENT_RESULT_ID DESC;
+
+select distinct(YEAR) from EVENT_LEAGUE order by EVENT_ID, YEAR DESC;
+select * from EVENT_LEAGUE_ITEM order by EVENT_LEAGUE_ID, POINTS DESC, RUN_COUNT DESC;
+
+select count(*) from EVENT_RESULT_ITEM where EVENT_RESULT_ID =  3
+select * from EVENT_RESULT_ITEM where EVENT_RESULT_ID =  3
+
+
+select * from EVENT_RESULT ORDER BY RESULT_NUMBER DESC;
+-- select * from EVENT_RESULT_ITEM ORDER BY RESULT_NUMBER DESC;
+
+delete from EVENT_RESULT where ID = 3;
+delete from EVENT_RESULT_ITEM where EVENT_RESULT_ID =  3
+delete from EVENT_LEAGUE where EVENT_ID = 2;
+delete from EVENT_LEAGUE_ITEM where EVENT_LEAGUE_ID = 30;
+delete from EVENT_LEAGUE;
+delete from EVENT_LEAGUE_ITEM;
+
+
+insert into EVENT (NAME, TITLE) values ('linfordwood', 'Linford Wood');
+commit;
+
+
+-- Athlete league position. Filter by Event and Year. Show individual Race Results
+use PRPL;
+select A.*, EL.*, ELI.* from ATHLETE A, EVENT E, EVENT_LEAGUE EL, EVENT_LEAGUE_ITEM ELI 
+where E.ID = EL.EVENT_ID AND EL.ID = ELI.EVENT_LEAGUE_ID AND A.ID = ELI.ATHLETE_ID AND A.ID = 1039585 and E.NAME = 'miltonkeynes' and EL.YEAR = 2017
+
+-- Results for a 
+select A.*, ER.*, ERI.* from ATHLETE A, EVENT E, EVENT_RESULT ER, EVENT_RESULT_ITEM ERI 
+where E.ID = ER.EVENT_ID AND ER.ID = ERI.EVENT_RESULT_ID AND A.ID = ERI.ATHLETE_ID AND A.ID = 1039585 and E.NAME = 'miltonkeynes' and ER.YEAR = 2017
+
+
+ALTER TABLE EVENT_RESULT ADD COLUMN (
+	LEAGUE_YEAR                     INTEGER UNSIGNED
+)
+
+ALTER TABLE EVENT_LEAGUE_ITEM ADD COLUMN (
+	POSITION                        INTEGER UNSIGNED NOT NULL
+)

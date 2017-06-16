@@ -1,0 +1,364 @@
+html,body
+{
+	font-family: Arial, Helvetica, sans-serif;
+	color: #55565a;
+	margin: 0px;
+	font-size: small;
+    height: 100%;
+	width: 100%;
+}
+h1
+{
+	font-size: large;
+	color: #55565a;
+	margin: auto;
+	width: 50%;
+	padding-bottom: 10px;
+	text-align: center;
+}
+h1 img
+{
+	padding-right: 5px;
+}
+h2
+{
+	font-size: large;
+	color: #55565a;
+}
+a:link,a:active,a:visited{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	text-decoration: none;
+	font-style: normal;
+/*    color: #C2D100;*/
+	color: #800080;
+}
+a.muted:link,a.muted:active,a.muted:visited{
+	color: #800080;
+}
+a:hover {
+    color: #800080;
+    text-decoration: underline;
+}
+table
+{
+    margin: 3px;
+}
+table th
+{
+	padding: 5px;
+}
+table td
+{
+}
+table.with-row-color tr:nth-child(even)
+{
+	background: lightgray;
+}
+table.with-row-color tr:nth-child(odd)
+{
+	background: #FFF;
+}
+table.with-border
+{
+	/*border: 1px solid gray;*/
+	border: 2px;
+	border-style: solid;
+	border-collapse: collapse;
+	border-color: gray;
+	/* font-size: 12px;*/
+}
+table.with-border th
+{
+	border: 1px;
+	border-style: solid;
+	border-color: lightgray;
+}
+table.with-border td
+{
+	border: 1px;
+	border-style: solid;
+	border-color: lightgray;
+	padding: 2px;
+}
+scrollable
+{
+	overflow:"scroll";
+}
+.headerText
+{
+     font-size:10px;
+}
+.headerTitle
+{
+     font-size:12px;
+}
+.contentTable
+{
+     border:collapse: seperate;
+     border:1px solid #55565a;
+     border-spacing: 1pt;
+}
+.contentTableRow
+{
+     border:collapse: seperate;
+     border:1px solid red;
+     border-spacing: 1pt;
+}
+span#form-error
+{
+	font-size: large;
+	font-weight: bold;
+	color: red;
+}
+span#form-info
+{
+	font-size: large;
+	font-weight: bold;
+	color: green;
+}
+td.form-field-error
+{
+	font-size: large;
+	font-weight: bold;
+	color: red;
+}
+td
+{
+	vertical-align: top;
+}
+td.form-field-name
+{
+	padding-right: 20px;
+	padding-bottom: 8px;
+}
+span.ok-state
+{
+	color: rgb(5,139,5);
+}
+
+span.error-state
+{
+	color: #F00;
+}
+
+div.log
+{
+	font-weight: normal;
+	background-color: black;
+}
+
+span.log-normal
+{
+	color: green;
+}
+
+span.log-warning
+{
+	font-weight: bold;
+	color: yellow;
+}
+
+span.log-error
+{
+	font-weight: bold;
+	color: red;
+}
+div#header
+{
+	clear: both;
+	float: left;
+	width: 100%;
+	/*background: #C2D100;*/
+	/* background: #8AC007; DALLEN DEBUG green theme */
+	color: #55565a;
+	padding: 0px;
+	margin: 0px;
+	height: 38px;
+	font-size: 20px;
+}
+div.header-menu
+{
+	float: left;
+}
+div.header-menu img
+{
+	width: 20px;
+	margin: 10px;
+}
+div.header-logo
+{
+	float: left;
+}
+div.header-logo img
+{
+	width: 120px;
+}
+div.header-title
+{
+	float: left;
+	padding-top: 10px;
+	padding-left: 6px;
+	margin: 0px;
+	height: 40px;
+	text-align: center;
+}
+a.header-title
+{
+    color: #800080;
+	text-decoration: none;
+}
+div.header-user-details
+{
+	float: right;
+	padding-right: 20px;
+}
+div.header-user-logout
+{
+/*	float: right;*/
+}
+div.header-navigation
+{
+	clear: both;
+	padding-top: 0px;
+	padding-left: 5px;
+	background: #cccccc;
+	width: 50px;;
+	/* font-size: medium; */
+}
+div.breadcrumb
+{
+	padding-top: 5px;
+	padding-bottom: 10px;
+	/*float: left;*/
+	/* font-size: medium; */
+}
+div.breadcrumb h1
+{
+	/* float: left;*/
+	display: inline;
+	margin: 0px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+div.breadcrumb h2
+{
+	/* float: left;*/
+	display: inline;
+	font-weight: normal;
+	font-size: small;
+	margin: 0px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+a.breadcrumb:link,a.breadcrumb:active,a.breadcrumb:visited{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	text-decoration: none;
+	font-style: normal;
+	color: #800080;
+}
+a.breadcrumb:hover {
+    text-decoration: underline;
+}
+div.menu
+{
+	float: left;
+	display: none;
+	/* background: #8AC007; DALLEN DEBUG green theme green theme green theme */
+	color: #55565a;
+	width: 150px;
+	min-height: calc(100% - 60px);
+}
+a.menu:link,a.menu:active,a.menu:visited{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	text-decoration: none;
+	font-style: normal;
+	color: #800080;
+}
+a.menu:hover {
+    color: #800080;
+    text-decoration: underline;
+}
+div.menu h1
+{
+	font-size: small;
+	padding-top: 5px;
+	margin: 0px;
+}
+div.menu h2
+{
+	font-size: small;
+	padding-top: 5px;
+	padding-left: 20px;
+	font-weight: normal;
+	margin: 0px;
+}
+div.menu table
+{
+}
+div.menu td
+{
+	padding: 1px;
+}
+div.content
+{
+	/*clear: both;*/
+	float: left;
+	margin: 5px;
+	padding-top: 5px;
+	width: calc(100% - 10px);
+    min-height: calc(100% - 75px);
+}
+div.content form
+{
+	clear; both;
+}
+div.footer
+{
+	clear: both;
+	float: left;
+	/*background: #C2D100;*/
+	/* background: #8AC007; DALLEN DEBUG green theme */
+	color: #55565a;
+	font-size: x-small;
+	width: 100%;
+	height: 22px;
+}
+div.footer-text
+{
+	padding-top: 5px;
+	padding-left: 5px;
+}
+
+div.events
+{
+	display: inline;
+}
+div.event-years
+{
+	display: inline;
+}
+
+div.events-large
+{
+	display: inline;
+}
+div.events-large span.ui-selectmenu-text
+{
+	font-size: 20px;
+}
+div.events-large span.ui-selectmenu-open
+{
+	font-size: 15px;
+}
+
+select#events-large
+{
+	height: 30px;
+	font-size: 30px;
+}
+
+div.event-select-label
+{
+	display: inline;
+}
+

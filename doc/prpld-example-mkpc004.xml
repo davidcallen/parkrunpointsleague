@@ -1,0 +1,18 @@
+<config>
+	<http>
+		<port>8080</port>
+	</http>
+
+	<logging>
+		<level>trace</level>
+		<debug-html>true</debug-html>
+		<trace-html>false</trace-html>
+	</logging>
+
+	<results>
+		<recreate-all-results>false</recreate-all-results>
+		<use-history-cache>false</use-history-cache>
+		<recreate-all-leagues>false</recreate-all-leagues>
+	</results>
+
+</config>
