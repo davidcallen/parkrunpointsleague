@@ -23,6 +23,7 @@ std::string BaseHandler::getHeader(const std::string& pageTitle, const bool incl
     std::string header;
     header = "<html><head><title>ParkRun Points League</title>\n";
     header += "<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\" type=\"text/css\"></link>\n";
+    header += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
     header += "  <script src=\"https://code.jquery.com/jquery-1.12.4.js\"></script>\n";
     if(useOurJQueryFiles)
     {

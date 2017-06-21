@@ -29,37 +29,15 @@ void FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
         bool isBinaryFile;
         const std::string requestURIcontentType = getContentType(requestURI, isBinaryFile);
 
-        const std::string fileNameAndPath("/mnt/hdd/d/prpl/trunk/assets/" + requestURI);
-/*
-isBinaryFile = false;
-        if(isBinaryFile)
-        {
-            std::ostringstream ostr;
-            Poco::Base64Encoder base64encoder(ostr);
+        const std::string fileNameAndPath("../assets/" + requestURI);
 
-            std::ifstream inputFileStream(fileNameAndPath.c_str(), std::ios_base::in);
-            std::copy(std::istreambuf_iterator<char>(inputFileStream),
-                        std::istreambuf_iterator<char>(),
-                        std::ostreambuf_iterator<char>(base64encoder));
-            base64encoder.close();
-            //response.setChunkedTransferEncoding(true);
-            response.setContentType(requestURIcontentType);
-
-            std::string output(ostr.str());
-            response.sendBuffer(output.c_str(), output.size());
-        }
-        else
-        {
-*/
-            response.sendFile(fileNameAndPath, requestURIcontentType);
-//        }
+        response.sendFile(fileNameAndPath, requestURIcontentType);
 	}
 	catch (Poco::Exception& e)
 	{
 	    response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_NOT_FOUND, Poco::Net::HTTPResponse::HTTP_REASON_NOT_FOUND);
 	    response.send();
 
-//		std::cerr << e.displayText() << std::endl;
 		poco_error_f2(Poco::Logger::root(), "HTTP request %s had error %s", request.getURI(), e.displayText());
 	}
 }

@@ -404,18 +404,7 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
         const EventResult* pEventResult = static_cast<EventResult*>(*iterResult);
 
         // Calculate which League year from the Events birthday
-        unsigned long leagueYear = 0;
-        Poco::DateTime birthdayCheck;
-        birthdayCheck.assign(pEventResult->date.year(), event.birthday.value().month(), event.birthday.value().day());
-
-        if(pEventResult->date >= birthdayCheck)
-        {
-            leagueYear = pEventResult->date.year();
-        }
-        else
-        {
-            leagueYear = pEventResult->date.year() - 1;
-        }
+        const unsigned long leagueYear = getLeagueYear(event.birthday.value(), pEventResult->date);
         createLeagueForYear = false;
 
         EventLeague eventLeague;
@@ -469,6 +458,7 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
                 }
             }
         }
+        EventResultItemDataModel::free(dbEventResultItems);
 
         // If we have moved to a different League year the write results to database and commit
         if(lastLeagueYear != 0 && leagueYear != lastLeagueYear && !eventLeagueItemsMapByAthlete.empty())
@@ -484,6 +474,9 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
     {
         result = processEventLeagueForYear(event, lastLeagueYear, eventLeagueItemsMapByAthlete);
     }
+
+    EventLeagueItemDataModel::free(eventLeagueItemsMapByAthlete);
+    EventResultDataModel::free(dbEventResults);
 
     return result;
 }

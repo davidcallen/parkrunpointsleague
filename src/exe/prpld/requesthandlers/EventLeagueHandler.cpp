@@ -185,7 +185,7 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
                 responseStream << "</tr>\n";
             }
             responseStream << "</table>\n";
-            responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%b-%d") << "</p>";
+            responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%d %b %Y") << "</p>";
             responseStream << "</body></html>\n";
 
             EventLeagueDataModel::free(eventLeagues);

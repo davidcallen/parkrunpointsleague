@@ -1,4 +1,6 @@
 bin/
+data/results/*
+sql/db-backup/*
 src/CMakeCache.txt
 src/CMakeFiles/
 src/Makefile

@@ -29,7 +29,7 @@
 
 Cache::Cache()
 {
-	_dataResultsPath = Poco::Util::Application::instance().config().getString("data.results.path", "../data/results/");
+	_dataResultsPath = Poco::Util::Application::instance().config().getString("results.data-path", "../data/results/");
 }
 
 bool Cache::checkFileExists(const std::string& fileNameAndPath)

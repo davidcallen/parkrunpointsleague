@@ -10,6 +10,10 @@
 	</logging>
 
 	<results>
+		<data-path>../data/results/</data-path>
+		<sleep-between-runs-seconds>30</sleep-between-runs-seconds>
+		<non-parkrun-day-slow-down-factor>4</non-parkrun-day-slow-down-factor>
+		
 		<recreate-all-results>false</recreate-all-results>
 		<use-history-cache>false</use-history-cache>
 		<recreate-all-leagues>false</recreate-all-leagues>
