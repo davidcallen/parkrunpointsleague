@@ -25,6 +25,7 @@ void GetLatestResultHandler::handleRequest(Poco::Net::HTTPServerRequest& request
 	{
 		response.setChunkedTransferEncoding(true);
 		response.setContentType("text/html");
+		response.set("cache-control", "max-age=0");
 
 		Poco::DateTime now;
 		std::string timeString(Poco::DateTimeFormatter::format(now, Poco::DateTimeFormat::SORTABLE_FORMAT));

@@ -11,8 +11,8 @@
 class EventLeagueItemDataModel
 {
 public:
-    static bool fetch(const unsigned long eventLeagueID, EventLeagueItems& eventLeagues);
-    static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventLeagueID, EventLeagueItems& eventLeagues);
+    static bool fetch(const unsigned long eventLeagueID, const std::string& orderByFieldName, EventLeagueItems& eventLeagues);
+    static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventLeagueID, const std::string& orderByFieldName, EventLeagueItems& eventLeagues);
 
     static bool fetch(const unsigned long eventLeagueID, const unsigned long athleteID, EventLeagueItem& eventLeague);
     static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventLeagueID, const unsigned long athleteID, EventLeagueItem& eventLeague);

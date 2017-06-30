@@ -24,28 +24,41 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
 	try
 	{
         const std::string& requestURI = request.getURI();
-
-        std::vector<std::string> uriSegments;
         Poco::URI uri(requestURI);
-        uri.getPathSegments(uriSegments);
 
 		response.setChunkedTransferEncoding(true);
 		response.setContentType("text/html");
+		response.set("cache-control", "max-age=0");
 
         // Get query arguments
-        unsigned long year = 0;
-        std::string eventName = "miltonkeynes";
-        if(uriSegments.size() > 1)
+        std::string requestFilterByEventName;
+        unsigned long requestFilterByYear = 0;
+        std::string requestFilterByGender;
+
+        Poco::URI::QueryParameters queryParameters = uri.getQueryParameters();
+        Poco::URI::QueryParameters::const_iterator iterQueryParams;
+        for(iterQueryParams = queryParameters.begin(); iterQueryParams != queryParameters.end(); ++iterQueryParams)
         {
-            eventName = uriSegments[1];
-        }
-        if(uriSegments.size() > 2)
-        {
-            year = Poco::NumberParser::parseUnsigned(uriSegments[2]);
-        }
+			if(iterQueryParams->first == "e")
+			{
+				requestFilterByEventName = iterQueryParams->second;
+			}
+			else if(iterQueryParams->first == "g")
+			{
+				requestFilterByGender = iterQueryParams->second;
+			}
+			else if(iterQueryParams->first == "y")
+			{
+				unsigned int yearTemp = 0;
+				if(Poco::NumberParser::tryParseUnsigned(iterQueryParams->second, yearTemp))
+				{
+					requestFilterByYear = yearTemp;
+				}
+			}
+		}
 
 		Event event;
-		if(!EventDataModel::fetch(eventName, event))
+		if(!EventDataModel::fetch(requestFilterByEventName, event))
 		{
 		    responseProblem(request, response, "Event League", "Sorry, this ParkRun is not currently in our database.");
 		}
@@ -60,18 +73,28 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             for(iterLeague = eventLeagues.begin(); iterLeague != eventLeagues.end(); ++iterLeague)
             {
                 EventLeague* pEventLeague = static_cast<EventLeague*>(*iterLeague);
-                if(year == 0 || pEventLeague->year == year)
+                if(requestFilterByYear == 0 || pEventLeague->year == requestFilterByYear)
                 {
-                    year = pEventLeague->year;
+                    requestFilterByYear = pEventLeague->year;
                     pEventLeagueFound = pEventLeague;
                     break;
                 }
             }
 
+            if(requestFilterByYear == 0)
+            {
+                responseProblem(request, response, event.title + " League", "Sorry, this ParkRun is not currently in our database.");
+            }
+
 			EventLeagueItems eventLeagueItems;
 			if(pEventLeagueFound != NULL)
             {
-                EventLeagueItemDataModel::fetch(pEventLeagueFound->ID, eventLeagueItems);
+                std::string orderByFieldName = "POSITION";
+                if(!requestFilterByGender.empty())
+                {
+                    orderByFieldName = "GENDER_POSITION";
+                }
+                EventLeagueItemDataModel::fetch(pEventLeagueFound->ID, orderByFieldName, eventLeagueItems);
             }
 
             if(event.birthday.isNull())
@@ -80,26 +103,12 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             }
 
             std::ostream& responseStream = response.send();
-            std::string additionalHeader;
-/*            additionalHeader += "  <script>\n";
-            additionalHeader += "    $(document).ready(function(){ \n";
-            additionalHeader += "      $(\"#events\").selectmenu({\n";
-            additionalHeader += "        select: function( event, data ) {\n";
-            additionalHeader += "          window.location.href = \"/league/\" + data.item.value + \"/" + Poco::NumberFormatter::format(year) + "\";\n";
-            additionalHeader += "        }\n";
-            additionalHeader += "      });\n";
-            additionalHeader += "      $(\"#eventYear\").selectmenu({\n";
-            additionalHeader += "        select: function( event, data ) {\n";
-            additionalHeader += "          window.location.href = \"/league/" + eventName + "/\" + data.item.value;\n";
-            additionalHeader += "        }\n";
-            additionalHeader += "      });\n";
-            additionalHeader += "    });\n";
-            additionalHeader += "  </script>\n";*/
-            std::string pageTitle = event.title + " League for " + Poco::NumberFormatter::format(year);
 
+            std::string additionalHeader;
+            std::string pageTitle = event.title + " League for " + Poco::NumberFormatter::format(requestFilterByYear);
             responseStream << getHeader(pageTitle, true, additionalHeader);
 
-            responseStream << "<div class=\"events\" ><select name=\"events\" id=\"events\" >\n";
+            responseStream << "<div class=\"events\" ><select name=\"eventName\" id=\"eventName\" >\n";
             Events events;
             EventDataModel::fetch(events);
             Events::const_iterator iterEvent;
@@ -108,7 +117,7 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
                 const Event* pEvent = static_cast<Event*>(*iterEvent);
 
                 std::string selected;
-                if(eventName == pEvent->name)
+                if(requestFilterByEventName == pEvent->name)
                 {
                     selected = "selected=\"selected\"";
                 }
@@ -125,7 +134,7 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
 
                 std::string yearOptionStr = Poco::NumberFormatter::format(pEventLeague->year);
                 std::string selected;
-                if(year == pEventLeague->year)
+                if(requestFilterByYear == pEventLeague->year)
                 {
                     selected = "selected=\"selected\"";
                 }
@@ -133,18 +142,43 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             }
             responseStream << "</select></div>\n";
 
+            // JavaScript for dropdown gender selection
+            std::string genderSelected;
+            responseStream << "<div class=\"gender\"><select name=\"gender\" id=\"gender\" >\n";
+            if(requestFilterByGender.empty())
+            {
+                genderSelected = "selected=\"selected\"";
+            }
+            responseStream << "<option " << genderSelected << " value=\"\">Combined</option>\n";
+            genderSelected = "";
+            if(requestFilterByGender == Athlete::GENDER_CHAR_MALE)
+            {
+                genderSelected = "selected=\"selected\"";
+            }
+            responseStream << "<option " << genderSelected << " value=\"" << Athlete::GENDER_CHAR_MALE << "\">" << Athlete::GENDER_CHAR_MALE << "</option>\n";
+            genderSelected = "";
+            if(requestFilterByGender == Athlete::GENDER_CHAR_FEMALE)
+            {
+                genderSelected = "selected=\"selected\"";
+            }
+            responseStream << "<option " << genderSelected << " value=\"" << Athlete::GENDER_CHAR_FEMALE << "\">" << Athlete::GENDER_CHAR_FEMALE << "</option>\n";
+            responseStream << "</select></div>\n";
+            responseStream << "<button onClick=\"bntClickGO(this.form)\">GO</button>\n";
+
             // Prevent delayed render of "select" jquery menu by putting script in body here (rather than in header)
             responseStream << "  <script>\n";
-            responseStream << "      $(\"#events\").selectmenu({\n";
-            responseStream << "        select: function( event, data ) {\n";
-            responseStream << "          window.location.href = \"/league/\" + data.item.value + \"/" + Poco::NumberFormatter::format(year) + "\";\n";
-            responseStream << "        }\n";
+            responseStream << "      $(\"#eventName\").selectmenu({\n";
             responseStream << "      });\n";
             responseStream << "      $(\"#eventYear\").selectmenu({\n";
-            responseStream << "        select: function( event, data ) {\n";
-            responseStream << "          window.location.href = \"/league/" + eventName + "/\" + data.item.value;\n";
-            responseStream << "        }\n";
             responseStream << "      });\n";
+            responseStream << "      $(\"#gender\").selectmenu({\n";
+            responseStream << "      });\n";
+            responseStream << "      function bntClickGO(form) {\n";
+            responseStream << "        var eventName = $(\"#eventName\").val();\n";
+            responseStream << "        var year = $(\"#eventYear\").val();\n";
+            responseStream << "        var gender = $(\"#gender\").val();\n";
+            responseStream << "        window.location.href = \"/league?e=\" + eventName + \"&y=\" + year + \"&g=\" + gender;\n";
+            responseStream << "      }\n";
             responseStream << "  </script>\n";
 
             responseStream << "<table>\n";
@@ -159,7 +193,7 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             if(!eventLeagueItems.empty())
             {
                 // TODO : this could become problematic to scale when many events and many athletes !!
-                // Use and athletes cache
+                // Use an athletes cache
                 AthleteDataModel::fetch(athletesMap);
             }
 
@@ -167,6 +201,14 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             for(iterLeagueItem = eventLeagueItems.begin(); iterLeagueItem != eventLeagueItems.end(); ++iterLeagueItem)
             {
                 EventLeagueItem* pEventLeagueItem = static_cast<EventLeagueItem*>(*iterLeagueItem);
+
+                if(!requestFilterByGender.empty())
+                {
+                    if(pEventLeagueItem->gender != requestFilterByGender)
+                    {
+                        continue;
+                    }
+                }
 
                 std::string athleteName;
                 AthletesMap::const_iterator iterAthlete = athletesMap.find(pEventLeagueItem->athleteID);
@@ -177,9 +219,16 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
                 }
 
                 responseStream << "<tr>\n";
-                responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->position) + "</td>";
-                responseStream << "<td><a href=\"/athlete/" +event.name + "/" + Poco::NumberFormatter::format(pEventLeagueItem->athleteID)
-                                    + "?year=" + Poco::NumberFormatter::format(year) + "\">" + athleteName + "</a></td>";
+                if(requestFilterByGender.empty())
+                {
+                    responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->position) + "</td>";
+                }
+                else
+                {
+                    responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->genderPosition) + "</td>";
+                }
+                responseStream << "<td><a href=\"/athlete?e=" + event.name + "&a=" + Poco::NumberFormatter::format(pEventLeagueItem->athleteID)
+                                    + "&y=" + Poco::NumberFormatter::format(requestFilterByYear) + "\">" + athleteName + "</a></td>";
                 responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->points) + "</td>";
                 responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->runCount) + "</td>";
                 responseStream << "</tr>\n";

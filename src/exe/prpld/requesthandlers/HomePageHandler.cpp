@@ -12,6 +12,7 @@ void HomePageHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 	{
 		response.setChunkedTransferEncoding(true);
 		response.setContentType("text/html");
+		response.set("cache-control", "max-age=60");
 
         Events events;
         EventDataModel::fetch(events);
@@ -23,7 +24,7 @@ void HomePageHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
         additionalHeader += "    $(document).ready(function(){ \n";
         additionalHeader += "      $( \"#events-large\" ).selectmenu({\n";
         additionalHeader += "        select: function( event, data ) {\n";
-        additionalHeader += "          window.location.href = \"/league/\" + data.item.value;\n";
+        additionalHeader += "          window.location.href = \"/league?e=\" + data.item.value;\n";
         additionalHeader += "        }\n";
         additionalHeader += "      });\n";
         additionalHeader += "    });\n";

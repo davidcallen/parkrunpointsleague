@@ -13,13 +13,16 @@ class EventLeagueItem
 {
 public:
 	EventLeagueItem();
-	EventLeagueItem(unsigned long _ID, unsigned long _eventLeagueID,
-					unsigned long _athleteID, unsigned long _points, unsigned long _runCount);
+	EventLeagueItem(const unsigned long _ID, const unsigned long _eventLeagueID,
+					const unsigned long _athleteID, const std::string& _gender,
+					const unsigned long _points, const unsigned long _runCount);
 
 public:
     unsigned long ID;
 	unsigned long eventLeagueID;
 	unsigned long position;
+	unsigned long genderPosition;
+	std::string gender;
 	unsigned long athleteID;
 	unsigned long points;
 	unsigned long runCount;
@@ -28,21 +31,5 @@ public:
 typedef std::vector<EventLeagueItem*> EventLeagueItems;
 typedef std::map<const unsigned long, EventLeagueItem*> EventLeagueItemsMapByAthlete;
 
-/*
-struct CompareByRunPoints : public std::binary_function <bool, std::string, std::string>
-{
-  bool operator() (const EventLeagueItem& lhs, const std::string& rhs)
-  {
-    // return true if lhs < rhs
-    // return false otherwise
-
-    // step 1:  compare years.  if lhs.year < rhs.year, return true.  else, continue
-    // step 2: compare months.  if lhs.month < rhs.month, return true.  else, continue.
-    //    note:  don't just compare the strings, else "AUG" < "JAN" etc
-    // step 3: compare days.  if lhs.day < rhs.day, return true.  else, return false.
-  }
-};
-typedef std::map<const unsigned long, EventLeagueItem*, CompareByRunPoints> EventLeagueItemsMapByAthlete;
-*/
 
 #endif // EventLeagueItem_INCLUDED

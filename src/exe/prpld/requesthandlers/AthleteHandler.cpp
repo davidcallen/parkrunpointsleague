@@ -24,42 +24,39 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 	try
 	{
         const std::string& requestURI = request.getURI();
-
-        std::vector<std::string> uriSegments;
         Poco::URI uri(requestURI);
-        uri.getPathSegments(uriSegments);
-
 
 		response.setChunkedTransferEncoding(true);
 		response.setContentType("text/html");
+		response.set("cache-control", "max-age=0");
 
         // Get query arguments
-        unsigned athleteID = 0;
-        std::string eventName = "";
-        unsigned int year = 0;
-        if(uriSegments.size() > 1)
-        {
-            eventName = uriSegments[1];
-        }
-        if(uriSegments.size() > 2)
-        {
-            if(!Poco::NumberParser::tryParseUnsigned(uriSegments[2], athleteID))
-            {
-                responseProblem(request, response, "Unknown athlete ID");
+        unsigned requestFilterByAthleteID = 0;
+        std::string requestFilterByEventName = "";
+        unsigned int requestFilterByYear = 0;
 
-                return;
-            }
-        }
         Poco::URI::QueryParameters queryParameters = uri.getQueryParameters();
         Poco::URI::QueryParameters::const_iterator iterQueryParams;
         for(iterQueryParams = queryParameters.begin(); iterQueryParams != queryParameters.end(); ++iterQueryParams)
         {
-			if(iterQueryParams->first == "year")
+            if(iterQueryParams->first == "e")
+            {
+                requestFilterByEventName = iterQueryParams->second;
+            }
+            else if(iterQueryParams->first == "a")
+            {
+                unsigned int requestFilterByAthleteIDTemp = 0;
+                if(Poco::NumberParser::tryParseUnsigned(iterQueryParams->second, requestFilterByAthleteIDTemp))
+                {
+                    requestFilterByAthleteID = requestFilterByAthleteIDTemp;
+                }
+            }
+			else if(iterQueryParams->first == "y")
 			{
-				unsigned int yearTemp = 0;
-				if(Poco::NumberParser::tryParseUnsigned(iterQueryParams->second, yearTemp))
+				unsigned int requestFilterByYearTemp = 0;
+				if(Poco::NumberParser::tryParseUnsigned(iterQueryParams->second, requestFilterByYearTemp))
 				{
-					year = yearTemp;
+					requestFilterByYear = requestFilterByYearTemp;
 				}
 			}
 		}
@@ -67,13 +64,13 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
         bool validateOK = true;
 
 		Event event;
-		if(!EventDataModel::fetch(eventName, event))
+		if(!EventDataModel::fetch(requestFilterByEventName, event))
 		{
 		    responseProblem(request, response, "Sorry, this ParkRun is not currently in our database.");
 		    validateOK = false;
 		}
 		Athlete athlete;
-		if(!AthleteDataModel::fetch(athleteID, athlete))
+		if(!AthleteDataModel::fetch(requestFilterByAthleteID, athlete))
 		{
 		    responseProblem(request, response, "Sorry, this Athlete is not currently in our database.");
 		    validateOK = false;
@@ -88,13 +85,13 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 			// Find the index of the League for specified query year, so can open accordian tab for this year.
 			unsigned long indexOfLeagueForYear = 0;
 			bool foundIndexOfLeagueForYear = false;
-			if(year != 0)
+			if(requestFilterByYear != 0)
 			{
 				EventLeagues::const_iterator iterLeague;
 				for(iterLeague = eventLeagues.begin(); iterLeague != eventLeagues.end(); ++iterLeague)
 				{
 					EventLeague* pEventLeague = static_cast<EventLeague*>(*iterLeague);
-					if(pEventLeague->year == year)
+					if(pEventLeague->year == requestFilterByYear)
 					{
 						foundIndexOfLeagueForYear = true;
 						break;
@@ -133,7 +130,7 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
                 EventLeague* pEventLeague = static_cast<EventLeague*>(*iterLeague);
 
                 EventLeagueItem eventLeagueItem;
-                if(EventLeagueItemDataModel::fetch(pEventLeague->ID, athleteID, eventLeagueItem))
+                if(EventLeagueItemDataModel::fetch(pEventLeague->ID, requestFilterByAthleteID, eventLeagueItem))
                 {
                     responseStream << "<p>Position " + Poco::NumberFormatter::format(eventLeagueItem.position) + " in " << pEventLeague->year << " with " + Poco::NumberFormatter::format(eventLeagueItem.points) + " points and " + Poco::NumberFormatter::format(eventLeagueItem.runCount) + " runs</p>\n";
                     responseStream << "<div id='athlete-event-league-results'>\n";
@@ -154,7 +151,7 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
                         EventResult* pEventResult = static_cast<EventResult*>(*iterEventResult);
 
                         EventResultItem eventResultItem;
-                        if(EventResultItemDataModel::fetch(pEventResult->ID, athleteID, eventResultItem))
+                        if(EventResultItemDataModel::fetch(pEventResult->ID, requestFilterByAthleteID, eventResultItem))
                         {
                             responseStream << "<tr>\n";
                             responseStream << "<td>" + Poco::NumberFormatter::format(pEventResult->resultNumber) + "</td>\n";

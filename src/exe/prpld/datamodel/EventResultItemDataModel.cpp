@@ -22,11 +22,12 @@ STATIC bool EventResultItemDataModel::fetch(Poco::Data::Session& dbSession, cons
     EventResultItem tmpEventResultItem;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "select ID, EVENT_RESULT_ID, POSITION, GENDER_POSITION, ATHLETE_ID, DURATION_SECS from EVENT_RESULT_ITEM where EVENT_RESULT_ID = ? order by POSITION ASC",
+	dbStmt << "select ID, EVENT_RESULT_ID, POSITION, GENDER_POSITION, GENDER, ATHLETE_ID, DURATION_SECS from EVENT_RESULT_ITEM where EVENT_RESULT_ID = ? order by POSITION ASC",
 		   Poco::Data::Keywords::into(tmpEventResultItem.ID),
 		   Poco::Data::Keywords::into(tmpEventResultItem.eventResultID),
 		   Poco::Data::Keywords::into(tmpEventResultItem.position),
 		   Poco::Data::Keywords::into(tmpEventResultItem.genderPosition),
+		   Poco::Data::Keywords::into(tmpEventResultItem.gender),
 		   Poco::Data::Keywords::into(tmpEventResultItem.athleteID),
 		   Poco::Data::Keywords::into(tmpEventResultItem.durationSecs),
 		   Poco::Data::Keywords::useRef(eventResultID),
@@ -59,11 +60,12 @@ STATIC bool EventResultItemDataModel::fetch(Poco::Data::Session& dbSession, cons
     bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "select ID, EVENT_RESULT_ID, POSITION, GENDER_POSITION, ATHLETE_ID, DURATION_SECS from EVENT_RESULT_ITEM where EVENT_RESULT_ID = ? and ATHLETE_ID = ? order by POSITION ASC",
+	dbStmt << "select ID, EVENT_RESULT_ID, POSITION, GENDER_POSITION, GENDER, ATHLETE_ID, DURATION_SECS from EVENT_RESULT_ITEM where EVENT_RESULT_ID = ? and ATHLETE_ID = ? order by POSITION ASC",
 		   Poco::Data::Keywords::into(eventResultItem.ID),
 		   Poco::Data::Keywords::into(eventResultItem.eventResultID),
 		   Poco::Data::Keywords::into(eventResultItem.position),
 		   Poco::Data::Keywords::into(eventResultItem.genderPosition),
+		   Poco::Data::Keywords::into(eventResultItem.gender),
 		   Poco::Data::Keywords::into(eventResultItem.athleteID),
 		   Poco::Data::Keywords::into(eventResultItem.durationSecs),
 		   Poco::Data::Keywords::useRef(eventResultID),
@@ -107,10 +109,11 @@ STATIC bool EventResultItemDataModel::insert(Poco::Data::Session& dbSession, Eve
     bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "insert into EVENT_RESULT_ITEM (EVENT_RESULT_ID, POSITION, GENDER_POSITION, ATHLETE_ID, DURATION_SECS) values (?, ?, ?, ?, ?)",
+	dbStmt << "insert into EVENT_RESULT_ITEM (EVENT_RESULT_ID, POSITION, GENDER_POSITION, GENDER, ATHLETE_ID, DURATION_SECS) values (?, ?, ?, ?, ?, ?)",
 		   Poco::Data::Keywords::useRef(pEventResultItem->eventResultID),
 		   Poco::Data::Keywords::useRef(pEventResultItem->position),
 		   Poco::Data::Keywords::useRef(pEventResultItem->genderPosition),
+		   Poco::Data::Keywords::useRef(pEventResultItem->gender),
 		   Poco::Data::Keywords::useRef(pEventResultItem->athleteID),
 		   Poco::Data::Keywords::useRef(pEventResultItem->durationSecs),
 		   Poco::Data::Keywords::now;

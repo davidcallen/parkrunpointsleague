@@ -9,14 +9,15 @@
 #include <algorithm>
 #include <utility>
 
-STATIC bool EventLeagueItemDataModel::fetch(const unsigned long eventLeagueID, EventLeagueItems& eventLeagueItems)
+STATIC bool EventLeagueItemDataModel::fetch(const unsigned long eventLeagueID, const std::string& orderByFieldName, EventLeagueItems& eventLeagueItems)
 {
     Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return fetch(dbSession, eventLeagueID, eventLeagueItems);
+    return fetch(dbSession, eventLeagueID, orderByFieldName, eventLeagueItems);
 }
 
-STATIC bool EventLeagueItemDataModel::fetch(Poco::Data::Session& dbSession, const unsigned long eventLeagueID, EventLeagueItems& eventLeagueItems)
+STATIC bool EventLeagueItemDataModel::fetch(Poco::Data::Session& dbSession, const unsigned long eventLeagueID,
+                                            const std::string& orderByFieldName, EventLeagueItems& eventLeagueItems)
 {
     bool result = true;
 
@@ -24,11 +25,25 @@ STATIC bool EventLeagueItemDataModel::fetch(Poco::Data::Session& dbSession, cons
 
     EventLeagueItem tmpEventLeagueItem;
 
+    std::string sqlOrderBy;
+    if(!orderByFieldName.empty())
+    {
+        sqlOrderBy = " ORDER BY " + orderByFieldName + " ASC";
+    }
+/*
+    std::string sqlWhere;
+    if(!whereGenderEquals.empty())
+    {
+        sqlWhere = " AND GENDER in (?) ";
+    }
+*/
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "select ID, EVENT_LEAGUE_ID, POSITION, ATHLETE_ID, POINTS, RUN_COUNT from EVENT_LEAGUE_ITEM where EVENT_LEAGUE_ID = ? ORDER BY POSITION ASC",
+	dbStmt << "select ID, EVENT_LEAGUE_ID, POSITION, GENDER_POSITION, GENDER, ATHLETE_ID, POINTS, RUN_COUNT from EVENT_LEAGUE_ITEM where EVENT_LEAGUE_ID = ?" + sqlOrderBy,
 		   Poco::Data::Keywords::into(tmpEventLeagueItem.ID),
 		   Poco::Data::Keywords::into(tmpEventLeagueItem.eventLeagueID),
 		   Poco::Data::Keywords::into(tmpEventLeagueItem.position),
+		   Poco::Data::Keywords::into(tmpEventLeagueItem.genderPosition),
+		   Poco::Data::Keywords::into(tmpEventLeagueItem.gender),
 		   Poco::Data::Keywords::into(tmpEventLeagueItem.athleteID),
 		   Poco::Data::Keywords::into(tmpEventLeagueItem.points),
 		   Poco::Data::Keywords::into(tmpEventLeagueItem.runCount),
@@ -61,10 +76,12 @@ STATIC bool EventLeagueItemDataModel::fetch(Poco::Data::Session& dbSession, cons
     bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "select ID, EVENT_LEAGUE_ID, POSITION, ATHLETE_ID, POINTS, RUN_COUNT from EVENT_LEAGUE_ITEM where EVENT_LEAGUE_ID = ? AND ATHLETE_ID = ? ORDER BY POSITION ASC",
+	dbStmt << "select ID, EVENT_LEAGUE_ID, POSITION, GENDER_POSITION, GENDER, ATHLETE_ID, POINTS, RUN_COUNT from EVENT_LEAGUE_ITEM where EVENT_LEAGUE_ID = ? AND ATHLETE_ID = ?",
         Poco::Data::Keywords::into(eventLeagueItem.ID),
         Poco::Data::Keywords::into(eventLeagueItem.eventLeagueID),
         Poco::Data::Keywords::into(eventLeagueItem.position),
+        Poco::Data::Keywords::into(eventLeagueItem.genderPosition),
+        Poco::Data::Keywords::into(eventLeagueItem.gender),
         Poco::Data::Keywords::into(eventLeagueItem.athleteID),
         Poco::Data::Keywords::into(eventLeagueItem.points),
         Poco::Data::Keywords::into(eventLeagueItem.runCount),
@@ -89,9 +106,11 @@ STATIC bool EventLeagueItemDataModel::insert(Poco::Data::Session& dbSession, Eve
     bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "insert into EVENT_LEAGUE_ITEM (EVENT_LEAGUE_ID, POSITION, ATHLETE_ID, POINTS, RUN_COUNT) values (?, ?, ?, ?, ?)",
+	dbStmt << "insert into EVENT_LEAGUE_ITEM (EVENT_LEAGUE_ID, POSITION, GENDER_POSITION, GENDER, ATHLETE_ID, POINTS, RUN_COUNT) values (?, ?, ?, ?, ?, ?, ?)",
 		   Poco::Data::Keywords::useRef(pEventLeagueItem->eventLeagueID),
 		   Poco::Data::Keywords::useRef(pEventLeagueItem->position),
+		   Poco::Data::Keywords::useRef(pEventLeagueItem->genderPosition),
+		   Poco::Data::Keywords::useRef(pEventLeagueItem->gender),
 		   Poco::Data::Keywords::useRef(pEventLeagueItem->athleteID),
 		   Poco::Data::Keywords::useRef(pEventLeagueItem->points),
 		   Poco::Data::Keywords::useRef(pEventLeagueItem->runCount),

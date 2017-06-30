@@ -272,7 +272,7 @@ bool EventHistoryScraper::parseResultsTable(const GumboNode* pTableNode)
 					if (_debugHTML)
 					{
 						poco_information(Poco::Logger::root(),
-										 "ResultNumber [" + resultNumberStr
+										 _event.name + " ResultNumber [" + resultNumberStr
 										 + "], Date [" + resultDateStr + " (" + Poco::DateTimeFormatter::format(resultDate, "%Y-%m-%d") + ")]");
 					}
                     EventResult* pEventResult = new EventResult(0, resultNumber, _event.ID, resultDate, Poco::NULL_GENERIC);
@@ -281,7 +281,7 @@ bool EventHistoryScraper::parseResultsTable(const GumboNode* pTableNode)
 				else
                 {
                     poco_trace(Poco::Logger::root(),
-                                     "Failed data with ResultNumber [" + resultNumberStr
+                                     "Failed scraping for data with ResultNumber [" + resultNumberStr
 										 + "], Date [" + resultDateStr + " (" + Poco::DateTimeFormatter::format(resultDate, "%Y-%m-%d") + ")]");
                 }
 			}

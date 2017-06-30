@@ -398,12 +398,12 @@ bool ResultsScraper::parseResultsTable(const GumboNode* pTableNode)
                     EventResultItem* pEventResultItem = NULL;
                     if(athleteName == Athlete::NAME_UNKNOWN)
                     {
-                        pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition,
+                        pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition, Athlete::GENDER_CHAR_MALE,
                                                                                 Poco::NULL_GENERIC, Poco::NULL_GENERIC);
                     }
                     else
                     {
-                        pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition,
+                        pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition, genderStr,
                                                                                 athleteNumber, durationTimespan.totalSeconds());
                         Athlete* pAthlete = new Athlete(athleteNumber, athleteName, genderStr);
                         _athletes.push_back(pAthlete);

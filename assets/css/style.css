@@ -6,6 +6,7 @@ html,body
 	/* font-size: small; */
     height: 100%;
 	width: 100%;
+	padding: 2px;
 }
 h1
 {
@@ -171,7 +172,6 @@ div#header
 	/*background: #C2D100;*/
 	/* background: #8AC007; DALLEN DEBUG green theme */
 	color: #55565a;
-	padding: 0px;
 	margin: 0px;
 	height: 38px;
 	font-size: larger;
@@ -337,6 +337,10 @@ div.event-years
 {
 	display: inline;
 }
+div.gender
+{
+	display: inline;
+}
 
 div.events-large
 {
@@ -349,6 +353,10 @@ div.events-large span.ui-selectmenu-text
 div.events-large span.ui-selectmenu-open
 {
 	font-size: 15px;
+}
+div.gender-large
+{
+	display: inline;
 }
 
 select#events-large

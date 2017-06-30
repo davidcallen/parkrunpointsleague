@@ -32,77 +32,87 @@ ResultsControllerTimer::ResultsControllerTimer() :
 
 void ResultsControllerTimer::onTimer(Poco::Timer& timer)
 {
-    // Run from ResultsHarveter Timer Thread
-
-    // TODO : ensure this timer callback wont be fired if already in progress. Check Poco Timer functionality.
-    // Otherwise if running slow, then could overload server with duplicate processing.
-
-    // Check if we are not a popular ParkRun day (usually Saturday or national holiday). If so then slow down our harvesting by factor of X
-    const unsigned long nonParkRunDaySlowDownFactor = Poco::Util::Application::instance().config().getInt("results.non-parkrun-day-slow-down-factor", 10);
-
-    // TODO : this does not cater for public holidays and is not very international. Use xerces calendar.
-    Poco::DateTime now;
-    if(now.dayOfWeek() != Poco::DateTime::SATURDAY)
+    try
     {
-        _ignoreCounter++;
-        if(_ignoreCounter < nonParkRunDaySlowDownFactor)
-        {
-            poco_trace(Poco::Logger::root(), "Skipping results harvesting since this is not a usual ParkRun day.");
-            return;
-        }
-        _ignoreCounter = 0;
-    }
-    else
-    {
-        if(now.hour() < 9 || now.hour() > 14)
+        // Run from ResultsHarveter Timer Thread
+
+        // TODO : ensure this timer callback wont be fired if already in progress. Check Poco Timer functionality.
+        // Otherwise if running slow, then could overload server with duplicate processing.
+
+        // Check if we are not a popular ParkRun day (usually Saturday or national holiday). If so then slow down our harvesting by factor of X
+        const unsigned long nonParkRunDaySlowDownFactor = Poco::Util::Application::instance().config().getInt("results.non-parkrun-day-slow-down-factor", 10);
+
+        // TODO : this does not cater for public holidays and is not very international. Use xerces calendar.
+        Poco::DateTime now;
+        if(now.dayOfWeek() != Poco::DateTime::SATURDAY)
         {
             _ignoreCounter++;
-            if(_ignoreCounter < nonParkRunDaySlowDownFactor / 2)
+            if(_ignoreCounter < nonParkRunDaySlowDownFactor)
             {
-                poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time.");
+                poco_trace(Poco::Logger::root(), "Skipping results harvesting since this is not a usual ParkRun day. Will harvest in "
+                           + Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor - _ignoreCounter) + " more turns.");
                 return;
             }
             _ignoreCounter = 0;
         }
-        else if(now.hour() >= 12 || now.hour() <= 14)
+        else
         {
-            _ignoreCounter++;
-            if(_ignoreCounter < nonParkRunDaySlowDownFactor / 4)
+            if(now.hour() < 9 || now.hour() > 14)
             {
-                poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time.");
-                return;
+                _ignoreCounter++;
+                if(_ignoreCounter < nonParkRunDaySlowDownFactor / 2)
+                {
+                    poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time. Will harvest in "
+                                + Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor / 2 - _ignoreCounter) + " more turns.");
+                    return;
+                }
+                _ignoreCounter = 0;
             }
-            _ignoreCounter = 0;
+            else if(now.hour() >= 12 || now.hour() <= 14)
+            {
+                _ignoreCounter++;
+                if(_ignoreCounter < nonParkRunDaySlowDownFactor / 4)
+                {
+                    poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time. Will harvest in "
+                                + Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor / 4 - _ignoreCounter) + " more turns.");
+                    return;
+                }
+                _ignoreCounter = 0;
+            }
         }
-    }
 
-    const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
+        const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
 
-    Events events;
-    EventDataModel::fetch(events);
+        Events events;
+        EventDataModel::fetch(events);
 
-    Events::const_iterator iterEvent;
-    for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
-    {
-        const Event* pEvent = static_cast<Event*>(*iterEvent);
-
-        if(PRPLHTTPServerApplication::instance().isStopping())
+        Events::const_iterator iterEvent;
+        for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
         {
-            break;
+            const Event* pEvent = static_cast<Event*>(*iterEvent);
+
+            if(PRPLHTTPServerApplication::instance().isStopping())
+            {
+                break;
+            }
+
+            ResultsController resultsController;
+            resultsController.process(pEvent->name);
+
+            if(PRPLHTTPServerApplication::instance().isStopping())
+            {
+                break;
+            }
+
+            Poco::Thread::sleep(resultsSleepBetweenEvents * 1000);
         }
 
-        ResultsController resultsController;
-        resultsController.process(pEvent->name);
-
-        if(PRPLHTTPServerApplication::instance().isStopping())
-        {
-            break;
-        }
-
-        Poco::Thread::sleep(resultsSleepBetweenEvents * 1000);
-    }
-
-    EventDataModel::free(events);
+        EventDataModel::free(events);
+	}
+	catch (Poco::Exception& e)
+	{
+		poco_error_f1(Poco::Logger::root(), "Results harvester had error %s", e.displayText());
+	}
 }
 
 ResultsController::ResultsController()
@@ -441,13 +451,17 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
                 if(!pEventResultItem->genderPosition.isNull() && pEventResultItem->genderPosition.value() < 400)
                 {
                     points = 400 - pEventResultItem->genderPosition.value() + 1;
+                    if(points < 0)
+                    {
+                        points = 0;
+                    }
                 }
                 EventLeagueItemsMapByAthlete::iterator iterEventLeagueItem = eventLeagueItemsMapByAthlete.find(pEventResultItem->athleteID);
                 EventLeagueItem* pEventLeagueItem = NULL;
                 if(iterEventLeagueItem == eventLeagueItemsMapByAthlete.end())
                 {
                     // New entry for the athlete for this years league
-                    pEventLeagueItem = new EventLeagueItem(0, 0, pEventResultItem->athleteID, points, 1);
+                    pEventLeagueItem = new EventLeagueItem(0, 0, pEventResultItem->athleteID, pEventResultItem->gender.value(), points, 1);
                     eventLeagueItemsMapByAthlete[pEventLeagueItem->athleteID] = pEventLeagueItem;
                 }
                 else
@@ -514,37 +528,38 @@ bool ResultsController::processEventLeagueForYear(const Event& event, const unsi
     }
 
     unsigned long position = 0;
+    unsigned long position_male = 0;
+    unsigned long position_female = 0;
     std::multimap<const unsigned long, EventLeagueItem*>::const_reverse_iterator iterEventLeagueItemsByRunPoints;
-    for(iterEventLeagueItemsByRunPoints = eventLeagueItemsByRunPoints.rbegin(); iterEventLeagueItemsByRunPoints != eventLeagueItemsByRunPoints.rend(); ++iterEventLeagueItemsByRunPoints)
+    for(iterEventLeagueItemsByRunPoints = eventLeagueItemsByRunPoints.rbegin();
+        iterEventLeagueItemsByRunPoints != eventLeagueItemsByRunPoints.rend();
+        ++iterEventLeagueItemsByRunPoints)
     {
         EventLeagueItem* pEventLeagueItem = static_cast<EventLeagueItem*>(iterEventLeagueItemsByRunPoints->second);
 
         pEventLeagueItem->eventLeagueID = eventLeague.ID;
         pEventLeagueItem->position = ++position;
+        if(pEventLeagueItem->gender == Athlete::GENDER_CHAR_MALE)
+        {
+            pEventLeagueItem->genderPosition = ++position_male;
+        }
+        else if(pEventLeagueItem->gender == Athlete::GENDER_CHAR_FEMALE)
+        {
+            pEventLeagueItem->genderPosition = ++position_female;
+        }
 
         poco_trace(Poco::Logger::root(),
                          "Created League result for " + event.name + " year " + Poco::NumberFormatter::format(year)
                         + " for position " + Poco::NumberFormatter::format(pEventLeagueItem->position)
+                        + " and gender position " + Poco::NumberFormatter::format(pEventLeagueItem->genderPosition)
+                        + " and gender " + pEventLeagueItem->gender
                         + " for athlete " + Poco::NumberFormatter::format(pEventLeagueItem->athleteID)
                         + " with points " + Poco::NumberFormatter::format(pEventLeagueItem->points)
                         + " with runcount " + Poco::NumberFormatter::format(pEventLeagueItem->runCount));
 
         EventLeagueItemDataModel::insert(dbSession, pEventLeagueItem);
     }
-/*
-    for(iterLeagueItems = eventLeagueItemsMapByAthlete.begin(); iterLeagueItems != eventLeagueItemsMapByAthlete.end(); ++iterLeagueItems)
-    {
-        EventLeagueItem* pEventLeagueItem = static_cast<EventLeagueItem*>(iterLeagueItems->second);
 
-        poco_trace(Poco::Logger::root(),
-                         "Created League result for " + event.name + " year " + Poco::NumberFormatter::format(year)
-                        + " for athlete " + Poco::NumberFormatter::format(pEventLeagueItem->athleteID) + " with points "
-                        + Poco::NumberFormatter::format(pEventLeagueItem->points) + " with runcount " + Poco::NumberFormatter::format(pEventLeagueItem->runCount));
-
-        pEventLeagueItem->eventLeagueID = eventLeague.ID;
-        EventLeagueItemDataModel::insert(dbSession, pEventLeagueItem);
-    }
-*/
     dbTransaction.commit();
 
     poco_information(Poco::Logger::root(),

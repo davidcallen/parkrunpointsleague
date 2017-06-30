@@ -5,7 +5,7 @@
 
 	<logging>
 		<level>trace</level>
-		<debug-html>true</debug-html>
+		<debug-html>false</debug-html>
 		<trace-html>false</trace-html>
 	</logging>
 
