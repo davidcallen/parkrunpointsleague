@@ -40,7 +40,7 @@ public:
 protected:
 	bool processEventResult(const Event& event, const EventResult& eventResult, EventResultItems& eventResultItems, Athletes& athletes);
 	bool processEventLeagues(const Event& event, const std::set<unsigned long>& changedLeagueYears);
-    bool processEventLeagueForYear(const Event& event, const unsigned long year, EventLeagueItemsMapByAthlete& eventLeagueItemsMapByAthlete);
+    bool processEventLeagueForYear(const Event& event, const unsigned long year, const unsigned long latestEventResultID, EventLeagueItemsMapByAthlete& eventLeagueItemsMapByAthlete);
     unsigned long getLeagueYear(const Poco::DateTime birthday, const Poco::DateTime date);
 
 };

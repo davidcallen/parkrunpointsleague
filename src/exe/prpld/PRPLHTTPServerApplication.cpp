@@ -150,6 +150,7 @@ void PRPLHTTPServerApplication::initializeLogging()
 	Poco::SimpleFileChannel* pSimpleFileChannel = new Poco::SimpleFileChannel("./prpld.log");
 	pSimpleFileChannel->open();
 	pSimpleFileChannel->setProperty("rotation", "10 M");
+	// pSimpleFileChannel->setProperty("purge-age", "2 months");
 
 	Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel();
 

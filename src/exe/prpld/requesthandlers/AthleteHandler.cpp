@@ -82,24 +82,6 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
             EventLeagues eventLeagues;
             EventLeagueDataModel::fetch(event.ID, eventLeagues);
 
-			// Find the index of the League for specified query year, so can open accordian tab for this year.
-			unsigned long indexOfLeagueForYear = 0;
-			bool foundIndexOfLeagueForYear = false;
-			if(requestFilterByYear != 0)
-			{
-				EventLeagues::const_iterator iterLeague;
-				for(iterLeague = eventLeagues.begin(); iterLeague != eventLeagues.end(); ++iterLeague)
-				{
-					EventLeague* pEventLeague = static_cast<EventLeague*>(*iterLeague);
-					if(pEventLeague->year == requestFilterByYear)
-					{
-						foundIndexOfLeagueForYear = true;
-						break;
-					}
-					indexOfLeagueForYear++;
-				}
-			}
-
             std::ostream& responseStream = response.send();
 
             std::string additionalHeader;
@@ -107,14 +89,7 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
             additionalHeader += "    $(document).ready(function(){ \n";
             additionalHeader += "      $(\"#athlete-event-league\").accordion({ \n";
             additionalHeader += "        collapsible: true, \n";
-            if(foundIndexOfLeagueForYear)
-            {
-				additionalHeader += "        active: " + Poco::NumberFormatter::format(indexOfLeagueForYear) + ",\n";
-			}
-			else
-			{
-				additionalHeader += "        active: false,\n";
-			}
+			additionalHeader += "        active: false,\n";
             additionalHeader += "        heightStyle: 'content'\n";
             additionalHeader += "      }); \n";
             additionalHeader += "    }); \n";
@@ -122,6 +97,9 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 
             std::string pageTitle = athlete.first_name + " " + athlete.last_name + " league positions for " + event.title ;
             responseStream << getHeader(pageTitle, true, additionalHeader);
+
+			unsigned long accordionIndexOfLeagueForYear = 0;
+            unsigned long leagueIndex = 0;
 
             responseStream << "<div id='athlete-event-league'>\n";
             EventLeagues::const_iterator iterLeague;
@@ -141,6 +119,7 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
                     responseStream << "<th>Pos</th>\n";
                     responseStream << "<th>Gender Pos</th>\n";
                     responseStream << "<th>Time</th>\n";
+                    responseStream << "<th>Points</th>\n";
                     responseStream << "</tr>\n";
 
                     EventResults eventResults;
@@ -166,14 +145,31 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
                                 responseStream << Poco::DateTimeFormatter::format(durationTimespan, "%h:%M:%S");
                             }
                             responseStream << "</td>\n";
+                            responseStream << "<td>" + Poco::NumberFormatter::format(EventLeagueItem::calculatePoints(eventResultItem.genderPosition.value(), 400)) + "</td>\n";
                             responseStream << "</tr>\n";
                         }
                     }
                     responseStream << "</table>\n";
                     responseStream << "</div>\n";
+
+					if(pEventLeague->year == requestFilterByYear)
+					{
+                        // save the accordion index of the League for specified query year, so can expand accordian tab for this year.
+						accordionIndexOfLeagueForYear = leagueIndex;
+					}
+                    leagueIndex++;
                 }
             }
             responseStream << "</div>\n";
+
+
+            // Set accordion to open on requested Year
+            responseStream << "  <script> \n";
+            responseStream << "    $(document).ready(function(){ \n";
+            responseStream << "        $(\"#athlete-event-league\").accordion(\"option\", \"active\",  " + Poco::NumberFormatter::format(accordionIndexOfLeagueForYear) + ");\n";
+            responseStream <<  "    }); \n";
+            responseStream <<  "  </script> \n";
+
 
             responseStream << "</body></html>\n";
 

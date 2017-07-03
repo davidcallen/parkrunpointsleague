@@ -97,35 +97,6 @@ STATIC bool EventResultDataModel::fetch(Poco::Data::Session& dbSession, const un
     return result;
 }
 
-STATIC bool EventResultDataModel::fetch(const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult)
-{
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
-
-    return fetch(dbSession, eventID, resultNumber, eventResult);
-}
-
-STATIC bool EventResultDataModel::fetch(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult)
-{
-    bool result = true;
-
-    eventResult.ID = 0;
-
-	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "select ID, EVENT_ID, RESULT_NUMBER, DATE, LEAGUE_YEAR from EVENT_RESULT where EVENT_ID = ? and RESULT_NUMBER = ?",
-		   Poco::Data::Keywords::into(eventResult.ID),
-		   Poco::Data::Keywords::into(eventResult.eventID),
-		   Poco::Data::Keywords::into(eventResult.resultNumber),
-		   Poco::Data::Keywords::into(eventResult.date),
-		   Poco::Data::Keywords::into(eventResult.leagueYear),
-		   Poco::Data::Keywords::useRef(eventID),
-		   Poco::Data::Keywords::useRef(resultNumber),
-		   Poco::Data::Keywords::now;
-
-    result = (eventResult.ID != 0);
-
-    return result;
-}
-
 STATIC bool EventResultDataModel::fetch(const unsigned long eventID, EventResults& eventResults)
 {
     Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
@@ -159,6 +130,63 @@ STATIC bool EventResultDataModel::fetch(Poco::Data::Session& dbSession, const un
             eventResults.push_back(pEventResult);
         }
 	}
+
+    return result;
+}
+
+STATIC bool EventResultDataModel::fetch(const unsigned long eventResultID, EventResult& eventResult)
+{
+    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+
+    return fetch(dbSession, eventResultID, eventResult);
+}
+
+STATIC bool EventResultDataModel::fetch(Poco::Data::Session& dbSession, const unsigned long eventResultID, EventResult& eventResult)
+{
+    bool result = true;
+
+    eventResult.ID = 0;
+
+	Poco::Data::Statement dbStmt(dbSession);
+	dbStmt << "select ID, EVENT_ID, RESULT_NUMBER, DATE, LEAGUE_YEAR from EVENT_RESULT where ID = ?",
+		   Poco::Data::Keywords::into(eventResult.ID),
+		   Poco::Data::Keywords::into(eventResult.eventID),
+		   Poco::Data::Keywords::into(eventResult.resultNumber),
+		   Poco::Data::Keywords::into(eventResult.date),
+		   Poco::Data::Keywords::into(eventResult.leagueYear),
+		   Poco::Data::Keywords::useRef(eventResultID),
+		   Poco::Data::Keywords::now;
+
+    result = (eventResult.ID != 0);
+
+    return result;
+}
+
+STATIC bool EventResultDataModel::fetch(const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult)
+{
+    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+
+    return fetch(dbSession, eventID, resultNumber, eventResult);
+}
+
+STATIC bool EventResultDataModel::fetch(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult)
+{
+    bool result = true;
+
+    eventResult.ID = 0;
+
+	Poco::Data::Statement dbStmt(dbSession);
+	dbStmt << "select ID, EVENT_ID, RESULT_NUMBER, DATE, LEAGUE_YEAR from EVENT_RESULT where EVENT_ID = ? and RESULT_NUMBER = ?",
+		   Poco::Data::Keywords::into(eventResult.ID),
+		   Poco::Data::Keywords::into(eventResult.eventID),
+		   Poco::Data::Keywords::into(eventResult.resultNumber),
+		   Poco::Data::Keywords::into(eventResult.date),
+		   Poco::Data::Keywords::into(eventResult.leagueYear),
+		   Poco::Data::Keywords::useRef(eventID),
+		   Poco::Data::Keywords::useRef(resultNumber),
+		   Poco::Data::Keywords::now;
+
+    result = (eventResult.ID != 0);
 
     return result;
 }

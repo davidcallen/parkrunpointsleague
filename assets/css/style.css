@@ -329,6 +329,11 @@ div.footer-text
 	padding-left: 5px;
 }
 
+div.league-selectors
+{
+	margin: auto;
+	width: 50%;
+}
 div.events
 {
 	display: inline;

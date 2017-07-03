@@ -25,10 +25,11 @@ STATIC bool EventLeagueDataModel::fetch(Poco::Data::Session& dbSession, const un
     EventLeague tmpEventLeague;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "select ID, EVENT_ID, YEAR from EVENT_LEAGUE where EVENT_ID = ? ORDER BY YEAR DESC",
+	dbStmt << "select ID, EVENT_ID, YEAR, LATEST_EVENT_RESULT_ID from EVENT_LEAGUE where EVENT_ID = ? ORDER BY YEAR DESC",
 		   Poco::Data::Keywords::into(tmpEventLeague.ID),
 		   Poco::Data::Keywords::into(tmpEventLeague.eventID),
 		   Poco::Data::Keywords::into(tmpEventLeague.year),
+		   Poco::Data::Keywords::into(tmpEventLeague.latestEventResultID),
 		   Poco::Data::Keywords::useRef(eventID),
 		   Poco::Data::Keywords::range(0, 1);
 
@@ -58,10 +59,11 @@ STATIC bool EventLeagueDataModel::fetch(Poco::Data::Session& dbSession, const un
     bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "select ID, EVENT_ID, YEAR from EVENT_LEAGUE where EVENT_ID = ? AND YEAR = ?",
+	dbStmt << "select ID, EVENT_ID, YEAR, LATEST_EVENT_RESULT_ID from EVENT_LEAGUE where EVENT_ID = ? AND YEAR = ?",
 		   Poco::Data::Keywords::into(eventLeague.ID),
 		   Poco::Data::Keywords::into(eventLeague.eventID),
 		   Poco::Data::Keywords::into(eventLeague.year),
+		   Poco::Data::Keywords::into(eventLeague.latestEventResultID),
 		   Poco::Data::Keywords::useRef(eventID),
 		   Poco::Data::Keywords::useRef(year),
 		   Poco::Data::Keywords::now;
@@ -83,9 +85,10 @@ STATIC bool EventLeagueDataModel::insert(Poco::Data::Session& dbSession, EventLe
     bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
-	dbStmt << "insert into EVENT_LEAGUE (EVENT_ID, YEAR) values (?, ?)",
+	dbStmt << "insert into EVENT_LEAGUE (EVENT_ID, YEAR, LATEST_EVENT_RESULT_ID) values (?, ?, ?)",
 		   Poco::Data::Keywords::useRef(pEventLeague->eventID),
 		   Poco::Data::Keywords::useRef(pEventLeague->year),
+		   Poco::Data::Keywords::useRef(pEventLeague->latestEventResultID),
 		   Poco::Data::Keywords::now;
 
     result = true;

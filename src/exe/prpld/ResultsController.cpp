@@ -284,6 +284,7 @@ VIRTUAL bool ResultsController::process(const std::string& eventName)
                     if(pFoundDBEventResult == NULL || recreateAllResults)
                     {
                         EventResultDataModel::insert(dbSession, *pScrapedEventResult);
+                        poco_information(Poco::Logger::root(), "Event " + event.name + " inserted new EventResult record for result number " + Poco::NumberFormatter::format(pScrapedEventResult->resultNumber));
 
                         EventResultDataModel::fetch(dbSession, pScrapedEventResult->eventID, pScrapedEventResult->resultNumber, dbEventResult);
                         pFoundDBEventResult = &dbEventResult;
@@ -324,6 +325,7 @@ VIRTUAL bool ResultsController::process(const std::string& eventName)
                     AthleteDataModel::reconcile(dbSession, scrapedAthletes);
 
                     dbTransaction.commit();
+                    poco_information(Poco::Logger::root(), "Event " + event.name + " inserted " + Poco::NumberFormatter::format(scrapedEventResultItems.size()) + " EventResultItem records.");
                 }
 
                 EventResultItemDataModel::free(scrapedEventResultItems);
@@ -408,6 +410,7 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
 
     bool createLeagueForYear = false;
     unsigned long lastLeagueYear = 0;
+    unsigned long latestEventResultID = 0;
     EventResults::const_iterator iterResult;
     for(iterResult = dbEventResults.begin(); iterResult != dbEventResults.end(); ++iterResult)
     {
@@ -450,11 +453,7 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
                 unsigned long points = 0;
                 if(!pEventResultItem->genderPosition.isNull() && pEventResultItem->genderPosition.value() < 400)
                 {
-                    points = 400 - pEventResultItem->genderPosition.value() + 1;
-                    if(points < 0)
-                    {
-                        points = 0;
-                    }
+                    points = EventLeagueItem::calculatePoints(pEventResultItem->genderPosition.value(), 400);
                 }
                 EventLeagueItemsMapByAthlete::iterator iterEventLeagueItem = eventLeagueItemsMapByAthlete.find(pEventResultItem->athleteID);
                 EventLeagueItem* pEventLeagueItem = NULL;
@@ -477,16 +476,17 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
         // If we have moved to a different League year the write results to database and commit
         if(lastLeagueYear != 0 && leagueYear != lastLeagueYear && !eventLeagueItemsMapByAthlete.empty())
         {
-            result = processEventLeagueForYear(event, lastLeagueYear, eventLeagueItemsMapByAthlete);
+            result = processEventLeagueForYear(event, lastLeagueYear, latestEventResultID, eventLeagueItemsMapByAthlete);
         }
 
         lastLeagueYear = leagueYear;
+        latestEventResultID = pEventResult->ID;
     }
 
     // If we have moved to a different League year the write results to database and commit
     if(createLeagueForYear && !eventLeagueItemsMapByAthlete.empty())
     {
-        result = processEventLeagueForYear(event, lastLeagueYear, eventLeagueItemsMapByAthlete);
+        result = processEventLeagueForYear(event, lastLeagueYear, latestEventResultID, eventLeagueItemsMapByAthlete);
     }
 
     EventLeagueItemDataModel::free(eventLeagueItemsMapByAthlete);
@@ -495,7 +495,7 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
     return result;
 }
 
-bool ResultsController::processEventLeagueForYear(const Event& event, const unsigned long year, EventLeagueItemsMapByAthlete& eventLeagueItemsMapByAthlete)
+bool ResultsController::processEventLeagueForYear(const Event& event, const unsigned long year, const unsigned long latestEventResultID, EventLeagueItemsMapByAthlete& eventLeagueItemsMapByAthlete)
 {
     bool result = true;
 
@@ -512,6 +512,8 @@ bool ResultsController::processEventLeagueForYear(const Event& event, const unsi
     {
         eventLeague.eventID = event.ID;
         eventLeague.year = year;
+        eventLeague.latestEventResultID = latestEventResultID;
+
         EventLeagueDataModel::insert(dbSession, &eventLeague);
         EventLeagueDataModel::fetch(dbSession, event.ID, year, eventLeague);
     }

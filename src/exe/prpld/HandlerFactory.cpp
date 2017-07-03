@@ -18,7 +18,7 @@ Poco::Net::HTTPRequestHandler * HandlerFactory::createRequestHandler (const Poco
 {
     const std::string& requestURI = request.getURI();
 
-	poco_trace(Poco::Logger::root(), "HTTP Request for " + requestURI);
+	poco_debug(Poco::Logger::root(), "HTTP Request for " + requestURI);
 
     std::vector<std::string> uriSegments;
     Poco::URI uri(requestURI);

@@ -13,12 +13,13 @@ class EventLeague
 {
 public:
 	EventLeague();
-	EventLeague(unsigned long _ID, unsigned long _eventID, unsigned long  _year);
+	EventLeague(unsigned long _ID, unsigned long _eventID, unsigned long  _year, unsigned long latestEventResultID);
 
 public:
     unsigned long ID;
 	unsigned long eventID;
 	unsigned long year;
+	unsigned long latestEventResultID;
 };
 
 typedef std::vector<EventLeague*> EventLeagues;

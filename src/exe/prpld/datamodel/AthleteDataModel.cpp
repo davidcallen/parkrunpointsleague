@@ -179,6 +179,8 @@ STATIC bool AthleteDataModel::reconcile(Poco::Data::Session& dbSession, const At
     AthletesMap existingDBathletesMap;
     AthleteDataModel::fetch(dbSession, existingDBathletesMap);
 
+    unsigned long insertCount = 0;
+    unsigned long updateCount = 0;
     Athletes::const_iterator iter;
     for(iter = athletes.begin(); iter != athletes.end(); ++iter)
     {
@@ -188,16 +190,23 @@ STATIC bool AthleteDataModel::reconcile(Poco::Data::Session& dbSession, const At
         if(existingDBathleteIter == existingDBathletesMap.end())
         {
             result = AthleteDataModel::insert(dbSession, *pAthlete);
+            insertCount++;
         }
         else
         {
             result = AthleteDataModel::update(dbSession, *pAthlete);
+            updateCount++;
         }
         if(!result)
         {
             break;
         }
         // We dont remove any Athletes
+    }
+
+    if(insertCount > 0 || updateCount > 0)
+    {
+        poco_trace(Poco::Logger::root(), "Athletes reconciled with " + Poco::NumberFormatter::format(insertCount) + " inserts and " + Poco::NumberFormatter::format(updateCount) + " updates.");
     }
 
     AthleteDataModel::free(existingDBathletesMap);

@@ -18,11 +18,14 @@ public:
     static bool fetch(const unsigned long eventID, const unsigned long leagueYear, EventResults& eventResults);
     static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long leagueYear, EventResults& eventResults);
 
-    static bool fetch(const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult);
-    static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult);
-
     static bool fetch(const unsigned long eventID, EventResults& eventResults);
     static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventID, EventResults& eventResults);
+
+    static bool fetch(const unsigned long eventResultID, EventResult& eventResult);
+    static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventResultID, EventResult& eventResult);
+
+    static bool fetch(const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult);
+    static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long resultNumber, EventResult& eventResult);
 
     static bool update(const EventResult& eventResult);
     static bool update(Poco::Data::Session& dbSession, const EventResult& eventResult);

@@ -18,6 +18,9 @@ public:
 					const unsigned long _points, const unsigned long _runCount);
 
 public:
+    static unsigned long calculatePoints(const unsigned long genderPosition, const unsigned long maxPoints);
+
+public:
     unsigned long ID;
 	unsigned long eventLeagueID;
 	unsigned long position;

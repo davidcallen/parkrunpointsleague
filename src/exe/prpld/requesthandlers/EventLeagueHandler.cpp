@@ -4,6 +4,7 @@
 #include "../datamodel/EventDataModel.h"
 #include "../datamodel/EventLeagueDataModel.h"
 #include "../datamodel/EventLeagueItemDataModel.h"
+#include "../datamodel/EventResultDataModel.h"
 #include "../datamodel/AthleteDataModel.h"
 
 #include <Poco/DateTime.h>
@@ -108,6 +109,7 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             std::string pageTitle = event.title + " League for " + Poco::NumberFormatter::format(requestFilterByYear);
             responseStream << getHeader(pageTitle, true, additionalHeader);
 
+            responseStream << "<div class=\"league-selectors\" >\n";
             responseStream << "<div class=\"events\" ><select name=\"eventName\" id=\"eventName\" >\n";
             Events events;
             EventDataModel::fetch(events);
@@ -164,6 +166,25 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             responseStream << "<option " << genderSelected << " value=\"" << Athlete::GENDER_CHAR_FEMALE << "\">" << Athlete::GENDER_CHAR_FEMALE << "</option>\n";
             responseStream << "</select></div>\n";
             responseStream << "<button onClick=\"bntClickGO(this.form)\">GO</button>\n";
+            responseStream << "</div>\n"; // for <div class=league-selectors >
+
+            if(pEventLeagueFound == NULL)
+            {
+                responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%d %b %Y") << "</p>";
+            }
+            else
+            {
+                Poco::DateTime leagueStartDate;
+                leagueStartDate.assign(pEventLeagueFound->year, event.birthday.value().month(), event.birthday.value().day());
+                responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(leagueStartDate, "%d %b %Y") << "</p>";
+            }
+
+            EventResult latestEventResult;
+            if(EventResultDataModel::fetch(pEventLeagueFound->latestEventResultID, latestEventResult))
+            {
+                responseStream << "<p>This latest result for this league is #" << Poco::NumberFormatter::format(latestEventResult.resultNumber)
+                                << " on " << Poco::DateTimeFormatter::format(latestEventResult.date, "%d %b %Y") << "</p>";
+            }
 
             // Prevent delayed render of "select" jquery menu by putting script in body here (rather than in header)
             responseStream << "  <script>\n";
@@ -234,7 +255,6 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
                 responseStream << "</tr>\n";
             }
             responseStream << "</table>\n";
-            responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%d %b %Y") << "</p>";
             responseStream << "</body></html>\n";
 
             EventLeagueDataModel::free(eventLeagues);
