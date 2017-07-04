@@ -177,13 +177,13 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
                 Poco::DateTime leagueStartDate;
                 leagueStartDate.assign(pEventLeagueFound->year, event.birthday.value().month(), event.birthday.value().day());
                 responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(leagueStartDate, "%d %b %Y") << "</p>";
-            }
 
-            EventResult latestEventResult;
-            if(EventResultDataModel::fetch(pEventLeagueFound->latestEventResultID, latestEventResult))
-            {
-                responseStream << "<p>This latest result for this league is #" << Poco::NumberFormatter::format(latestEventResult.resultNumber)
-                                << " on " << Poco::DateTimeFormatter::format(latestEventResult.date, "%d %b %Y") << "</p>";
+                EventResult latestEventResult;
+                if(EventResultDataModel::fetch(pEventLeagueFound->latestEventResultID, latestEventResult))
+                {
+                    responseStream << "<p>This latest result for this league is #" << Poco::NumberFormatter::format(latestEventResult.resultNumber)
+                                    << " on " << Poco::DateTimeFormatter::format(latestEventResult.date, "%d %b %Y") << "</p>";
+                }
             }
 
             // Prevent delayed render of "select" jquery menu by putting script in body here (rather than in header)
