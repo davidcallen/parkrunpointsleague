@@ -194,8 +194,13 @@ STATIC bool AthleteDataModel::reconcile(Poco::Data::Session& dbSession, const At
         }
         else
         {
-            result = AthleteDataModel::update(dbSession, *pAthlete);
-            updateCount++;
+            Athlete* pExistingAthlete = existingDBathleteIter->second;
+
+            if(!Athlete::compare(pAthlete, pExistingAthlete))
+            {
+                result = AthleteDataModel::update(dbSession, *pAthlete);
+                updateCount++;
+            }
         }
         if(!result)
         {

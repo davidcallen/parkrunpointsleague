@@ -43,7 +43,7 @@ std::string Athlete::getGenderString() const
 */
 STATIC void Athlete::getNames(const std::string& name, std::string& firstnames, std::string& lastname)
 {
-    Poco::StringTokenizer stringTokenizer(name, " ");
+    Poco::StringTokenizer stringTokenizer(name, " \n");
     if(stringTokenizer.count() == 2)
     {
         firstnames = stringTokenizer[0];

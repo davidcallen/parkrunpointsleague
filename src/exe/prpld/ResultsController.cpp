@@ -26,7 +26,7 @@
 #include <Poco/DateTime.h>
 
 ResultsControllerTimer::ResultsControllerTimer() :
-    _ignoreCounter(0)
+    _ignoreCounter(9999)
 {
 }
 
