@@ -247,7 +247,7 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 
 		initializeLogging();
 
-		poco_information(Poco::Logger::root(), _appName + " starting");
+		poco_information(Poco::Logger::root(), _appName + " starting. (built on " __DATE__ " " __TIME__ ")");
 
 		if(!connectDB())
 		{
