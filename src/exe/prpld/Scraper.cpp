@@ -288,14 +288,16 @@ VIRTUAL bool Scraper::tidyHTML()
 		rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
 	if ( rc >= 0 )
 		rc = tidyParseString( tdoc, input );           // Parse the input
+	if ( rc >= 0 )                                    // Set No wrapping
+		rc = ( tidyOptSetInt(tdoc, TidyWrapLen, 10000) ? rc : -1 );
+	if ( rc >= 0 )                                    // Set No wrapping
+        rc = ( tidyOptSetBool(tdoc, TidyWrapAttVals, no) ? rc : -1 );
 	if ( rc >= 0 )
 		rc = tidyCleanAndRepair( tdoc );               // Tidy it up!
     if ( rc >= 0 )
 		rc = tidyRunDiagnostics( tdoc );               // Kvetch
 	if ( rc > 1 )                                    // If error, force output.
 		rc = ( tidyOptSetBool(tdoc, TidyForceOutput, yes) ? rc : -1 );
-	if ( rc > 1 )                                    // Set No wrapping
-		rc = ( tidyOptSetInt(tdoc, TidyWrapLen, 10000) ? rc : -1 );
 	if ( rc >= 0 )
 		rc = tidySaveBuffer( tdoc, &output );          // Pretty Print
 

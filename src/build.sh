@@ -307,6 +307,9 @@ fi
 rm make.log > /dev/null
 touch make.log
 
+# Touch main file to update the build datetime within it
+touch ${ROOT_PATH}/src/exe/prpl/PRPLHTTPServerApplication.cpp
+
 cd ${ROOT_PATH}/src
 if [ "${TEE}" == "" ]
 then

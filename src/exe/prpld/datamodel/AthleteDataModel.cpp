@@ -168,7 +168,7 @@ STATIC bool AthleteDataModel::reconcile(const Athletes& athletes)
 // Note: We dont remove any Athletes
 STATIC bool AthleteDataModel::reconcile(Poco::Data::Session& dbSession, const Athletes& athletes)
 {
-    bool result = false;
+    bool result = true;
 
     if(athletes.empty())
     {
@@ -185,11 +185,12 @@ STATIC bool AthleteDataModel::reconcile(Poco::Data::Session& dbSession, const At
     for(iter = athletes.begin(); iter != athletes.end(); ++iter)
     {
         Athlete* pAthlete = *iter;
+        bool saveResult = true;
 
         AthletesMap::iterator existingDBathleteIter = existingDBathletesMap.find(pAthlete->ID);
         if(existingDBathleteIter == existingDBathletesMap.end())
         {
-            result = AthleteDataModel::insert(dbSession, *pAthlete);
+            saveResult = AthleteDataModel::insert(dbSession, *pAthlete);
             insertCount++;
         }
         else
@@ -198,13 +199,15 @@ STATIC bool AthleteDataModel::reconcile(Poco::Data::Session& dbSession, const At
 
             if(!Athlete::compare(pAthlete, pExistingAthlete))
             {
-                result = AthleteDataModel::update(dbSession, *pAthlete);
+                saveResult = AthleteDataModel::update(dbSession, *pAthlete);
                 updateCount++;
             }
         }
-        if(!result)
+        if(!saveResult)
         {
-            break;
+            poco_error(Poco::Logger::root(), "Athlete could not be saved to database for " + Poco::NumberFormatter::format(pAthlete->ID)
+                       + " " + pAthlete->first_name + " " + pAthlete->last_name);
+            result = false;
         }
         // We dont remove any Athletes
     }

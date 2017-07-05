@@ -62,6 +62,7 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
 		if(!EventDataModel::fetch(requestFilterByEventName, event))
 		{
 		    responseProblem(request, response, "Event League", "Sorry, this ParkRun is not currently in our database.");
+		    return;
 		}
 		else
 		{
@@ -85,6 +86,8 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             if(requestFilterByYear == 0)
             {
                 responseProblem(request, response, event.title + " League", "Sorry, this ParkRun is not currently in our database.");
+
+                return;
             }
 
 			EventLeagueItems eventLeagueItems;
@@ -101,6 +104,8 @@ void EventLeagueHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
             if(event.birthday.isNull())
             {
                 responseProblem(request, response, event.title + " League", "Sorry, this ParkRun is not currently in our database.");
+
+                return;
             }
 
             std::ostream& responseStream = response.send();
