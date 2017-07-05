@@ -16,6 +16,23 @@ Building Poco library framework
  (maybe it should be putting it in /usr/local/lib64)
 
 
+Building libtidy
+--------------------------------
+- libtidy seems to have many forks. The one on Fed23 works and doesnt wrap the output. The one in RHEL6 wraps the text and causes issues.
+
+cd src/external/libtidy
+
+mv tidy-20091203cvs-format.patch tidy
+cd tidy
+patch -p1 -b < tidy-20091203cvs-format.patch
+chmod +x ./build/gnuauto/setup.sh
+./build/gnuauto/setup.sh
+./configure --disable-static --disable-dependency-tracking
+make -j 4
+sudo make install
+
+
+
 Libraries
 ----------
 - Uses google gumbo parser for parsing HTML pages
