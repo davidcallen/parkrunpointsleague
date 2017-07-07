@@ -176,6 +176,27 @@ div#header
 	height: 38px;
 	font-size: larger;
 }
+div#header a:link {
+	text-decoration: none;
+	color: #55565a;
+}
+div#header a:active {
+	text-decoration: none;
+	color: #55565a;
+}
+div#header a:visited{
+	text-decoration: none;
+	color: #55565a;
+}
+div#header a.muted:link {
+	color: #55565a;
+}
+div#header a.muted:active {
+	color: #55565a;
+}
+div#header a.muted:visited{
+	color: #55565a;
+}
 div.header-menu
 {
 	float: left;
@@ -301,12 +322,8 @@ div.menu td
 }
 div.content
 {
-	/*clear: both;*/
-	float: left;
-	margin: 5px;
-	padding-top: 5px;
-	width: calc(100% - 10px);
-    min-height: calc(100% - 75px);
+	max-width: 960px;
+	margin: auto;
 }
 div.content form
 {
@@ -328,25 +345,12 @@ div.footer-text
 	padding-top: 5px;
 	padding-left: 5px;
 }
-
 div.league-selectors
 {
 	margin: auto;
 	width: 50%;
+	text-align: center;
 }
-div.events
-{
-	display: inline;
-}
-div.event-years
-{
-	display: inline;
-}
-div.gender
-{
-	display: inline;
-}
-
 div.events-large
 {
 	display: inline;

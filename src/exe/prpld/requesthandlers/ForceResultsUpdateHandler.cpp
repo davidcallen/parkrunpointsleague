@@ -39,8 +39,7 @@ void ForceResultsUpdateHandler::handleRequest(Poco::Net::HTTPServerRequest& requ
 	}
 	catch (Poco::Exception& e)
 	{
-//		std::cerr << e.displayText() << std::endl;
 		poco_error_f2(Poco::Logger::root(), "HTTP request %s had error %s", request.getURI(), e.displayText());
-
+		responseProblem(request, response, "Force results update", "Something bad happened");
 	}
 }

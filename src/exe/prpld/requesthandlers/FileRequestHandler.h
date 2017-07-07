@@ -5,9 +5,11 @@
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 
+#include "BaseHandler.h"
+
 #include "../Common.h"
 
-class FileRequestHandler: public Poco::Net::HTTPRequestHandler
+class FileRequestHandler: public BaseHandler
 {
 public:
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);

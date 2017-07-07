@@ -66,13 +66,13 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 		Event event;
 		if(!EventDataModel::fetch(requestFilterByEventName, event))
 		{
-		    responseProblem(request, response, "Sorry, this ParkRun is not currently in our database.");
+		    responseProblem(request, response, "League positions", "Sorry, this ParkRun is not currently in our database.");
 		    validateOK = false;
 		}
 		Athlete athlete;
 		if(!AthleteDataModel::fetch(requestFilterByAthleteID, athlete))
 		{
-		    responseProblem(request, response, "Sorry, this Athlete is not currently in our database.");
+		    responseProblem(request, response, "League positions", "Sorry, this Athlete is not currently in our database.");
 		    validateOK = false;
 		}
 
@@ -170,8 +170,7 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
             responseStream <<  "    }); \n";
             responseStream <<  "  </script> \n";
 
-
-            responseStream << "</body></html>\n";
+            responseStream << getFooter();
 
             EventLeagueDataModel::free(eventLeagues);
 		}
@@ -179,17 +178,8 @@ void AthleteHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 	}
 	catch (Poco::Exception& e)
 	{
-//		std::cerr << e.displayText() << std::endl;
 		poco_error_f2(Poco::Logger::root(), "HTTP request %s had error %s", request.getURI(), e.displayText());
-		responseProblem(request, response, "Something bad happened");
+		responseProblem(request, response, "League positions", "Something bad happened");
 	}
 }
 
-void AthleteHandler::responseProblem(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response, const std::string& message)
-{
-    std::ostream& responseStream = response.send();
-    responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
-    responseStream << "<body><h1>Oops found a problem</h1>";
-    responseStream << "<p>" << message << "</p>";
-    responseStream << "</body></html>";
-}

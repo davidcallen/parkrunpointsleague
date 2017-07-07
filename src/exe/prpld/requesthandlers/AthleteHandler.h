@@ -13,10 +13,6 @@ class AthleteHandler: public BaseHandler
 {
 public:
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-
-protected:
-    void responseProblem(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response, const std::string& message);
-
 };
 
 #endif // AthleteHandler_INCLUDED

@@ -58,7 +58,6 @@ void HomePageHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 	}
 	catch (Poco::Exception& e)
 	{
-//		std::cerr << e.displayText() << std::endl;
 		poco_error_f2(Poco::Logger::root(), "HTTP request %s had error %s", request.getURI(), e.displayText());
 		responseProblem(request, response, "ParkRun Points League", "Something bad happened");
 	}

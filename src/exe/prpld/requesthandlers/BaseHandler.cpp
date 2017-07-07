@@ -38,10 +38,20 @@ std::string BaseHandler::getHeader(const std::string& pageTitle, const bool incl
         header += "  <script src=\"https://code.jquery.com/ui/1.12.1/jquery-ui" + minify + ".js\"></script>\n";
     }
     header += additionalHeader + "</head>";
-    header += "<body><div id=\"header\"><img src=\"/images/logo/logo-24.png\">Park Run Points Leagues</div>\n";
+    header += "<body><div id=\"header\"><a href=\"/\"><img src=\"/images/logo/logo-24.png\">Park Run Points Leagues</a></div>\n";
     header += "<h1>" + pageTitle + "</h1>\n";
+    header += "<div class=\"content\">\n";
 
     return header;
+}
+
+std::string BaseHandler::getFooter() const
+{
+    std::string footer;
+    footer += "</div> <!-- class=\"content\" -->\n";
+    footer += "</body></html>\n";
+
+    return footer;
 }
 
 void BaseHandler::responseProblem(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response, const std::string& pageTitle, const std::string& message)
@@ -50,6 +60,6 @@ void BaseHandler::responseProblem(Poco::Net::HTTPServerRequest& request, Poco::N
     responseStream << getHeader(pageTitle, false, "") << "</head>\n";
     responseStream << "<body><h1>Oops found a problem</h1>\n";
     responseStream << "<p>" << message << "</p>\n";
-    responseStream << "</body></html>\n";
+    responseStream << getFooter();
 }
 

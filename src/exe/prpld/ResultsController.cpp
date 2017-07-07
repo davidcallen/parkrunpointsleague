@@ -104,7 +104,15 @@ void ResultsControllerTimer::onTimer(Poco::Timer& timer)
                 break;
             }
 
-            Poco::Thread::sleep(resultsSleepBetweenEvents * 1000);
+            // Loop on the sleeping so can check if app is stopping and bomb out for timely halting
+            for(unsigned int i = 0; i < resultsSleepBetweenEvents; i++)
+            {
+                if(PRPLHTTPServerApplication::instance().isStopping())
+                {
+                    break;
+                }
+                Poco::Thread::sleep(1000);
+            }
         }
 
         EventDataModel::free(events);

@@ -111,8 +111,7 @@ void GetLatestResultHandler::handleRequest(Poco::Net::HTTPServerRequest& request
 	}
 	catch (Poco::Exception& e)
 	{
-//		std::cerr << e.displayText() << std::endl;
 		poco_error_f2(Poco::Logger::root(), "HTTP request %s had error %s", request.getURI(), e.displayText());
-
+		responseProblem(request, response, "Get latest results", "Something bad happened");
 	}
 }
