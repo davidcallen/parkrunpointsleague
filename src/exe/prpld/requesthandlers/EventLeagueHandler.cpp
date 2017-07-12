@@ -159,20 +159,6 @@ void EventLeagueHandler::handleRequestLeaguePage(Poco::Net::HTTPServerRequest& r
 
         // JavaScript for dropdown years list
         responseStream << "<div class=\"event-years\"><select name=\"eventYear\" id=\"eventYear\" >\n";
-/*
-        for(iterLeague = eventLeagues.begin(); iterLeague != eventLeagues.end(); ++iterLeague)
-        {
-            EventLeague* pEventLeague = static_cast<EventLeague*>(*iterLeague);
-
-            std::string yearOptionStr = Poco::NumberFormatter::format(pEventLeague->year);
-            std::string selected;
-            if(requestFilterByYear == pEventLeague->year)
-            {
-                selected = "selected=\"selected\"";
-            }
-            responseStream << "<option " << selected << " value=\""<< yearOptionStr << "\">"<< yearOptionStr << "</option>\n";
-        }
-*/
         responseStream << "</select></div>\n";
 
         // JavaScript for dropdown gender selection
@@ -201,18 +187,18 @@ void EventLeagueHandler::handleRequestLeaguePage(Poco::Net::HTTPServerRequest& r
 
         if(pEventLeagueFound == NULL)
         {
-            responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%d %b %Y") << "</p>";
+            responseStream << "<p>Started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%d %b %Y") << "</p>";
         }
         else
         {
             Poco::DateTime leagueStartDate;
             leagueStartDate.assign(pEventLeagueFound->year, event.birthday.value().month(), event.birthday.value().day());
-            responseStream << "<p>This league started on " << Poco::DateTimeFormatter::format(leagueStartDate, "%d %b %Y") << "</p>";
+            responseStream << "<p>Started on " << Poco::DateTimeFormatter::format(leagueStartDate, "%d %b %Y") << "</p>";
 
             EventResult latestEventResult;
             if(EventResultDataModel::fetch(pEventLeagueFound->latestEventResultID, latestEventResult))
             {
-                responseStream << "<p>This latest result for this league is #" << Poco::NumberFormatter::format(latestEventResult.resultNumber)
+                responseStream << "<p>Latest result is #" << Poco::NumberFormatter::format(latestEventResult.resultNumber)
                                 << " on " << Poco::DateTimeFormatter::format(latestEventResult.date, "%d %b %Y") << "</p>";
             }
         }

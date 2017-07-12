@@ -172,7 +172,7 @@ div#header
 	/*background: #C2D100;*/
 	/* background: #8AC007; DALLEN DEBUG green theme */
 	color: #55565a;
-	margin: 0px;
+	margin: 0px 0px 5px 0px;
 	height: 38px;
 	font-size: larger;
 }
@@ -324,6 +324,13 @@ div.content
 {
 	max-width: 960px;
 	margin: auto;
+    color: inherit;
+    background-color: #F5FAFC;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #C7DBE3;
+    border-radius: 10px;
+    padding: 10px 5px 10px 5px;
 }
 div.content form
 {

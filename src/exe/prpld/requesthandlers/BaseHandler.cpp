@@ -38,7 +38,7 @@ std::string BaseHandler::getHeader(const std::string& pageTitle, const bool incl
         header += "  <script src=\"https://code.jquery.com/ui/1.12.1/jquery-ui" + minify + ".js\"></script>\n";
     }
     header += additionalHeader + "</head>";
-    header += "<body><div id=\"header\"><a href=\"/\"><img src=\"/images/logo/logo-24.png\">Park Run Points Leagues</a></div>\n";
+    header += "<body><div id=\"header\"><a href=\"/\"><img src=\"/images/logo/logo-24.png\">ParkRun Points Leagues</a></div>\n";
     header += "<h1>" + pageTitle + "</h1>\n";
     header += "<div class=\"content\">\n";
 

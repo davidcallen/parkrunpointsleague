@@ -29,7 +29,7 @@ void HomePageHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
         additionalHeader += "      });\n";
         additionalHeader += "    });\n";
         additionalHeader += "  </script>\n";
-        std::string pageTitle = "Gotta love ParkRun!";
+        std::string pageTitle = "ParkRun Points Leagues";
 
         responseStream << getHeader(pageTitle, true, additionalHeader);
 
@@ -48,9 +48,13 @@ void HomePageHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 
         responseStream << "</select></div>\n";
 
-        responseStream << "<p>PRPL respects ParkRuns decisions and hopes to fill the void without offending or contradicting ParkRuns goals.</p>\n";
+        responseStream << "<p>Our goals : \n";
+        responseStream << "<ul><li>Only provide the League results and not duplicate ParkRun's website functionality.</li>\n";
+        responseStream << "<li>Respect ParkRun's decisions and hope to provide the League without offending or contradicting ParkRuns goals.</li>\n";
+        responseStream << "<li>Respect all data - it will never be shared with any other organisations.</li></ul>\n";
+        responseStream << "</p>\n";
 
-        responseStream << "<p>If you prefer not to see your athelete name on this site, just drop us an email and we'll remove you.</p>\n";
+        responseStream << "<p>If you prefer not to see your athlete name on this site, just drop us an email and we'll remove you.</p>\n";
 
         responseStream << "</body></html>\n";
 
