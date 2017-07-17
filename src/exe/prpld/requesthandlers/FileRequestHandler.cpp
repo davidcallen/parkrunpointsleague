@@ -1,9 +1,4 @@
 #include "FileRequestHandler.h"
-#include "../ResultsController.h"
-
-#include "../datamodel/EventDataModel.h"
-#include "../datamodel/EventLeagueDataModel.h"
-#include "../datamodel/AthleteDataModel.h"
 
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormatter.h>

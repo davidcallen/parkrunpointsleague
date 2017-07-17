@@ -374,19 +374,17 @@ bool ResultsController::processEventResult(const Event& event, const EventResult
         result = resultsScraper.execute(event, eventResult);
         if(result)
         {
+            std::string html;
+            resultsScraper.getTidyHTML(html);
 
-        }
-        // DEBUG TODO - Currently always save to file for checking on <xml tag issue
-        std::string html;
-        resultsScraper.getTidyHTML(html);
-
-        if(html.empty())
-        {
-            resultsScraper.getHTML(html);
-        }
-        if(!html.empty())
-        {
-            result = resultsCache.save(event.name, eventResult.resultNumber, html);
+            if(html.empty())
+            {
+                resultsScraper.getHTML(html);
+            }
+            if(!html.empty())
+            {
+                result = resultsCache.save(event.name, eventResult.resultNumber, html);
+            }
         }
     }
     if(result)
@@ -448,6 +446,16 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
         EventResultItems dbEventResultItems;
         EventResultItemDataModel::fetch(pEventResult->ID, dbEventResultItems);
 
+/*
+// Calculate the maximum number of runners for each gender for each EventResult in this year
+EventResultItems::const_iterator iterResultItem;
+for(iterResultItem = dbEventResultItems.begin(); iterResultItem != dbEventResultItems.end(); ++iterResultItem)
+{
+    const EventResultItem* pEventResultItem = static_cast<EventResultItem*>(*iterResultItem);
+
+    TODO continue here ! needs some thought
+}
+*/
         EventResultItems::const_iterator iterResultItem;
         for(iterResultItem = dbEventResultItems.begin(); iterResultItem != dbEventResultItems.end(); ++iterResultItem)
         {
@@ -513,7 +521,8 @@ bool ResultsController::processEventLeagueForYear(const Event& event, const unsi
     EventLeague eventLeague;
     if(EventLeagueDataModel::fetch(dbSession, event.ID, year, eventLeague))
     {
-        EventLeagueDataModel::remove(dbSession, eventLeague.eventID, eventLeague.year);
+        eventLeague.latestEventResultID = latestEventResultID;
+        EventLeagueDataModel::update(dbSession, &eventLeague);
         EventLeagueItemDataModel::remove(dbSession, eventLeague.ID);
     }
     else

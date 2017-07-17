@@ -358,6 +358,18 @@ div.league-selectors
 	width: 50%;
 	text-align: center;
 }
+div.events
+{
+	margin-bottom: 3px;
+}
+div.event-years
+{
+	margin-bottom: 3px;
+}
+div.gender
+{
+	margin-bottom: 3px;
+}
 div.events-large
 {
 	display: inline;
