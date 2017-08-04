@@ -446,16 +446,6 @@ bool ResultsController::processEventLeagues(const Event& event, const std::set<u
         EventResultItems dbEventResultItems;
         EventResultItemDataModel::fetch(pEventResult->ID, dbEventResultItems);
 
-/*
-// Calculate the maximum number of runners for each gender for each EventResult in this year
-EventResultItems::const_iterator iterResultItem;
-for(iterResultItem = dbEventResultItems.begin(); iterResultItem != dbEventResultItems.end(); ++iterResultItem)
-{
-    const EventResultItem* pEventResultItem = static_cast<EventResultItem*>(*iterResultItem);
-
-    TODO continue here ! needs some thought
-}
-*/
         EventResultItems::const_iterator iterResultItem;
         for(iterResultItem = dbEventResultItems.begin(); iterResultItem != dbEventResultItems.end(); ++iterResultItem)
         {
