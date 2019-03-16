@@ -46,3 +46,15 @@ TODO
 -------
 DONE - make ResultsScraper descend from Scraper
 
+- setup email server or Feedback page ?
+
+- add dynamic calculation of max points [ NOT CONVINCED EASILY DOABLE ]
+	- need to read all results available and get max runners per gender.
+		- round this up to the next 100th and then add 100 e.g. 312 -> 400 then +100 = 500
+	- if its the 1st year then calculate as above whilst proceeding through 
+		- If number of runners exceeds max points then recalculate maxpoints and its league
+	- if 2nd+ year then use maxpoints from prior year + 30% growth, then recalculate based on this.
+
+- Add a "Last/Next check time" for saturday mornings to help prevent frequent refreshers
+- Add email notification form, so can get email when a league is updated.
+

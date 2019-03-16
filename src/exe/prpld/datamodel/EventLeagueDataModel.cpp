@@ -73,6 +73,28 @@ STATIC bool EventLeagueDataModel::fetch(Poco::Data::Session& dbSession, const un
     return result;
 }
 
+STATIC bool EventLeagueDataModel::update(EventLeague* pEventLeague)
+{
+    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+
+    return update(dbSession, pEventLeague);
+}
+
+STATIC bool EventLeagueDataModel::update(Poco::Data::Session& dbSession, EventLeague* pEventLeague)
+{
+    bool result = true;
+
+	Poco::Data::Statement dbStmt(dbSession);
+	dbStmt << "update EVENT_LEAGUE set LATEST_EVENT_RESULT_ID = ? where ID = ?",
+		   Poco::Data::Keywords::useRef(pEventLeague->latestEventResultID),
+		   Poco::Data::Keywords::useRef(pEventLeague->ID),
+		   Poco::Data::Keywords::now;
+
+    result = true;
+
+    return result;
+}
+
 STATIC bool EventLeagueDataModel::insert(EventLeague* pEventLeague)
 {
     Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();

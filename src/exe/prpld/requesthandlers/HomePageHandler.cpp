@@ -33,7 +33,8 @@ void HomePageHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 
         responseStream << getHeader(pageTitle, true, additionalHeader);
 
-        responseStream << "<p>In February 2017 ParkRun <a href=\"http://www.parkrun.com/news/2016/11/25/points-league-announcement/\">turned off its Points League web pages</a>. If you enjoyed the Points League and want to continue following it, then PRPL is for you.</p>\n";
+        responseStream << "<p>In February 2017 ParkRun <a href=\"http://www.parkrun.com/news/2016/11/25/points-league-announcement/\">turned off its Points League web pages</a>. </p>\n";
+        responseStream << "<p>If you enjoyed the Points League and want to continue following it, then PRPL is for you.</p>\n";
 
         responseStream << "<div class=\"event-select-label\" >Select your event to view its league : </div>\n";
         responseStream << "<div class=\"events-large\" ><select name=\"events\" id=\"events-large\" >\n";

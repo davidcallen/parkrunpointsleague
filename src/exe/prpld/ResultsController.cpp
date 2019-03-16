@@ -374,19 +374,17 @@ bool ResultsController::processEventResult(const Event& event, const EventResult
         result = resultsScraper.execute(event, eventResult);
         if(result)
         {
+            std::string html;
+            resultsScraper.getTidyHTML(html);
 
-        }
-        // DEBUG TODO - Currently always save to file for checking on <xml tag issue
-        std::string html;
-        resultsScraper.getTidyHTML(html);
-
-        if(html.empty())
-        {
-            resultsScraper.getHTML(html);
-        }
-        if(!html.empty())
-        {
-            result = resultsCache.save(event.name, eventResult.resultNumber, html);
+            if(html.empty())
+            {
+                resultsScraper.getHTML(html);
+            }
+            if(!html.empty())
+            {
+                result = resultsCache.save(event.name, eventResult.resultNumber, html);
+            }
         }
     }
     if(result)
@@ -513,7 +511,8 @@ bool ResultsController::processEventLeagueForYear(const Event& event, const unsi
     EventLeague eventLeague;
     if(EventLeagueDataModel::fetch(dbSession, event.ID, year, eventLeague))
     {
-        EventLeagueDataModel::remove(dbSession, eventLeague.eventID, eventLeague.year);
+        eventLeague.latestEventResultID = latestEventResultID;
+        EventLeagueDataModel::update(dbSession, &eventLeague);
         EventLeagueItemDataModel::remove(dbSession, eventLeague.ID);
     }
     else

@@ -42,7 +42,7 @@ a:hover {
 }
 table
 {
-    margin: 3px;
+    /* margin: 3px;*/
 }
 table th
 {
@@ -325,12 +325,12 @@ div.content
 	max-width: 960px;
 	margin: auto;
     color: inherit;
-    background-color: #F5FAFC;
+    /* background-color: #F5FAFC;*/
     border-style: solid;
     border-width: 1px;
-    border-color: #C7DBE3;
+    border-color: rgba(217, 144, 255, 0.45);
     border-radius: 10px;
-    padding: 10px 5px 10px 5px;
+    padding: 10px 10px 10px 10px;
 }
 div.content form
 {
@@ -357,6 +357,18 @@ div.league-selectors
 	margin: auto;
 	width: 50%;
 	text-align: center;
+}
+div.events
+{
+	margin-bottom: 3px;
+}
+div.event-years
+{
+	margin-bottom: 3px;
+}
+div.gender
+{
+	margin-bottom: 3px;
 }
 div.events-large
 {

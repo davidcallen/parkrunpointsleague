@@ -17,6 +17,9 @@ public:
     static bool fetch(const unsigned long eventID, const unsigned long year, EventLeague& eventLeague);
     static bool fetch(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long year, EventLeague& eventLeague);
 
+    static bool update(EventLeague* pEventLeague);
+    static bool update(Poco::Data::Session& dbSession, EventLeague* pEventLeague);
+
     static bool insert(EventLeague* pEventLeague);
     static bool insert(Poco::Data::Session& dbSession, EventLeague* pEventLeague);
 

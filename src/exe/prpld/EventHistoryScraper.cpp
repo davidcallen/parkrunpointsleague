@@ -290,7 +290,7 @@ bool EventHistoryScraper::parseResultsTable(const GumboNode* pTableNode)
 
     if(resultsFound != _eventResults.size())
     {
-        poco_warning_f3(Poco::Logger::root(), "%s event has %u results but only %u found to be valid.", _event.name, resultsFound, (unsigned long)_eventResults.size());
+        poco_warning_f3(Poco::Logger::root(), "%s event has %u results but only %lu found to be valid.", _event.name, resultsFound, (unsigned long)_eventResults.size());
     }
 
 	return result;

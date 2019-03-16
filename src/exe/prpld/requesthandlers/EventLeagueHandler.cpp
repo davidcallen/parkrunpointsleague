@@ -187,7 +187,7 @@ void EventLeagueHandler::handleRequestLeaguePage(Poco::Net::HTTPServerRequest& r
 
         if(pEventLeagueFound == NULL)
         {
-            responseStream << "<p>Started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%d %b %Y") << "</p>";
+            responseStream << "<p>" << event.title << " started on " << Poco::DateTimeFormatter::format(event.birthday.value(), "%d %b %Y") << "</p>";
         }
         else
         {
@@ -208,10 +208,10 @@ void EventLeagueHandler::handleRequestLeaguePage(Poco::Net::HTTPServerRequest& r
 
         responseStream << "<table class=\"with-row-color\">\n";
         responseStream << "<tr>\n";
-        responseStream << "<th>Position</th>";
-        responseStream << "<th>Athlete</th>";
-        responseStream << "<th>Points</th>";
-        responseStream << "<th>Runs</th>";
+        responseStream << "<th style=\"white-space:nowrap\">Position</th>";
+        responseStream << "<th width=\"99%\">Athlete</th>";
+        responseStream << "<th style=\"white-space:nowrap\">Points</th>";
+        responseStream << "<th style=\"white-space:nowrap\">Runs</th>";
         responseStream << "</tr>\n";
 
         AthletesMap athletesMap;
@@ -246,16 +246,16 @@ void EventLeagueHandler::handleRequestLeaguePage(Poco::Net::HTTPServerRequest& r
             responseStream << "<tr>\n";
             if(requestFilterByGender.empty())
             {
-                responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->position) + "</td>";
+                responseStream << "<td style=\"white-space:nowrap\">" + Poco::NumberFormatter::format(pEventLeagueItem->position) + "</td>";
             }
             else
             {
-                responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->genderPosition) + "</td>";
+                responseStream << "<td style=\"white-space:nowrap\">" + Poco::NumberFormatter::format(pEventLeagueItem->genderPosition) + "</td>";
             }
             responseStream << "<td><a href=\"/athlete?e=" + event.name + "&a=" + Poco::NumberFormatter::format(pEventLeagueItem->athleteID)
                                 + "&y=" + Poco::NumberFormatter::format(requestFilterByYear) + "\">" + athleteName + "</a></td>";
-            responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->points) + "</td>";
-            responseStream << "<td>" + Poco::NumberFormatter::format(pEventLeagueItem->runCount) + "</td>";
+            responseStream << "<td style=\"white-space:nowrap\">" + Poco::NumberFormatter::format(pEventLeagueItem->points) + "</td>";
+            responseStream << "<td style=\"white-space:nowrap\">" + Poco::NumberFormatter::format(pEventLeagueItem->runCount) + "</td>";
             responseStream << "</tr>\n";
         }
         responseStream << "</table>\n";
