@@ -2,18 +2,23 @@ Building Poco library framework
 --------------------------------
 - if choosing to install from source
 
+	cd prpl/src
+	git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git
+
 	Use the --everything to ensure we get MySQL
 
 	$ ./configure --everything
 
+
+	# Will need unixODBC-devel for installing poco/Data and prevent it complaining about missing sqlext.h
+	sudo yum install unixODBC-devel
 
 	$ make -j 8
 
 	$ make install
 
 - installs to /usr/local/include and /usr/local/lib
-
- (maybe it should be putting it in /usr/local/lib64)
+	(maybe it should be putting it in /usr/local/lib64)
 
 
 Building libtidy
