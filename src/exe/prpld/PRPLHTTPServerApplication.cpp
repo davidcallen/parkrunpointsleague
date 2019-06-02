@@ -72,11 +72,19 @@ PRPLHTTPServerApplication::PRPLHTTPServerApplication() :
 VIRTUAL PRPLHTTPServerApplication::~PRPLHTTPServerApplication()
 {
 	_pInstance = NULL;
+	cleanup();
+}
 
+void PRPLHTTPServerApplication::cleanup()
+{
 	if(_pDbSessionPool != NULL)
 	{
+		poco_information(Poco::Logger::root(), "Shutting down DB Session Pool");
+		_pDbSessionPool->shutdown();
 		delete _pDbSessionPool;
+		_pDbSessionPool= NULL;
 	}
+	Poco::Logger::root().shutdown();
 }
 
 Poco::Data::SessionPool* PRPLHTTPServerApplication::getDbSessionPool()
@@ -318,8 +326,13 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 		delete _pResultsHarvesterTimer;
 
 		poco_information(Poco::Logger::root(), "Stopping HTTP server...");
+
+		poco_information(Poco::Logger::root(), "Cleaning up ...");
+		cleanup();
 		server.stop();
 	}
+
+	poco_information(Poco::Logger::root(), "Shutting down ...");
 
 	return Application::EXIT_OK;
 }

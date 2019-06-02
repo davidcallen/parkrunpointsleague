@@ -37,6 +37,7 @@ public:
 	PRPLHTTPServerApplication();
 
 	virtual ~PRPLHTTPServerApplication();
+	void cleanup();
 
 	struct SchemaVersion
 	{
