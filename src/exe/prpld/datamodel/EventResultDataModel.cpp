@@ -303,5 +303,6 @@ STATIC void EventResultDataModel::freeEventResult(EventResult* pEventResult)
 	if(pEventResult != NULL)
 	{
 		delete pEventResult;
+		pEventResult = NULL;
 	}
 }

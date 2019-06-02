@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
-#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 
@@ -46,7 +46,7 @@ public:
 protected:
 	virtual bool getPageHTTPrequest(const std::string& url);
 
-	virtual bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& httpResponse, std::stringstream& responseStream);
+	virtual bool doRequest(Poco::Net::HTTPSClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& httpResponse, std::stringstream& responseStream);
 
 	virtual bool timespanParse(const std::string& timespanStr, Poco::Timespan& timespan);
 

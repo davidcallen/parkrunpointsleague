@@ -31,7 +31,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Poco/Logger.h>
 
 #include <Poco/URI.h>
-#include <Poco/Net/HTTPClientSession.h>
 
 #include <Poco/StreamCopier.h>
 #include <Poco/NullStream.h>
@@ -40,6 +39,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Poco/NumberFormatter.h>
 
 #include <Poco/Util/Application.h>
+
+#include <Poco/Net/HTTPSClientSession.h>
 
 #include <gumbo.h>
 
@@ -79,7 +80,7 @@ VIRTUAL bool Scraper::getPageHTTPrequest(const std::string& url)
 {
 	Poco::URI uri(url);
 
-	Poco::Net::HTTPClientSession httpClientSession(uri.getHost(), uri.getPort());
+	Poco::Net::HTTPSClientSession httpClientSession(uri.getHost());
 
 	Poco::Net::HTTPRequest httpRequest(Poco::Net::HTTPRequest::HTTP_GET, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
 
@@ -110,12 +111,12 @@ VIRTUAL bool Scraper::getPageHTTPrequest(const std::string& url)
 	return false;
 }
 
-VIRTUAL bool Scraper::doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request,
-									Poco::Net::HTTPResponse& httpResponse, std::stringstream& responseStream)
+VIRTUAL bool Scraper::doRequest(Poco::Net::HTTPSClientSession& session, Poco::Net::HTTPRequest& request,
+								Poco::Net::HTTPResponse& httpResponse, std::stringstream& responseStream)
 {
 	try
 	{
-		request.add("User-Agent", "User-Agent:Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36");
+		request.add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0");
 		session.sendRequest(request);
 		std::istream& rs = session.receiveResponse(httpResponse);
 

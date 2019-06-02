@@ -19,13 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef EventHistoryScraper_INCLUDED
 #define EventHistoryScraper_INCLUDED
 
-#include <Poco/Net/HTTPRequestHandler.h>
-#include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPResponse.h>
-
 #include <gumbo.h>
 
 #include "Common.h"

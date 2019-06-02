@@ -88,6 +88,7 @@ include_directories("/usr/include")
 
 set (EXTRA_LIBS
     PocoNet
+    PocoNetSSL
     PocoUtil
     PocoXML
     PocoData

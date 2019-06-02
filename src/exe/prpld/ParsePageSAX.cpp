@@ -27,7 +27,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Poco/Logger.h>
 
 #include <Poco/URI.h>
-#include <Poco/Net/HTTPClientSession.h>
 
 #include <Poco/StreamCopier.h>
 #include <Poco/NullStream.h>
