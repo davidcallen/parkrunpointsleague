@@ -51,11 +51,11 @@ void GetLatestResultHandler::handleRequest(Poco::Net::HTTPServerRequest& request
 		Event event;
 		if(!EventDataModel::fetch("miltonkeynes", event))
 		{
-            std::ostream& responseStream = response.send();
-            responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
-            responseStream << "<body><h1>Error</h1>";
-            responseStream << "<p>Sorry, this ParkRun is not currently in our database.</p>";
-            responseStream << "</body></html>";
+			std::ostream& responseStream = response.send();
+			responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
+			responseStream << "<body><h1>Error</h1>";
+			responseStream << "<p>Sorry, this ParkRun is not currently in our database.</p>";
+			responseStream << "</body></html>";
 		}
 		else
 		{
@@ -65,32 +65,32 @@ void GetLatestResultHandler::handleRequest(Poco::Net::HTTPServerRequest& request
 			EventResults eventResults;
 			if(EventResultDataModel::fetch(event.ID, latestResultDate, eventResults))
 			{
-                std::ostream& responseStream = response.send();
-                responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
-                responseStream << "<body><h1>Event #" + Poco::NumberFormatter::format(event.ID) + + " on "
-                    + Poco::DateTimeFormatter::format(latestResultDate, Poco::DateTimeFormat::SORTABLE_FORMAT) + "</h1>";
-                responseStream << "<table>";
-                responseStream << "</table>";
-                responseStream << "</body></html>";
+				std::ostream& responseStream = response.send();
+				responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
+				responseStream << "<body><h1>Event #" + Poco::NumberFormatter::format(event.ID) + + " on "
+					+ Poco::DateTimeFormatter::format(latestResultDate, Poco::DateTimeFormat::SORTABLE_FORMAT) + "</h1>";
+				responseStream << "<table>";
+				responseStream << "</table>";
+				responseStream << "</body></html>";
 			}
 			else
-            {
-                std::ostream& responseStream = response.send();
-                responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
-                responseStream << "<body><h1>Error</h1>";
-                responseStream << "<p>Sorry, the latest ParkRun Result is not currently in our database.</p>";
-                responseStream << "</body></html>";
-            }
+			{
+				std::ostream& responseStream = response.send();
+				responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
+				responseStream << "<body><h1>Error</h1>";
+				responseStream << "<p>Sorry, the latest ParkRun Result is not currently in our database.</p>";
+				responseStream << "</body></html>";
+			}
 		}
 /*
 		Event event;
 		if(!EventDataModel::fetch("miltonkeynes", event))
 		{
-            std::ostream& responseStream = response.send();
-            responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
-            responseStream << "<body><h1>Error</h1>";
-            responseStream << "<p>Sorry, this ParkRun is not currently in our database.</p>";
-            responseStream << "</body></html>";
+			std::ostream& responseStream = response.send();
+			responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
+			responseStream << "<body><h1>Error</h1>";
+			responseStream << "<p>Sorry, this ParkRun is not currently in our database.</p>";
+			responseStream << "</body></html>";
 		}
 		else
 		{
@@ -100,12 +100,12 @@ void GetLatestResultHandler::handleRequest(Poco::Net::HTTPServerRequest& request
 			EventResult eventResult;
 			if(EventResultDataModel::fetch(event.ID, latestResultDate, eventResult))
 			{
-                // Already have the result
+				// Already have the result
 			}
 			else
 			{
-			    ResultsCache resultsCache;
-			    resultsCache.
+				ResultsCache resultsCache;
+				resultsCache.
 
 				ResultsScraper resultsScraper;
 
@@ -114,14 +114,14 @@ void GetLatestResultHandler::handleRequest(Poco::Net::HTTPServerRequest& request
 				eventResult.eventID = event.ID;
 				if(eventResult.resultNumber != 0)
 				{
-				    EventResultDataModel::insert(eventResult);
+					EventResultDataModel::insert(eventResult);
 
-				    EventResultItems& eventResultItems = resultsScraper.getEventResultItems();
-				    EventResultItems::const_iterator iter;
-				    for(iter = eventResultItems.begin(); iter != eventResultItems.end(); ++iter)
-                    {
-                        EventResultItemDataModel::insert(*iter);
-                    }
+					EventResultItems& eventResultItems = resultsScraper.getEventResultItems();
+					EventResultItems::const_iterator iter;
+					for(iter = eventResultItems.begin(); iter != eventResultItems.end(); ++iter)
+					{
+						EventResultItemDataModel::insert(*iter);
+					}
 				}
 			}
 		}

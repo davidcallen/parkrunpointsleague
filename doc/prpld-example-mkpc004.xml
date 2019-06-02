@@ -3,6 +3,13 @@
 		<port>8080</port>
 	</http>
 
+	<database>
+		<host>localhost</host>
+		<name>PRPL</name>
+		<port>3306</port>
+		<password>parklife</password>
+	</database>
+
 	<logging>
 		<level>trace</level>
 		<debug-html>false</debug-html>

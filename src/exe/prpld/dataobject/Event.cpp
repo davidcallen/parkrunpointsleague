@@ -31,35 +31,35 @@ Event::Event(const std::string& p_name, const std::string& p_title, const Poco::
 /*
 VIRTUAL unsigned long Event::getBirthdayMonth()
 {
-    if(_birthdayMonth == 0)
-    {
-        splitBirthday();
-    }
+	if(_birthdayMonth == 0)
+	{
+		splitBirthday();
+	}
 
-    return _birthdayMonth;
+	return _birthdayMonth;
 }
 
 VIRTUAL unsigned long Event::getBirthdayDay()
 {
-    if(_birthdayDay == 0)
-    {
-        splitBirthday();
-    }
+	if(_birthdayDay == 0)
+	{
+		splitBirthday();
+	}
 
-    return _birthdayDay;
+	return _birthdayDay;
 }
 
 VIRTUAL void Event::splitBirthday()
 {
-    Poco::StringTokenizer tokenizer(birthday, "-");
-    if(tokenizer.size() > 0)
-    {
-        _birthdayMonth = Poco::NumberParser(tokenizer[0]);
-    }
-    if(tokenizer.size() > 1)
-    {
-        _birthdayDay = Poco::NumberParser(tokenizer[1]);
-    }
+	Poco::StringTokenizer tokenizer(birthday, "-");
+	if(tokenizer.size() > 0)
+	{
+		_birthdayMonth = Poco::NumberParser(tokenizer[0]);
+	}
+	if(tokenizer.size() > 1)
+	{
+		_birthdayDay = Poco::NumberParser(tokenizer[1]);
+	}
 }
 
 */

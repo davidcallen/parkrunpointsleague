@@ -26,8 +26,8 @@ EventResultItem::EventResultItem()
 }
 
 EventResultItem::EventResultItem(const unsigned long _ID, const unsigned long _eventResultID, const unsigned long _position,
-                                 Poco::Nullable<unsigned long> _genderPosition, Poco::Nullable<std::string> _gender, Poco::Nullable<unsigned long> _athleteID,
-                                 Poco::Nullable<unsigned long> _durationSecs)
+								 Poco::Nullable<unsigned long> _genderPosition, Poco::Nullable<std::string> _gender, Poco::Nullable<unsigned long> _athleteID,
+								 Poco::Nullable<unsigned long> _durationSecs)
 	: ID(_ID), eventResultID(_eventResultID), position(_position), genderPosition(_genderPosition), gender(_gender),
 	athleteID(_athleteID), durationSecs(_durationSecs)
 {
@@ -36,11 +36,11 @@ EventResultItem::EventResultItem(const unsigned long _ID, const unsigned long _e
 
 Poco::Timespan EventResultItem::getDurationTimespan() const
 {
-    Poco::Timespan durationTimespan;
-    if(!durationSecs.isNull())
-    {
-        durationTimespan.assign(0, 0, 0, durationSecs.value(), 0);
-    }
+	Poco::Timespan durationTimespan;
+	if(!durationSecs.isNull())
+	{
+		durationTimespan.assign(0, 0, 0, durationSecs.value(), 0);
+	}
 
-    return durationTimespan;
+	return durationTimespan;
 }

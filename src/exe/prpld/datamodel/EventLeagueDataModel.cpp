@@ -29,18 +29,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 STATIC bool EventLeagueDataModel::fetch(const unsigned long eventID, EventLeagues& eventLeagues)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return fetch(dbSession, eventID, eventLeagues);
+	return fetch(dbSession, eventID, eventLeagues);
 }
 
 STATIC bool EventLeagueDataModel::fetch(Poco::Data::Session& dbSession, const unsigned long eventID, EventLeagues& eventLeagues)
 {
-    bool result = true;
+	bool result = true;
 
-    eventLeagues.clear();
+	eventLeagues.clear();
 
-    EventLeague tmpEventLeague;
+	EventLeague tmpEventLeague;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "select ID, EVENT_ID, YEAR, LATEST_EVENT_RESULT_ID from EVENT_LEAGUE where EVENT_ID = ? ORDER BY YEAR DESC",
@@ -51,30 +51,30 @@ STATIC bool EventLeagueDataModel::fetch(Poco::Data::Session& dbSession, const un
 		   Poco::Data::Keywords::useRef(eventID),
 		   Poco::Data::Keywords::range(0, 1);
 
-    while (!dbStmt.done())
-    {
-        if(dbStmt.execute() > 0)
-        {
-            EventLeague* pEventLeague = new EventLeague();
-            *pEventLeague = tmpEventLeague;
+	while (!dbStmt.done())
+	{
+		if(dbStmt.execute() > 0)
+		{
+			EventLeague* pEventLeague = new EventLeague();
+			*pEventLeague = tmpEventLeague;
 
-            eventLeagues.push_back(pEventLeague);
-        }
-    }
+			eventLeagues.push_back(pEventLeague);
+		}
+	}
 
-    return result;
+	return result;
 }
 
 STATIC bool EventLeagueDataModel::fetch(const unsigned long eventID, const unsigned long year, EventLeague& eventLeague)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return fetch(dbSession, eventID, year, eventLeague);
+	return fetch(dbSession, eventID, year, eventLeague);
 }
 
 STATIC bool EventLeagueDataModel::fetch(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long year, EventLeague& eventLeague)
 {
-    bool result = true;
+	bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "select ID, EVENT_ID, YEAR, LATEST_EVENT_RESULT_ID from EVENT_LEAGUE where EVENT_ID = ? AND YEAR = ?",
@@ -86,21 +86,21 @@ STATIC bool EventLeagueDataModel::fetch(Poco::Data::Session& dbSession, const un
 		   Poco::Data::Keywords::useRef(year),
 		   Poco::Data::Keywords::now;
 
-    result = (eventLeague.ID != 0);
+	result = (eventLeague.ID != 0);
 
-    return result;
+	return result;
 }
 
 STATIC bool EventLeagueDataModel::update(EventLeague* pEventLeague)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return update(dbSession, pEventLeague);
+	return update(dbSession, pEventLeague);
 }
 
 STATIC bool EventLeagueDataModel::update(Poco::Data::Session& dbSession, EventLeague* pEventLeague)
 {
-    bool result = true;
+	bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "update EVENT_LEAGUE set LATEST_EVENT_RESULT_ID = ? where ID = ?",
@@ -108,21 +108,21 @@ STATIC bool EventLeagueDataModel::update(Poco::Data::Session& dbSession, EventLe
 		   Poco::Data::Keywords::useRef(pEventLeague->ID),
 		   Poco::Data::Keywords::now;
 
-    result = true;
+	result = true;
 
-    return result;
+	return result;
 }
 
 STATIC bool EventLeagueDataModel::insert(EventLeague* pEventLeague)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return insert(dbSession, pEventLeague);
+	return insert(dbSession, pEventLeague);
 }
 
 STATIC bool EventLeagueDataModel::insert(Poco::Data::Session& dbSession, EventLeague* pEventLeague)
 {
-    bool result = true;
+	bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "insert into EVENT_LEAGUE (EVENT_ID, YEAR, LATEST_EVENT_RESULT_ID) values (?, ?, ?)",
@@ -131,35 +131,35 @@ STATIC bool EventLeagueDataModel::insert(Poco::Data::Session& dbSession, EventLe
 		   Poco::Data::Keywords::useRef(pEventLeague->latestEventResultID),
 		   Poco::Data::Keywords::now;
 
-    result = true;
+	result = true;
 
-    return result;
+	return result;
 }
 
 STATIC bool EventLeagueDataModel::remove(const unsigned long eventID)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return remove(dbSession, eventID);
+	return remove(dbSession, eventID);
 }
 
 STATIC bool EventLeagueDataModel::remove(Poco::Data::Session& dbSession, const unsigned long eventID)
 {
-    bool result = true;
+	bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "delete from EVENT_LEAGUE where EVENT_ID = ?",
 		   Poco::Data::Keywords::useRef(eventID),
 		   Poco::Data::Keywords::now;
 
-    result = true;
+	result = true;
 
-    return result;
+	return result;
 }
 
 STATIC bool EventLeagueDataModel::remove(Poco::Data::Session& dbSession, const unsigned long eventID, const unsigned long leagueYear)
 {
-    bool result = true;
+	bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "delete from EVENT_LEAGUE where EVENT_ID = ? and YEAR = ?",
@@ -167,30 +167,30 @@ STATIC bool EventLeagueDataModel::remove(Poco::Data::Session& dbSession, const u
 		   Poco::Data::Keywords::useRef(leagueYear),
 		   Poco::Data::Keywords::now;
 
-    result = true;
+	result = true;
 
-    return result;
+	return result;
 }
 
 STATIC void EventLeagueDataModel::free(EventLeagues& eventLeagues)
 {
-    std::for_each(eventLeagues.begin(), eventLeagues.end(), EventLeagueDataModel::freeEventLeague);
-    eventLeagues.clear();
+	std::for_each(eventLeagues.begin(), eventLeagues.end(), EventLeagueDataModel::freeEventLeague);
+	eventLeagues.clear();
 }
 
 STATIC void EventLeagueDataModel::freeEventLeague(EventLeague* pEventLeague)
 {
-    if(pEventLeague != NULL)
-    {
-        delete pEventLeague;
-    }
+	if(pEventLeague != NULL)
+	{
+		delete pEventLeague;
+	}
 }
 
 STATIC void EventLeagueDataModel::freeEventLeaguePair(std::pair<const unsigned long, EventLeague*>& eventLeaguePair)
 {
-    if(eventLeaguePair.second != NULL)
-    {
-        delete eventLeaguePair.second;
-    }
+	if(eventLeaguePair.second != NULL)
+	{
+		delete eventLeaguePair.second;
+	}
 }
 

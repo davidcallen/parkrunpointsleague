@@ -46,11 +46,11 @@ void ForceResultsUpdateHandler::handleRequest(Poco::Net::HTTPServerRequest& requ
 		Poco::DateTime now;
 		std::string timeString(Poco::DateTimeFormatter::format(now, Poco::DateTimeFormat::SORTABLE_FORMAT));
 
-        std::ostream& responseStream = response.send();
-        responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
-        responseStream << "<body><p>ParkRun results fetching</p>";
-        responseStream << "<p></p>";
-        responseStream << "</body></html>";
+		std::ostream& responseStream = response.send();
+		responseStream << "<html><head><head><title>ParkRun Points League</title></head>";
+		responseStream << "<body><p>ParkRun results fetching</p>";
+		responseStream << "<p></p>";
+		responseStream << "</body></html>";
 
 		ResultsController resultsController;
 		resultsController.process("miltonkeynes");

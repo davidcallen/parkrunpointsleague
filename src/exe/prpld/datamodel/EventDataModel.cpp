@@ -26,16 +26,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 STATIC bool EventDataModel::fetch(const std::string& name, Event& event)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return fetch(dbSession, name, event);
+	return fetch(dbSession, name, event);
 }
 
 STATIC bool EventDataModel::fetch(Poco::Data::Session& dbSession, const std::string& name, Event& event)
 {
-    bool result = true;
+	bool result = true;
 
-    event.ID = 0;
+	event.ID = 0;
 
 	Poco::Data::Statement select(dbSession);
 	select << "select ID, NAME, TITLE, BIRTHDAY from EVENT where NAME = ?",
@@ -46,23 +46,23 @@ STATIC bool EventDataModel::fetch(Poco::Data::Session& dbSession, const std::str
 		   Poco::Data::Keywords::useRef(name),
 		   Poco::Data::Keywords::now;
 
-    result = (event.ID != 0);
+	result = (event.ID != 0);
 
-    return result;
+	return result;
 }
 
 STATIC bool EventDataModel::fetch(Events& events)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return fetch(dbSession, events);
+	return fetch(dbSession, events);
 }
 
 STATIC bool EventDataModel::fetch(Poco::Data::Session& dbSession, Events& events)
 {
-    bool result = true;
+	bool result = true;
 
-    Event tmpEvent;
+	Event tmpEvent;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "select ID, NAME, TITLE, BIRTHDAY from EVENT order by NAME DESC",
@@ -74,28 +74,28 @@ STATIC bool EventDataModel::fetch(Poco::Data::Session& dbSession, Events& events
 
 	while (!dbStmt.done())
 	{
-        if(dbStmt.execute() > 0)
-        {
-            Event* pEvent = new Event;
-            *pEvent= tmpEvent;
+		if(dbStmt.execute() > 0)
+		{
+			Event* pEvent = new Event;
+			*pEvent= tmpEvent;
 
-            events.push_back(pEvent);
-        }
+			events.push_back(pEvent);
+		}
 	}
 
-    return result;
+	return result;
 }
 
 STATIC bool EventDataModel::update(const Event& event)
 {
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
 
-    return update(dbSession, event);
+	return update(dbSession, event);
 }
 
 STATIC bool EventDataModel::update(Poco::Data::Session& dbSession, const Event& event)
 {
-    bool result = true;
+	bool result = true;
 
 	Poco::Data::Statement dbStmt(dbSession);
 	dbStmt << "update EVENT set NAME = ?, TITLE = ?, BIRTHDAY = ? where ID = ?",
@@ -105,21 +105,21 @@ STATIC bool EventDataModel::update(Poco::Data::Session& dbSession, const Event& 
 		   Poco::Data::Keywords::useRef(event.ID),
 		   Poco::Data::Keywords::now;
 
-    result = true;
+	result = true;
 
-    return result;
+	return result;
 }
 
 STATIC void EventDataModel::free(Events& events)
 {
-    std::for_each(events.begin(), events.end(), EventDataModel::freeEvent);
-    events.clear();
+	std::for_each(events.begin(), events.end(), EventDataModel::freeEvent);
+	events.clear();
 }
 
 STATIC void EventDataModel::freeEvent(Event* pEvent)
 {
-    if(pEvent != NULL)
-    {
-        delete pEvent;
-    }
+	if(pEvent != NULL)
+	{
+		delete pEvent;
+	}
 }

@@ -71,24 +71,24 @@ PRPLHTTPServerApplication::PRPLHTTPServerApplication() :
 
 VIRTUAL PRPLHTTPServerApplication::~PRPLHTTPServerApplication()
 {
-    _pInstance = NULL;
+	_pInstance = NULL;
 
-    if(_pDbSessionPool != NULL)
-    {
-        delete _pDbSessionPool;
-    }
+	if(_pDbSessionPool != NULL)
+	{
+		delete _pDbSessionPool;
+	}
 }
 
 Poco::Data::SessionPool* PRPLHTTPServerApplication::getDbSessionPool()
 {
 	poco_check_ptr (_pDbSessionPool);
 
-    return _pDbSessionPool;
+	return _pDbSessionPool;
 }
 
 bool PRPLHTTPServerApplication::isStopping() const
 {
-    return _stopping;
+	return _stopping;
 }
 
 void PRPLHTTPServerApplication::initialize(Application& self)
@@ -193,10 +193,33 @@ bool PRPLHTTPServerApplication::connectDB()
 {
 	Poco::Data::MySQL::Connector::registerConnector();
 
-	// TODO : move db connection details into app xml config
-    _pDbSessionPool = new Poco::Data::SessionPool("MySQL", "host=localhost;port=3306;db=PRPL;user=PRPL;password=xxxxx;compress=true;auto-reconnect=true");
+	std::string dbConnectString = config().getString("database.connection-string", "");
+	if(dbConnectString.empty())
+	{
+		std::string databaseName = config().getString("database.name", "PRPL");
+		std::string databaseHost = config().getString("database.host", "localhost");
+		std::string databasePort = config().getString("database.port", "3306");
+		std::string databaseUser = config().getString("database.user", "PRPL");
+		std::string databasePassword = config().getString("database.password", "");
 
-    Poco::Data::Session session = _pDbSessionPool->get();
+		dbConnectString = "host=";
+		dbConnectString += databaseHost;
+		dbConnectString += ";port=";
+		dbConnectString += databasePort;
+		dbConnectString += ";db=";
+		dbConnectString += databaseName;
+		dbConnectString += ";user=";
+		dbConnectString += databaseUser;
+		dbConnectString += ";password=";
+		dbConnectString += databasePassword;
+		dbConnectString += ";compress=true;auto-reconnect=true";
+	}
+	poco_information_f1(Poco::Logger::root(), "Connecting to database using '%s'", dbConnectString);
+
+	_pDbSessionPool = new Poco::Data::SessionPool("MySQL", dbConnectString);
+	Poco::Data::Session session = _pDbSessionPool->get();
+
+	poco_information(Poco::Logger::root(), "Connected to database PRPL");
 
 	// Check Schema version is valid
 	Param param;
@@ -243,10 +266,10 @@ bool PRPLHTTPServerApplication::connectDB()
 		return false;
 	}
 
-    _schemaVersion = schemaVersion;
+	_schemaVersion = schemaVersion;
 
-    poco_information_f4(Poco::Logger::root(), "Schema version %u.%u.%u.%u", _schemaVersion.major,
-                        _schemaVersion.minor, _schemaVersion.release, _schemaVersion.hotfix);
+	poco_information_f4(Poco::Logger::root(), "Schema version %u.%u.%u.%u", _schemaVersion.major,
+						_schemaVersion.minor, _schemaVersion.release, _schemaVersion.hotfix);
 
 	return true;
 }
@@ -283,7 +306,7 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 
 		poco_information_f1(Poco::Logger::root(), "HTTP listening on port %hu", port);
 
-        startResultsHavester();
+		startResultsHavester();
 
 		waitForTerminationRequest();
 
@@ -291,8 +314,8 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 		_stopping = true;
 
 		poco_information(Poco::Logger::root(), "Stopping results harvester...");
-        _pResultsHarvesterTimer->stop();
-        delete _pResultsHarvesterTimer;
+		_pResultsHarvesterTimer->stop();
+		delete _pResultsHarvesterTimer;
 
 		poco_information(Poco::Logger::root(), "Stopping HTTP server...");
 		server.stop();
@@ -304,10 +327,10 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 
 void PRPLHTTPServerApplication::startResultsHavester()
 {
-    const unsigned long resultsSleepBetweenRuns = config().getInt("results.sleep-between-runs-seconds", 360);
+	const unsigned long resultsSleepBetweenRuns = config().getInt("results.sleep-between-runs-seconds", 360);
 
-    _pResultsHarvesterTimer = new Poco::Timer(1000, resultsSleepBetweenRuns * 1000);
+	_pResultsHarvesterTimer = new Poco::Timer(1000, resultsSleepBetweenRuns * 1000);
 
-    ResultsControllerTimer resultsControllerTimer;
-    _pResultsHarvesterTimer->start(Poco::TimerCallback<ResultsControllerTimer>(resultsControllerTimer, &ResultsControllerTimer::onTimer));
+	ResultsControllerTimer resultsControllerTimer;
+	_pResultsHarvesterTimer->start(Poco::TimerCallback<ResultsControllerTimer>(resultsControllerTimer, &ResultsControllerTimer::onTimer));
 }

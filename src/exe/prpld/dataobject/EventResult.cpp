@@ -24,7 +24,7 @@ EventResult::EventResult()
 }
 
 EventResult::EventResult(const unsigned long _ID, const unsigned long _resultNumber, const unsigned long _eventID,
-                         const Poco::DateTime _date, const Poco::Nullable<unsigned long> _leagueYear)
-    : ID(_ID), resultNumber(_resultNumber), eventID(_eventID), date(_date), leagueYear(_leagueYear)
+						 const Poco::DateTime _date, const Poco::Nullable<unsigned long> _leagueYear)
+	: ID(_ID), resultNumber(_resultNumber), eventID(_eventID), date(_date), leagueYear(_leagueYear)
 {
 }

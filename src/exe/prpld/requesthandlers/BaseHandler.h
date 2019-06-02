@@ -29,11 +29,11 @@ class BaseHandler: public Poco::Net::HTTPRequestHandler
 {
 public:
 	std::string getHeader(const std::string& pageTitle, const bool includeJQuery, const std::string& additionalHeader) const;
-    std::string getFooter() const;
+	std::string getFooter() const;
 
 protected:
-    void responseProblem(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response,
-                         const std::string& pageTitle, const std::string& message);
+	void responseProblem(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response,
+						 const std::string& pageTitle, const std::string& message);
 
 };
 

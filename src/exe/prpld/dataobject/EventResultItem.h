@@ -31,11 +31,11 @@ class EventResultItem
 public:
 	EventResultItem();
 	EventResultItem(const unsigned long _ID, const unsigned long eventResultID, const unsigned long position,
-                    Poco::Nullable<unsigned long> genderPosition, Poco::Nullable<std::string> gender, Poco::Nullable<unsigned long> athleteID,
-                    Poco::Nullable<unsigned long> durationSecs);
+					Poco::Nullable<unsigned long> genderPosition, Poco::Nullable<std::string> gender, Poco::Nullable<unsigned long> athleteID,
+					Poco::Nullable<unsigned long> durationSecs);
 
 public:
-    unsigned long ID;
+	unsigned long ID;
 	unsigned long eventResultID;
 	unsigned long position;
 	Poco::Nullable<unsigned long> genderPosition;
@@ -44,7 +44,7 @@ public:
 	Poco::Nullable<unsigned long> durationSecs;
 
 public:
-    Poco::Timespan getDurationTimespan() const;
+	Poco::Timespan getDurationTimespan() const;
 };
 
 typedef std::vector<EventResultItem*> EventResultItems;

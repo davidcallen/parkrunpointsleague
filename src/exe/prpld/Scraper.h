@@ -36,15 +36,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class Scraper
 {
 public:
-    Scraper();
-    virtual ~Scraper();
+	Scraper();
+	virtual ~Scraper();
 
 public:
 	virtual void getHTML(std::string& html);
 	virtual void getTidyHTML(std::string& html);
 
 protected:
-    virtual bool getPageHTTPrequest(const std::string& url);
+	virtual bool getPageHTTPrequest(const std::string& url);
 
 	virtual bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& httpResponse, std::stringstream& responseStream);
 
@@ -58,7 +58,7 @@ protected:
 
 	virtual void printAttributes(const GumboNode* node);
 
-    virtual bool tidyHTML();
+	virtual bool tidyHTML();
 
 protected:
 	bool _debugHTML;

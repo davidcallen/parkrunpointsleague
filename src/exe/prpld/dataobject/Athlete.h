@@ -27,17 +27,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 /*
 enum AthleteGenderEnum
 {
-    GENDER_UNKNOWN=0,
-    GENDER_MALE=1,
-    GENDER_FEMALE=2
+	GENDER_UNKNOWN=0,
+	GENDER_MALE=1,
+	GENDER_FEMALE=2
 };
 */
 class Athlete
 {
 public:
-    static const std::string NAME_UNKNOWN;
-    static const std::string GENDER_CHAR_MALE;
-    static const std::string GENDER_CHAR_FEMALE;
+	static const std::string NAME_UNKNOWN;
+	static const std::string GENDER_CHAR_MALE;
+	static const std::string GENDER_CHAR_FEMALE;
 
 public:
 	Athlete();
@@ -47,12 +47,12 @@ public:
 	// std::string getGenderString() const;
 
 public:
-    static void getNames(const std::string& name, std::string& firstnames, std::string& lastname);
-    // static AthleteGenderEnum parseGender(const std::string& gender);
-    static bool compare(Athlete* pAthlete1, Athlete* pAthlete2);
+	static void getNames(const std::string& name, std::string& firstnames, std::string& lastname);
+	// static AthleteGenderEnum parseGender(const std::string& gender);
+	static bool compare(Athlete* pAthlete1, Athlete* pAthlete2);
 
 public:
-    unsigned long ID;
+	unsigned long ID;
 	std::string first_name;
 	std::string last_name;
 	// AthleteGenderEnum gender;

@@ -25,17 +25,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class EventHistoryCache : public Cache
 {
 public:
-    EventHistoryCache();
+	EventHistoryCache();
 
 public:
 	bool checkExists(const std::string& eventName);
 	bool get(const std::string& eventName, std::string& html);
-    bool save(const std::string& eventName, const std::string& html);
+	bool save(const std::string& eventName, const std::string& html);
 
 protected:
-    std::string getFilenameAndPath(const std::string& eventName);
-    std::string getEventDataPath(const std::string& eventName);
-//    std::string getFilename();
+	std::string getFilenameAndPath(const std::string& eventName);
+	std::string getEventDataPath(const std::string& eventName);
+//	std::string getFilename();
 
 };
 

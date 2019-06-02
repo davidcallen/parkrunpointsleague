@@ -128,11 +128,11 @@ bool ResultsScraper::getPage()
 	std::string url;
 	if(_eventResult.resultNumber == 0)
 	{
-		url = "http://www.parkrun.org.uk/" + _event.name + "/results/latestresults/";
+		url = "https://www.parkrun.org.uk/" + _event.name + "/results/latestresults/";
 	}
 	else
 	{
-		url = "http://www.parkrun.org.uk/" + _event.name + "/results/weeklyresults/?runSeqNumber=" + Poco::NumberFormatter::format(_eventResult.resultNumber);
+ 		url = "https://www.parkrun.org.uk/" + _event.name + "/results/weeklyresults/?runSeqNumber=" + Poco::NumberFormatter::format(_eventResult.resultNumber);
 	}
 	result = getPageHTTPrequest(url);
 
@@ -141,7 +141,7 @@ bool ResultsScraper::getPage()
 
 bool ResultsScraper::parsePage(const std::string& html)
 {
-    bool result = false;
+	bool result = false;
 
 	GumboOutput* pOutput = gumbo_parse(html.c_str());
 
@@ -311,7 +311,7 @@ bool ResultsScraper::parseResultsTable(const GumboNode* pTableNode)
 	if (tableBodyNode == NULL)
 	{
 		poco_warning_f2(Poco::Logger::root(), "%s event %lu has page with zero results - ignore it until it is populated.",
-                        _event.name, _eventResult.resultNumber);
+						_event.name, _eventResult.resultNumber);
 
 		result = false;
 		return result;
@@ -392,9 +392,9 @@ bool ResultsScraper::parseResultsTable(const GumboNode* pTableNode)
 							case 7:
 								parseTableDataGenderPosition(pTableDataNode, genderPositionStr);
 								if(!genderPositionStr.empty())
-                                {
-                                    genderPosition = Poco::NumberParser::parse(genderPositionStr);
-                                }
+								{
+									genderPosition = Poco::NumberParser::parse(genderPositionStr);
+								}
 								break;
 							default:
 								break;
@@ -419,23 +419,23 @@ bool ResultsScraper::parseResultsTable(const GumboNode* pTableNode)
 										 + " secs " + Poco::NumberFormatter::format(durationTimespan.totalSeconds()) + "]");
 					}
 
-                    EventResultItem* pEventResultItem = NULL;
-                    if(athleteName == Athlete::NAME_UNKNOWN)
-                    {
-                        pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition, Athlete::GENDER_CHAR_MALE,
-                                                                                Poco::NULL_GENERIC, Poco::NULL_GENERIC);
-                    }
-                    else
-                    {
-                        pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition, genderStr,
-                                                                                athleteNumber, durationTimespan.totalSeconds());
-                        Athlete* pAthlete = new Athlete(athleteNumber, athleteName, genderStr);
-                        _athletes.push_back(pAthlete);
-                    }
+					EventResultItem* pEventResultItem = NULL;
+					if(athleteName == Athlete::NAME_UNKNOWN)
+					{
+						pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition, Athlete::GENDER_CHAR_MALE,
+																				Poco::NULL_GENERIC, Poco::NULL_GENERIC);
+					}
+					else
+					{
+						pEventResultItem = new EventResultItem(0, _eventResult.eventID, position, genderPosition, genderStr,
+																				athleteNumber, durationTimespan.totalSeconds());
+						Athlete* pAthlete = new Athlete(athleteNumber, athleteName, genderStr);
+						_athletes.push_back(pAthlete);
+					}
 					_eventResultItems.push_back(pEventResultItem);
 
-                    // We have found good data so lets set our result to true
-                    result = true;
+					// We have found good data so lets set our result to true
+					result = true;
 				}
 				else
 				{
@@ -452,14 +452,14 @@ bool ResultsScraper::parseResultsTable(const GumboNode* pTableNode)
 	if(resultItemsFound != _eventResultItems.size())
 	{
 		poco_warning_f4(Poco::Logger::root(), "%s event %lu has %lu results but only %lu found to be valid.",
-                        _event.name, _eventResult.resultNumber, resultItemsFound, (unsigned long)_eventResultItems.size());
+						_event.name, _eventResult.resultNumber, resultItemsFound, (unsigned long)_eventResultItems.size());
 	}
 
 	if(_eventResultItems.empty())
 	{
 		poco_warning_f2(Poco::Logger::root(), "%s event %lu has page with zero results - ignore it until it is populated.",
-                        _event.name, _eventResult.resultNumber);
-        result = false;
+						_event.name, _eventResult.resultNumber);
+		result = false;
 	}
 
 	return result;

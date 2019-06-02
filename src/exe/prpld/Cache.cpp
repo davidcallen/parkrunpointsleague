@@ -52,7 +52,7 @@ Cache::Cache()
 
 bool Cache::checkFileExists(const std::string& fileNameAndPath)
 {
-    poco_assert_dbg(!fileNameAndPath.empty());
+	poco_assert_dbg(!fileNameAndPath.empty());
 
 	Poco::File file(fileNameAndPath);
 
@@ -61,7 +61,7 @@ bool Cache::checkFileExists(const std::string& fileNameAndPath)
 
 bool Cache::getFromFile(const std::string& fileNameAndPath, std::string& contents)
 {
-    poco_assert_dbg(!fileNameAndPath.empty());
+	poco_assert_dbg(!fileNameAndPath.empty());
 
 	Poco::File file(fileNameAndPath);
 
@@ -84,12 +84,12 @@ bool Cache::getFromFile(const std::string& fileNameAndPath, std::string& content
 
 bool Cache::saveToFile(const std::string& fileNameAndPath, const std::string& contents)
 {
-    poco_assert_dbg(!fileNameAndPath.empty());
+	poco_assert_dbg(!fileNameAndPath.empty());
 
-    std::ofstream ofs(fileNameAndPath.c_str(), std::ofstream::out | std::ofstream::binary);
-    ofs << contents;
-    //Poco::StreamCopier::copyStream(responseStream, ofs);
-    ofs.close();
+	std::ofstream ofs(fileNameAndPath.c_str(), std::ofstream::out | std::ofstream::binary);
+	ofs << contents;
+	//Poco::StreamCopier::copyStream(responseStream, ofs);
+	ofs.close();
 
-    return true;
+	return true;
 }

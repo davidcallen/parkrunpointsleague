@@ -33,8 +33,8 @@ public:
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
 
 protected:
-    void handleRequestLeaguePage(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-    void handleRequestGetYearsPage(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
+	void handleRequestLeaguePage(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
+	void handleRequestGetYearsPage(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
 };
 
 #endif // EventLeagueHandler_INCLUDED

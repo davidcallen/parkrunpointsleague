@@ -44,96 +44,96 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Poco/DateTime.h>
 
 ResultsControllerTimer::ResultsControllerTimer() :
-    _ignoreCounter(9999)
+	_ignoreCounter(9999)
 {
 }
 
 void ResultsControllerTimer::onTimer(Poco::Timer& timer)
 {
-    try
-    {
-        // Run from ResultsHarveter Timer Thread
+	try
+	{
+		// Run from ResultsHarveter Timer Thread
 
-        // TODO : ensure this timer callback wont be fired if already in progress. Check Poco Timer functionality.
-        // Otherwise if running slow, then could overload server with duplicate processing.
+		// TODO : ensure this timer callback wont be fired if already in progress. Check Poco Timer functionality.
+		// Otherwise if running slow, then could overload server with duplicate processing.
 
-        // Check if we are not a popular ParkRun day (usually Saturday or national holiday). If so then slow down our harvesting by factor of X
-        const unsigned long nonParkRunDaySlowDownFactor = Poco::Util::Application::instance().config().getInt("results.non-parkrun-day-slow-down-factor", 10);
+		// Check if we are not a popular ParkRun day (usually Saturday or national holiday). If so then slow down our harvesting by factor of X
+		const unsigned long nonParkRunDaySlowDownFactor = Poco::Util::Application::instance().config().getInt("results.non-parkrun-day-slow-down-factor", 10);
 
-        // TODO : this does not cater for public holidays and is not very international. Use xerces calendar.
-        Poco::DateTime now;
-        if(now.dayOfWeek() != Poco::DateTime::SATURDAY)
-        {
-            _ignoreCounter++;
-            if(_ignoreCounter < nonParkRunDaySlowDownFactor)
-            {
-                poco_trace(Poco::Logger::root(), "Skipping results harvesting since this is not a usual ParkRun day. Will harvest in "
-                           + Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor - _ignoreCounter) + " more turns.");
-                return;
-            }
-            _ignoreCounter = 0;
-        }
-        else
-        {
-            if(now.hour() < 9 || now.hour() > 14)
-            {
-                _ignoreCounter++;
-                if(_ignoreCounter < nonParkRunDaySlowDownFactor / 2)
-                {
-                    poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time. Will harvest in "
-                                + Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor / 2 - _ignoreCounter) + " more turns.");
-                    return;
-                }
-                _ignoreCounter = 0;
-            }
-            else if(now.hour() >= 12 || now.hour() <= 14)
-            {
-                _ignoreCounter++;
-                if(_ignoreCounter < nonParkRunDaySlowDownFactor / 4)
-                {
-                    poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time. Will harvest in "
-                                + Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor / 4 - _ignoreCounter) + " more turns.");
-                    return;
-                }
-                _ignoreCounter = 0;
-            }
-        }
+		// TODO : this does not cater for public holidays and is not very international. Use xerces calendar.
+		Poco::DateTime now;
+		if(now.dayOfWeek() != Poco::DateTime::SATURDAY)
+		{
+			_ignoreCounter++;
+			if(_ignoreCounter < nonParkRunDaySlowDownFactor)
+			{
+				poco_trace(Poco::Logger::root(), "Skipping results harvesting since this is not a usual ParkRun day. Will harvest in "
+						   + Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor - _ignoreCounter) + " more turns.");
+				return;
+			}
+			_ignoreCounter = 0;
+		}
+		else
+		{
+			if(now.hour() < 9 || now.hour() > 14)
+			{
+				_ignoreCounter++;
+				if(_ignoreCounter < nonParkRunDaySlowDownFactor / 2)
+				{
+					poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time. Will harvest in "
+								+ Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor / 2 - _ignoreCounter) + " more turns.");
+					return;
+				}
+				_ignoreCounter = 0;
+			}
+			else if(now.hour() >= 12 || now.hour() <= 14)
+			{
+				_ignoreCounter++;
+				if(_ignoreCounter < nonParkRunDaySlowDownFactor / 4)
+				{
+					poco_trace(Poco::Logger::root(), "Skipping results harvesting since outside usual ParkRun time. Will harvest in "
+								+ Poco::NumberFormatter::format(nonParkRunDaySlowDownFactor / 4 - _ignoreCounter) + " more turns.");
+					return;
+				}
+				_ignoreCounter = 0;
+			}
+		}
 
-        const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
+		const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
 
-        Events events;
-        EventDataModel::fetch(events);
+		Events events;
+		EventDataModel::fetch(events);
 
-        Events::const_iterator iterEvent;
-        for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
-        {
-            const Event* pEvent = static_cast<Event*>(*iterEvent);
+		Events::const_iterator iterEvent;
+		for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
+		{
+			const Event* pEvent = static_cast<Event*>(*iterEvent);
 
-            if(PRPLHTTPServerApplication::instance().isStopping())
-            {
-                break;
-            }
+			if(PRPLHTTPServerApplication::instance().isStopping())
+			{
+				break;
+			}
 
-            ResultsController resultsController;
-            resultsController.process(pEvent->name);
+			ResultsController resultsController;
+			resultsController.process(pEvent->name);
 
-            if(PRPLHTTPServerApplication::instance().isStopping())
-            {
-                break;
-            }
+			if(PRPLHTTPServerApplication::instance().isStopping())
+			{
+				break;
+			}
 
-            // Loop on the sleeping so can check if app is stopping and bomb out for timely halting
-            for(unsigned int i = 0; i < resultsSleepBetweenEvents; i++)
-            {
-                if(PRPLHTTPServerApplication::instance().isStopping())
-                {
-                    break;
-                }
-                Poco::Thread::sleep(1000);
-            }
-        }
+			// Loop on the sleeping so can check if app is stopping and bomb out for timely halting
+			for(unsigned int i = 0; i < resultsSleepBetweenEvents; i++)
+			{
+				if(PRPLHTTPServerApplication::instance().isStopping())
+				{
+					break;
+				}
+				Poco::Thread::sleep(1000);
+			}
+		}
 
-        EventDataModel::free(events);
+		EventDataModel::free(events);
 	}
 	catch (Poco::Exception& e)
 	{
@@ -147,472 +147,472 @@ ResultsController::ResultsController()
 /*
 void ResultsController::onTimer(Poco::Timer& timer)
 {
-    while (!PRPLHTTPServerApplication::instance().isStopping())
-    {
-        // Run from ResultsHarveter Thread
-        const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
+	while (!PRPLHTTPServerApplication::instance().isStopping())
+	{
+		// Run from ResultsHarveter Thread
+		const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
 
-        Events events;
-        EventDataModel::fetch(events);
+		Events events;
+		EventDataModel::fetch(events);
 
-        Events::const_iterator iterEvent;
-        for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
-        {
-            const Event* pEvent = static_cast<Event*>(*iterEvent);
-            process(pEvent->name);
+		Events::const_iterator iterEvent;
+		for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
+		{
+			const Event* pEvent = static_cast<Event*>(*iterEvent);
+			process(pEvent->name);
 
-            Poco::Thread::sleep(resultsSleepBetweenEvents * 1000);
-        }
+			Poco::Thread::sleep(resultsSleepBetweenEvents * 1000);
+		}
 
-        EventDataModel::free(events);
-    }
+		EventDataModel::free(events);
+	}
 }
 
 VIRTUAL void ResultsController::run()
 {
-    // Run from ResultsHarveter Thread
-    const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
-    const unsigned long resultsSleepBetweenRuns = Poco::Util::Application::instance().config().getInt("results.sleep-between-runs-seconds", 360);
+	// Run from ResultsHarveter Thread
+	const unsigned long resultsSleepBetweenEvents = Poco::Util::Application::instance().config().getInt("results.sleep-between-events-seconds", 10);
+	const unsigned long resultsSleepBetweenRuns = Poco::Util::Application::instance().config().getInt("results.sleep-between-runs-seconds", 360);
 
-    Events events;
-    EventDataModel::fetch(events);
+	Events events;
+	EventDataModel::fetch(events);
 
-    Events::const_iterator iterEvent;
-    for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
-    {
-        const Event* pEvent = static_cast<Event*>(*iterEvent);
-        process(pEvent->name);
+	Events::const_iterator iterEvent;
+	for(iterEvent = events.begin(); iterEvent != events.end(); ++iterEvent)
+	{
+		const Event* pEvent = static_cast<Event*>(*iterEvent);
+		process(pEvent->name);
 
-        Poco::Thread::sleep(resultsSleepBetweenEvents * 1000);
-    }
+		Poco::Thread::sleep(resultsSleepBetweenEvents * 1000);
+	}
 
-    EventDataModel::free(events);
+	EventDataModel::free(events);
 
-//        Poco::Thread::sleep(resultsSleepBetweenRuns * 1000);
+//		Poco::Thread::sleep(resultsSleepBetweenRuns * 1000);
 }
 */
 // Get the latest result
 VIRTUAL bool ResultsController::process(const std::string& eventName)
 {
-    bool result = true;
+	bool result = true;
 
-    poco_information(Poco::Logger::root(), "Starting results harvester for " + eventName);
-    Poco::Stopwatch stopWatch;
+	poco_information(Poco::Logger::root(), "Starting results harvester for " + eventName);
+	Poco::Stopwatch stopWatch;
 	stopWatch.start();
 
-    // will delete any existing DB entries and recreate them - useful for Testing
-    const bool recreateAllResults = Poco::Util::Application::instance().config().getBool("results.recreate-all-results", false);
-    const bool useHistoryCache = Poco::Util::Application::instance().config().getBool("results.use-history-cache", false);
+	// will delete any existing DB entries and recreate them - useful for Testing
+	const bool recreateAllResults = Poco::Util::Application::instance().config().getBool("results.recreate-all-results", false);
+	const bool useHistoryCache = Poco::Util::Application::instance().config().getBool("results.use-history-cache", false);
 
-    std::set<unsigned long> changedLeagueYears;
+	std::set<unsigned long> changedLeagueYears;
 
-    Event event;
-    if(!EventDataModel::fetch(eventName, event))
-    {
-        return false;
-    }
-    else
-    {
-        EventHistoryScraper eventHistoryScraper;
+	Event event;
+	if(!EventDataModel::fetch(eventName, event))
+	{
+		return false;
+	}
+	else
+	{
+		EventHistoryScraper eventHistoryScraper;
 
-        EventHistoryCache eventHistoryCache;
-        if(useHistoryCache && eventHistoryCache.checkExists(eventName))
-        {
-            std::string html;
-            eventHistoryCache.get(eventName, html);
+		EventHistoryCache eventHistoryCache;
+		if(useHistoryCache && eventHistoryCache.checkExists(eventName))
+		{
+			std::string html;
+			eventHistoryCache.get(eventName, html);
 
-            eventHistoryScraper.execute(event, html);
-        }
-        else
-        {
-            if(eventHistoryScraper.execute(event))
-            {
-                std::string html;
-                eventHistoryScraper.getTidyHTML(html);
+			eventHistoryScraper.execute(event, html);
+		}
+		else
+		{
+			if(eventHistoryScraper.execute(event))
+			{
+				std::string html;
+				eventHistoryScraper.getTidyHTML(html);
 
-                if(html.empty())
-                {
-                    eventHistoryScraper.getHTML(html);
-                }
+				if(html.empty())
+				{
+					eventHistoryScraper.getHTML(html);
+				}
 
-                if(!html.empty())
-                {
-                    eventHistoryCache.save(eventName, html);
-                }
-            }
-        }
-        EventResults scrapedEventResults = eventHistoryScraper.getEventResults();
+				if(!html.empty())
+				{
+					eventHistoryCache.save(eventName, html);
+				}
+			}
+		}
+		EventResults scrapedEventResults = eventHistoryScraper.getEventResults();
 
-        // Get EventResults from database
-        EventResults dbEventResults;
-        EventResultDataModel::fetch(event.ID, dbEventResults);
+		// Get EventResults from database
+		EventResults dbEventResults;
+		EventResultDataModel::fetch(event.ID, dbEventResults);
 
 
-        // Check if each EventResult is in the database, and if not then fetch it, parse it, and save it.
-        EventResult* pFoundDBEventResult = NULL;
+		// Check if each EventResult is in the database, and if not then fetch it, parse it, and save it.
+		EventResult* pFoundDBEventResult = NULL;
 
-        EventResults::reverse_iterator iter;
-        for(iter = scrapedEventResults.rbegin(); iter != scrapedEventResults.rend(); ++iter)
-        {
-            EventResult* pScrapedEventResult = *iter;
-            pScrapedEventResult->eventID = event.ID;
+		EventResults::reverse_iterator iter;
+		for(iter = scrapedEventResults.rbegin(); iter != scrapedEventResults.rend(); ++iter)
+		{
+			EventResult* pScrapedEventResult = *iter;
+			pScrapedEventResult->eventID = event.ID;
 
-            pFoundDBEventResult = NULL;
+			pFoundDBEventResult = NULL;
 
-            // If we have found the first Result then update the Events Birthday
-            if(pScrapedEventResult->resultNumber == 1 && event.birthday.isNull())
-            {
-                event.birthday = pScrapedEventResult->date;
+			// If we have found the first Result then update the Events Birthday
+			if(pScrapedEventResult->resultNumber == 1 && event.birthday.isNull())
+			{
+				event.birthday = pScrapedEventResult->date;
 
-                EventDataModel::update(event);
-            }
+				EventDataModel::update(event);
+			}
 
-            if(!event.birthday.isNull())
-            {
-                const unsigned long leagueYear = getLeagueYear(event.birthday.value(), pScrapedEventResult->date);
+			if(!event.birthday.isNull())
+			{
+				const unsigned long leagueYear = getLeagueYear(event.birthday.value(), pScrapedEventResult->date);
 
-                pScrapedEventResult->leagueYear = leagueYear;
-            }
+				pScrapedEventResult->leagueYear = leagueYear;
+			}
 
-            EventResults::const_iterator dbIter;
-            for(dbIter = dbEventResults.begin(); dbIter != dbEventResults.end(); ++dbIter)
-            {
-                EventResult* pDBEventResult = *dbIter;
+			EventResults::const_iterator dbIter;
+			for(dbIter = dbEventResults.begin(); dbIter != dbEventResults.end(); ++dbIter)
+			{
+				EventResult* pDBEventResult = *dbIter;
 
-                if(pDBEventResult->resultNumber == pScrapedEventResult->resultNumber
-                    && pDBEventResult->date == pScrapedEventResult->date)
-                {
-                    pFoundDBEventResult = pDBEventResult;
-                    break;
-                }
-                if(pDBEventResult->resultNumber > pScrapedEventResult->resultNumber)
-                {
-                    // Since the DB records are in Ascending ResultNumber then we have passed it so get out early
-                    break;
-                }
-            }
+				if(pDBEventResult->resultNumber == pScrapedEventResult->resultNumber
+					&& pDBEventResult->date == pScrapedEventResult->date)
+				{
+					pFoundDBEventResult = pDBEventResult;
+					break;
+				}
+				if(pDBEventResult->resultNumber > pScrapedEventResult->resultNumber)
+				{
+					// Since the DB records are in Ascending ResultNumber then we have passed it so get out early
+					break;
+				}
+			}
 
-            // No EventResult in DB so fetch its ResultItems from website and save to db
-            if(pFoundDBEventResult == NULL || recreateAllResults)
-            {
-                // Get EventResult from website
-                EventResultItems scrapedEventResultItems;
-                Athletes scrapedAthletes;
-                if(processEventResult(event, *pScrapedEventResult, scrapedEventResultItems, scrapedAthletes))
-                {
-                    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
-                    Poco::Data::Transaction dbTransaction(dbSession, true);
-                    if(recreateAllResults)
-                    {
-                        EventResultDataModel::remove(dbSession, pScrapedEventResult);
-                    }
-                    EventResult dbEventResult;
-                    if(pFoundDBEventResult == NULL || recreateAllResults)
-                    {
-                        EventResultDataModel::insert(dbSession, *pScrapedEventResult);
-                        poco_information(Poco::Logger::root(), "Event " + event.name + " inserted new EventResult record for result number " + Poco::NumberFormatter::format(pScrapedEventResult->resultNumber));
+			// No EventResult in DB so fetch its ResultItems from website and save to db
+			if(pFoundDBEventResult == NULL || recreateAllResults)
+			{
+				// Get EventResult from website
+				EventResultItems scrapedEventResultItems;
+				Athletes scrapedAthletes;
+				if(processEventResult(event, *pScrapedEventResult, scrapedEventResultItems, scrapedAthletes))
+				{
+					Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+					Poco::Data::Transaction dbTransaction(dbSession, true);
+					if(recreateAllResults)
+					{
+						EventResultDataModel::remove(dbSession, pScrapedEventResult);
+					}
+					EventResult dbEventResult;
+					if(pFoundDBEventResult == NULL || recreateAllResults)
+					{
+						EventResultDataModel::insert(dbSession, *pScrapedEventResult);
+						poco_information(Poco::Logger::root(), "Event " + event.name + " inserted new EventResult record for result number " + Poco::NumberFormatter::format(pScrapedEventResult->resultNumber));
 
-                        EventResultDataModel::fetch(dbSession, pScrapedEventResult->eventID, pScrapedEventResult->resultNumber, dbEventResult);
-                        pFoundDBEventResult = &dbEventResult;
+						EventResultDataModel::fetch(dbSession, pScrapedEventResult->eventID, pScrapedEventResult->resultNumber, dbEventResult);
+						pFoundDBEventResult = &dbEventResult;
 
-                        if(!event.birthday.isNull())
-                        {
-                            const unsigned long leagueYear = getLeagueYear(event.birthday.value(), dbEventResult.date);
-                            changedLeagueYears.insert(leagueYear);
+						if(!event.birthday.isNull())
+						{
+							const unsigned long leagueYear = getLeagueYear(event.birthday.value(), dbEventResult.date);
+							changedLeagueYears.insert(leagueYear);
 
-                            if(dbEventResult.leagueYear.isNull() || dbEventResult.leagueYear.value() != leagueYear)
-                            {
-                                dbEventResult.leagueYear = leagueYear;
-                                EventResultDataModel::update(dbSession, dbEventResult);
-                            }
-                        }
-                    }
+							if(dbEventResult.leagueYear.isNull() || dbEventResult.leagueYear.value() != leagueYear)
+							{
+								dbEventResult.leagueYear = leagueYear;
+								EventResultDataModel::update(dbSession, dbEventResult);
+							}
+						}
+					}
 
-                    if(recreateAllResults)
-                    {
-                        EventResultItemDataModel::remove(dbSession, pFoundDBEventResult->ID);
-                    }
-                    const unsigned long eventResultItemsCount = EventResultItemDataModel::fetchCount(dbSession, pFoundDBEventResult->ID);
+					if(recreateAllResults)
+					{
+						EventResultItemDataModel::remove(dbSession, pFoundDBEventResult->ID);
+					}
+					const unsigned long eventResultItemsCount = EventResultItemDataModel::fetchCount(dbSession, pFoundDBEventResult->ID);
 
-                    if(eventResultItemsCount == 0)
-                    {
-                        EventResultItems::const_iterator iter;
-                        for(iter = scrapedEventResultItems.begin(); iter != scrapedEventResultItems.end(); ++iter)
-                        {
-                            EventResultItem* pEventResultItem = *iter;
+					if(eventResultItemsCount == 0)
+					{
+						EventResultItems::const_iterator iter;
+						for(iter = scrapedEventResultItems.begin(); iter != scrapedEventResultItems.end(); ++iter)
+						{
+							EventResultItem* pEventResultItem = *iter;
 
-                            pEventResultItem->eventResultID = pFoundDBEventResult->ID;
+							pEventResultItem->eventResultID = pFoundDBEventResult->ID;
 
-                            EventResultItemDataModel::insert(dbSession, pEventResultItem);
-                        }
-                        // EventResultItemDataModel::reconcile(dbSession, pFoundDBEventResult->ID, scrapedEventResultItems);
-                    }
+							EventResultItemDataModel::insert(dbSession, pEventResultItem);
+						}
+						// EventResultItemDataModel::reconcile(dbSession, pFoundDBEventResult->ID, scrapedEventResultItems);
+					}
 
-                    AthleteDataModel::reconcile(dbSession, scrapedAthletes);
+					AthleteDataModel::reconcile(dbSession, scrapedAthletes);
 
-                    dbTransaction.commit();
-                    poco_information(Poco::Logger::root(), "Event " + event.name + " inserted " + Poco::NumberFormatter::format(scrapedEventResultItems.size()) + " EventResultItem records.");
-                }
+					dbTransaction.commit();
+					poco_information(Poco::Logger::root(), "Event " + event.name + " inserted " + Poco::NumberFormatter::format(scrapedEventResultItems.size()) + " EventResultItem records.");
+				}
 
-                EventResultItemDataModel::free(scrapedEventResultItems);
-                AthleteDataModel::free(scrapedAthletes);
-            }
-        }
+				EventResultItemDataModel::free(scrapedEventResultItems);
+				AthleteDataModel::free(scrapedAthletes);
+			}
+		}
 
-        EventResultDataModel::free(scrapedEventResults);
-        EventResultDataModel::free(dbEventResults);
-    }
+		EventResultDataModel::free(scrapedEventResults);
+		EventResultDataModel::free(dbEventResults);
+	}
 
-    // Process event results and create leagues
-    result = processEventLeagues(event, changedLeagueYears);
+	// Process event results and create leagues
+	result = processEventLeagues(event, changedLeagueYears);
 
 	poco_information(Poco::Logger::root(), "Event " + event.name + " took " + Poco::NumberFormatter::format(stopWatch.elapsedSeconds()) + " seconds.");
 
-    return result;
+	return result;
 }
 
 // Get the latest result
 bool ResultsController::processEventResult(const Event& event, const EventResult& eventResult, EventResultItems& eventResultItems, Athletes& athletes)
 {
-    bool result = false;
+	bool result = false;
 
-    ResultsScraper resultsScraper;
+	ResultsScraper resultsScraper;
 
-    ResultsCache resultsCache;
-    if(resultsCache.checkExists(event.name, eventResult.resultNumber))
-    {
-        std::string html;
-        if(resultsCache.get(event.name, eventResult.resultNumber, html))
-        {
-            result = resultsScraper.execute(event, eventResult, html);
-        }
-    }
-    else
-    {
-        result = resultsScraper.execute(event, eventResult);
-        if(result)
-        {
-            std::string html;
-            resultsScraper.getTidyHTML(html);
+	ResultsCache resultsCache;
+	if(resultsCache.checkExists(event.name, eventResult.resultNumber))
+	{
+		std::string html;
+		if(resultsCache.get(event.name, eventResult.resultNumber, html))
+		{
+			result = resultsScraper.execute(event, eventResult, html);
+		}
+	}
+	else
+	{
+		result = resultsScraper.execute(event, eventResult);
+		if(result)
+		{
+			std::string html;
+			resultsScraper.getTidyHTML(html);
 
-            if(html.empty())
-            {
-                resultsScraper.getHTML(html);
-            }
-            if(!html.empty())
-            {
-                result = resultsCache.save(event.name, eventResult.resultNumber, html);
-            }
-        }
-    }
-    if(result)
-    {
-        eventResultItems = resultsScraper.getEventResultItems();
-        athletes = resultsScraper.getAthletes();
-    }
+			if(html.empty())
+			{
+				resultsScraper.getHTML(html);
+			}
+			if(!html.empty())
+			{
+				result = resultsCache.save(event.name, eventResult.resultNumber, html);
+			}
+		}
+	}
+	if(result)
+	{
+		eventResultItems = resultsScraper.getEventResultItems();
+		athletes = resultsScraper.getAthletes();
+	}
 
-    return result;
+	return result;
 }
 
 bool ResultsController::processEventLeagues(const Event& event, const std::set<unsigned long>& changedLeagueYears)
 {
-    bool result = true;
+	bool result = true;
 
-    // will delete any existing DB entries and recreate them - useful for Testing
-    const bool recreateAllLeagues = Poco::Util::Application::instance().config().getBool("results.recreate-all-leagues", false);
+	// will delete any existing DB entries and recreate them - useful for Testing
+	const bool recreateAllLeagues = Poco::Util::Application::instance().config().getBool("results.recreate-all-leagues", false);
 
-    if(event.birthday.isNull())
-    {
-        return false;
-    }
-    EventLeagues eventLeagues;
-    EventLeagueItemsMapByAthlete eventLeagueItemsMapByAthlete;
+	if(event.birthday.isNull())
+	{
+		return false;
+	}
+	EventLeagues eventLeagues;
+	EventLeagueItemsMapByAthlete eventLeagueItemsMapByAthlete;
 
-    // Loop thru the EventResults in oldest first, if necessary calculate the League and update it
-    EventResults dbEventResults;
-    EventResultDataModel::fetch(event.ID, dbEventResults);
+	// Loop thru the EventResults in oldest first, if necessary calculate the League and update it
+	EventResults dbEventResults;
+	EventResultDataModel::fetch(event.ID, dbEventResults);
 
-    bool createLeagueForYear = false;
-    unsigned long lastLeagueYear = 0;
-    unsigned long latestEventResultID = 0;
-    EventResults::const_iterator iterResult;
-    for(iterResult = dbEventResults.begin(); iterResult != dbEventResults.end(); ++iterResult)
-    {
-        const EventResult* pEventResult = static_cast<EventResult*>(*iterResult);
+	bool createLeagueForYear = false;
+	unsigned long lastLeagueYear = 0;
+	unsigned long latestEventResultID = 0;
+	EventResults::const_iterator iterResult;
+	for(iterResult = dbEventResults.begin(); iterResult != dbEventResults.end(); ++iterResult)
+	{
+		const EventResult* pEventResult = static_cast<EventResult*>(*iterResult);
 
-        // Calculate which League year from the Events birthday
-        const unsigned long leagueYear = getLeagueYear(event.birthday.value(), pEventResult->date);
-        createLeagueForYear = false;
+		// Calculate which League year from the Events birthday
+		const unsigned long leagueYear = getLeagueYear(event.birthday.value(), pEventResult->date);
+		createLeagueForYear = false;
 
-        EventLeague eventLeague;
-        if(!EventLeagueDataModel::fetch(event.ID, leagueYear, eventLeague))
-        {
-            createLeagueForYear = true;
-        }
-        else
-        {
-            // TODO : check if any new EventResults for this year and if so recreate this League
-            createLeagueForYear = (changedLeagueYears.find(leagueYear) != changedLeagueYears.end());
-        }
+		EventLeague eventLeague;
+		if(!EventLeagueDataModel::fetch(event.ID, leagueYear, eventLeague))
+		{
+			createLeagueForYear = true;
+		}
+		else
+		{
+			// TODO : check if any new EventResults for this year and if so recreate this League
+			createLeagueForYear = (changedLeagueYears.find(leagueYear) != changedLeagueYears.end());
+		}
 
-        if(!createLeagueForYear)
-        {
-            continue;
-        }
+		if(!createLeagueForYear)
+		{
+			continue;
+		}
 
-         // Get this EventResults items and add to this League data
-        EventResultItems dbEventResultItems;
-        EventResultItemDataModel::fetch(pEventResult->ID, dbEventResultItems);
+		 // Get this EventResults items and add to this League data
+		EventResultItems dbEventResultItems;
+		EventResultItemDataModel::fetch(pEventResult->ID, dbEventResultItems);
 
-        EventResultItems::const_iterator iterResultItem;
-        for(iterResultItem = dbEventResultItems.begin(); iterResultItem != dbEventResultItems.end(); ++iterResultItem)
-        {
-            const EventResultItem* pEventResultItem = static_cast<EventResultItem*>(*iterResultItem);
+		EventResultItems::const_iterator iterResultItem;
+		for(iterResultItem = dbEventResultItems.begin(); iterResultItem != dbEventResultItems.end(); ++iterResultItem)
+		{
+			const EventResultItem* pEventResultItem = static_cast<EventResultItem*>(*iterResultItem);
 
-            if(!pEventResultItem->athleteID.isNull() && pEventResultItem->athleteID.value() > 0
-               && !pEventResultItem->durationSecs.isNull() && pEventResultItem->durationSecs.value() > 0)
-            {
-                // TODO : the max points can vary by year, roughly depending on average number of runners of a single gender in prior year
-                // I guess the actual number does not matter as long as it is big enough.
-                unsigned long points = 0;
-                if(!pEventResultItem->genderPosition.isNull() && pEventResultItem->genderPosition.value() < 400)
-                {
-                    points = EventLeagueItem::calculatePoints(pEventResultItem->genderPosition.value(), 400);
-                }
-                EventLeagueItemsMapByAthlete::iterator iterEventLeagueItem = eventLeagueItemsMapByAthlete.find(pEventResultItem->athleteID);
-                EventLeagueItem* pEventLeagueItem = NULL;
-                if(iterEventLeagueItem == eventLeagueItemsMapByAthlete.end())
-                {
-                    // New entry for the athlete for this years league
-                    pEventLeagueItem = new EventLeagueItem(0, 0, pEventResultItem->athleteID, pEventResultItem->gender.value(), points, 1);
-                    eventLeagueItemsMapByAthlete[pEventLeagueItem->athleteID] = pEventLeagueItem;
-                }
-                else
-                {
-                    pEventLeagueItem = static_cast<EventLeagueItem*>(iterEventLeagueItem->second);
-                    pEventLeagueItem->points += points;
-                    pEventLeagueItem->runCount += 1;
-                }
-            }
-        }
-        EventResultItemDataModel::free(dbEventResultItems);
+			if(!pEventResultItem->athleteID.isNull() && pEventResultItem->athleteID.value() > 0
+			   && !pEventResultItem->durationSecs.isNull() && pEventResultItem->durationSecs.value() > 0)
+			{
+				// TODO : the max points can vary by year, roughly depending on average number of runners of a single gender in prior year
+				// I guess the actual number does not matter as long as it is big enough.
+				unsigned long points = 0;
+				if(!pEventResultItem->genderPosition.isNull() && pEventResultItem->genderPosition.value() < 400)
+				{
+					points = EventLeagueItem::calculatePoints(pEventResultItem->genderPosition.value(), 400);
+				}
+				EventLeagueItemsMapByAthlete::iterator iterEventLeagueItem = eventLeagueItemsMapByAthlete.find(pEventResultItem->athleteID);
+				EventLeagueItem* pEventLeagueItem = NULL;
+				if(iterEventLeagueItem == eventLeagueItemsMapByAthlete.end())
+				{
+					// New entry for the athlete for this years league
+					pEventLeagueItem = new EventLeagueItem(0, 0, pEventResultItem->athleteID, pEventResultItem->gender.value(), points, 1);
+					eventLeagueItemsMapByAthlete[pEventLeagueItem->athleteID] = pEventLeagueItem;
+				}
+				else
+				{
+					pEventLeagueItem = static_cast<EventLeagueItem*>(iterEventLeagueItem->second);
+					pEventLeagueItem->points += points;
+					pEventLeagueItem->runCount += 1;
+				}
+			}
+		}
+		EventResultItemDataModel::free(dbEventResultItems);
 
-        // If we have moved to a different League year the write results to database and commit
-        if(lastLeagueYear != 0 && leagueYear != lastLeagueYear && !eventLeagueItemsMapByAthlete.empty())
-        {
-            result = processEventLeagueForYear(event, lastLeagueYear, latestEventResultID, eventLeagueItemsMapByAthlete);
-        }
+		// If we have moved to a different League year the write results to database and commit
+		if(lastLeagueYear != 0 && leagueYear != lastLeagueYear && !eventLeagueItemsMapByAthlete.empty())
+		{
+			result = processEventLeagueForYear(event, lastLeagueYear, latestEventResultID, eventLeagueItemsMapByAthlete);
+		}
 
-        lastLeagueYear = leagueYear;
-        latestEventResultID = pEventResult->ID;
-    }
+		lastLeagueYear = leagueYear;
+		latestEventResultID = pEventResult->ID;
+	}
 
-    // If we have moved to a different League year the write results to database and commit
-    if(createLeagueForYear && !eventLeagueItemsMapByAthlete.empty())
-    {
-        result = processEventLeagueForYear(event, lastLeagueYear, latestEventResultID, eventLeagueItemsMapByAthlete);
-    }
+	// If we have moved to a different League year the write results to database and commit
+	if(createLeagueForYear && !eventLeagueItemsMapByAthlete.empty())
+	{
+		result = processEventLeagueForYear(event, lastLeagueYear, latestEventResultID, eventLeagueItemsMapByAthlete);
+	}
 
-    EventLeagueItemDataModel::free(eventLeagueItemsMapByAthlete);
-    EventResultDataModel::free(dbEventResults);
+	EventLeagueItemDataModel::free(eventLeagueItemsMapByAthlete);
+	EventResultDataModel::free(dbEventResults);
 
-    return result;
+	return result;
 }
 
 bool ResultsController::processEventLeagueForYear(const Event& event, const unsigned long year, const unsigned long latestEventResultID, EventLeagueItemsMapByAthlete& eventLeagueItemsMapByAthlete)
 {
-    bool result = true;
+	bool result = true;
 
-    Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
-    Poco::Data::Transaction dbTransaction(dbSession, true);
+	Poco::Data::Session dbSession = PRPLHTTPServerApplication::instance().getDbSessionPool()->get();
+	Poco::Data::Transaction dbTransaction(dbSession, true);
 
-    EventLeague eventLeague;
-    if(EventLeagueDataModel::fetch(dbSession, event.ID, year, eventLeague))
-    {
-        eventLeague.latestEventResultID = latestEventResultID;
-        EventLeagueDataModel::update(dbSession, &eventLeague);
-        EventLeagueItemDataModel::remove(dbSession, eventLeague.ID);
-    }
-    else
-    {
-        eventLeague.eventID = event.ID;
-        eventLeague.year = year;
-        eventLeague.latestEventResultID = latestEventResultID;
+	EventLeague eventLeague;
+	if(EventLeagueDataModel::fetch(dbSession, event.ID, year, eventLeague))
+	{
+		eventLeague.latestEventResultID = latestEventResultID;
+		EventLeagueDataModel::update(dbSession, &eventLeague);
+		EventLeagueItemDataModel::remove(dbSession, eventLeague.ID);
+	}
+	else
+	{
+		eventLeague.eventID = event.ID;
+		eventLeague.year = year;
+		eventLeague.latestEventResultID = latestEventResultID;
 
-        EventLeagueDataModel::insert(dbSession, &eventLeague);
-        EventLeagueDataModel::fetch(dbSession, event.ID, year, eventLeague);
-    }
+		EventLeagueDataModel::insert(dbSession, &eventLeague);
+		EventLeagueDataModel::fetch(dbSession, event.ID, year, eventLeague);
+	}
 
-    // Sort league Items by run points to get it by ascending positions
-    std::multimap<const unsigned long, EventLeagueItem*> eventLeagueItemsByRunPoints;
+	// Sort league Items by run points to get it by ascending positions
+	std::multimap<const unsigned long, EventLeagueItem*> eventLeagueItemsByRunPoints;
 
-    EventLeagueItemsMapByAthlete::const_iterator iterLeagueItems;
-    for(iterLeagueItems = eventLeagueItemsMapByAthlete.begin(); iterLeagueItems != eventLeagueItemsMapByAthlete.end(); ++iterLeagueItems)
-    {
-        EventLeagueItem* pEventLeagueItem = static_cast<EventLeagueItem*>(iterLeagueItems->second);
+	EventLeagueItemsMapByAthlete::const_iterator iterLeagueItems;
+	for(iterLeagueItems = eventLeagueItemsMapByAthlete.begin(); iterLeagueItems != eventLeagueItemsMapByAthlete.end(); ++iterLeagueItems)
+	{
+		EventLeagueItem* pEventLeagueItem = static_cast<EventLeagueItem*>(iterLeagueItems->second);
 
-        eventLeagueItemsByRunPoints.insert(std::pair<const unsigned long, EventLeagueItem*>(pEventLeagueItem->points, pEventLeagueItem));
-    }
+		eventLeagueItemsByRunPoints.insert(std::pair<const unsigned long, EventLeagueItem*>(pEventLeagueItem->points, pEventLeagueItem));
+	}
 
-    unsigned long position = 0;
-    unsigned long position_male = 0;
-    unsigned long position_female = 0;
-    std::multimap<const unsigned long, EventLeagueItem*>::const_reverse_iterator iterEventLeagueItemsByRunPoints;
-    for(iterEventLeagueItemsByRunPoints = eventLeagueItemsByRunPoints.rbegin();
-        iterEventLeagueItemsByRunPoints != eventLeagueItemsByRunPoints.rend();
-        ++iterEventLeagueItemsByRunPoints)
-    {
-        EventLeagueItem* pEventLeagueItem = static_cast<EventLeagueItem*>(iterEventLeagueItemsByRunPoints->second);
+	unsigned long position = 0;
+	unsigned long position_male = 0;
+	unsigned long position_female = 0;
+	std::multimap<const unsigned long, EventLeagueItem*>::const_reverse_iterator iterEventLeagueItemsByRunPoints;
+	for(iterEventLeagueItemsByRunPoints = eventLeagueItemsByRunPoints.rbegin();
+		iterEventLeagueItemsByRunPoints != eventLeagueItemsByRunPoints.rend();
+		++iterEventLeagueItemsByRunPoints)
+	{
+		EventLeagueItem* pEventLeagueItem = static_cast<EventLeagueItem*>(iterEventLeagueItemsByRunPoints->second);
 
-        pEventLeagueItem->eventLeagueID = eventLeague.ID;
-        pEventLeagueItem->position = ++position;
-        if(pEventLeagueItem->gender == Athlete::GENDER_CHAR_MALE)
-        {
-            pEventLeagueItem->genderPosition = ++position_male;
-        }
-        else if(pEventLeagueItem->gender == Athlete::GENDER_CHAR_FEMALE)
-        {
-            pEventLeagueItem->genderPosition = ++position_female;
-        }
+		pEventLeagueItem->eventLeagueID = eventLeague.ID;
+		pEventLeagueItem->position = ++position;
+		if(pEventLeagueItem->gender == Athlete::GENDER_CHAR_MALE)
+		{
+			pEventLeagueItem->genderPosition = ++position_male;
+		}
+		else if(pEventLeagueItem->gender == Athlete::GENDER_CHAR_FEMALE)
+		{
+			pEventLeagueItem->genderPosition = ++position_female;
+		}
 
-        poco_trace(Poco::Logger::root(),
-                         "Created League result for " + event.name + " year " + Poco::NumberFormatter::format(year)
-                        + " for position " + Poco::NumberFormatter::format(pEventLeagueItem->position)
-                        + " and gender position " + Poco::NumberFormatter::format(pEventLeagueItem->genderPosition)
-                        + " and gender " + pEventLeagueItem->gender
-                        + " for athlete " + Poco::NumberFormatter::format(pEventLeagueItem->athleteID)
-                        + " with points " + Poco::NumberFormatter::format(pEventLeagueItem->points)
-                        + " with runcount " + Poco::NumberFormatter::format(pEventLeagueItem->runCount));
+		poco_trace(Poco::Logger::root(),
+						 "Created League result for " + event.name + " year " + Poco::NumberFormatter::format(year)
+						+ " for position " + Poco::NumberFormatter::format(pEventLeagueItem->position)
+						+ " and gender position " + Poco::NumberFormatter::format(pEventLeagueItem->genderPosition)
+						+ " and gender " + pEventLeagueItem->gender
+						+ " for athlete " + Poco::NumberFormatter::format(pEventLeagueItem->athleteID)
+						+ " with points " + Poco::NumberFormatter::format(pEventLeagueItem->points)
+						+ " with runcount " + Poco::NumberFormatter::format(pEventLeagueItem->runCount));
 
-        EventLeagueItemDataModel::insert(dbSession, pEventLeagueItem);
-    }
+		EventLeagueItemDataModel::insert(dbSession, pEventLeagueItem);
+	}
 
-    dbTransaction.commit();
+	dbTransaction.commit();
 
-    poco_information(Poco::Logger::root(),
-                     "Created League results for " + event.name + " and year " + Poco::NumberFormatter::format(year));
+	poco_information(Poco::Logger::root(),
+					 "Created League results for " + event.name + " and year " + Poco::NumberFormatter::format(year));
 
-    EventLeagueItemDataModel::free(eventLeagueItemsMapByAthlete);
+	EventLeagueItemDataModel::free(eventLeagueItemsMapByAthlete);
 
-    return result;
+	return result;
 }
 
 
 unsigned long ResultsController::getLeagueYear(const Poco::DateTime birthday, const Poco::DateTime date)
 {
-    // Calculate which League year from the Events birthday
-    unsigned long leagueYear = 0;
-    Poco::DateTime birthdayCheck;
-    birthdayCheck.assign(date.year(), birthday.month(), birthday.day());
+	// Calculate which League year from the Events birthday
+	unsigned long leagueYear = 0;
+	Poco::DateTime birthdayCheck;
+	birthdayCheck.assign(date.year(), birthday.month(), birthday.day());
 
-    if(date >= birthdayCheck)
-    {
-        leagueYear = date.year();
-    }
-    else
-    {
-        leagueYear = date.year() - 1;
-    }
+	if(date >= birthdayCheck)
+	{
+		leagueYear = date.year();
+	}
+	else
+	{
+		leagueYear = date.year() - 1;
+	}
 
-    return leagueYear;
+	return leagueYear;
 }

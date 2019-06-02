@@ -29,16 +29,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class EventResult
 {
 public:
-    EventResult();
+	EventResult();
 	EventResult(const unsigned long _ID, const unsigned long _resultNumber, const unsigned long _eventID,
-                const Poco::DateTime _date, const Poco::Nullable<unsigned long> _leagueYear);
+				const Poco::DateTime _date, const Poco::Nullable<unsigned long> _leagueYear);
 
 public:
-    unsigned long ID;
-    unsigned long resultNumber;
-    unsigned long eventID;
-    Poco::DateTime date;
-    Poco::Nullable<unsigned long> leagueYear;
+	unsigned long ID;
+	unsigned long resultNumber;
+	unsigned long eventID;
+	Poco::DateTime date;
+	Poco::Nullable<unsigned long> leagueYear;
 };
 
 typedef std::vector<EventResult*> EventResults;

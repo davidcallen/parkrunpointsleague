@@ -44,7 +44,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 EventHistoryScraper::EventHistoryScraper()
-    : Scraper()
+	: Scraper()
 {
 }
 
@@ -60,26 +60,26 @@ VIRTUAL EventHistoryScraper::~EventHistoryScraper()
  */
 bool EventHistoryScraper::execute(const Event& event)
 {
-    bool result = false;
+	bool result = false;
 	try
 	{
-	    _html = "";
-	    _tidyHtml = "";
-	    _event = event;
-	    _eventResults.clear();
+		_html = "";
+		_tidyHtml = "";
+		_event = event;
+		_eventResults.clear();
 
 		result = getPage();
-        if(result)
-        {
-            if(!_tidyHtml.empty())
-            {
-                result = parsePage(_tidyHtml);
-            }
-            else if(!_html.empty())
-            {
-                result = parsePage(_html);
-            }
-        }
+		if(result)
+		{
+			if(!_tidyHtml.empty())
+			{
+				result = parsePage(_tidyHtml);
+			}
+			else if(!_html.empty())
+			{
+				result = parsePage(_html);
+			}
+		}
 	}
 	catch (Poco::Exception& e)
 	{
@@ -91,31 +91,31 @@ bool EventHistoryScraper::execute(const Event& event)
 
 bool EventHistoryScraper::execute(const Event& event, const std::string& html)
 {
-    bool result = false;
+	bool result = false;
 
-    _html = "";
-    _tidyHtml = "";
-    _event = event;
-    _eventResults.clear();
+	_html = "";
+	_tidyHtml = "";
+	_event = event;
+	_eventResults.clear();
 
-    result = parsePage(html);
+	result = parsePage(html);
 
-    return result;
+	return result;
 }
 
 Event& EventHistoryScraper::getEvent()
 {
-    return _event;
+	return _event;
 }
 
 EventResults& EventHistoryScraper::getEventResults()
 {
-    return _eventResults;
+	return _eventResults;
 }
 
 bool EventHistoryScraper::getPage()
 {
-    return getPageHTTPrequest("http://www.parkrun.org.uk/" + _event.name + "/results/eventhistory/");
+	return getPageHTTPrequest("https://www.parkrun.org.uk/" + _event.name + "/results/eventhistory/");
 }
 
 bool EventHistoryScraper::parsePage(const std::string& html)
@@ -199,10 +199,10 @@ GumboNode* EventHistoryScraper::parsePageFindTable(const GumboNode* pContentNode
 		return false;
 	}
 
-    if(_traceHTML)
-    {
-        printAttributes(pTableNode);
-    }
+	if(_traceHTML)
+	{
+		printAttributes(pTableNode);
+	}
 
 	return pTableNode;
 }
@@ -221,7 +221,7 @@ bool EventHistoryScraper::parseResultsTable(const GumboNode* pTableNode)
 		return false;
 	}
 
-    unsigned int resultsFound = 0;
+	unsigned int resultsFound = 0;
 
 	const GumboVector* pTBodyChildren = &tableBodyNode->v.element.children;
 	for (unsigned int i = 0; i < pTBodyChildren ->length; ++i)
@@ -245,7 +245,7 @@ bool EventHistoryScraper::parseResultsTable(const GumboNode* pTableNode)
 				Poco::DateTime resultDate;
 				std::string resultDateStr;
 
-                resultsFound++;
+				resultsFound++;
 
 				// Loop through Table Data in this row
 				int tdCount = 0;
@@ -284,8 +284,8 @@ bool EventHistoryScraper::parseResultsTable(const GumboNode* pTableNode)
 					}
 				} // Loop TDs
 				if(resultNumber > 0
-                    && !resultNumberStr.empty()
-                    && !resultDateStr.empty())
+					&& !resultNumberStr.empty()
+					&& !resultDateStr.empty())
 				{
 					if (_debugHTML)
 					{
@@ -293,23 +293,23 @@ bool EventHistoryScraper::parseResultsTable(const GumboNode* pTableNode)
 										 _event.name + " ResultNumber [" + resultNumberStr
 										 + "], Date [" + resultDateStr + " (" + Poco::DateTimeFormatter::format(resultDate, "%Y-%m-%d") + ")]");
 					}
-                    EventResult* pEventResult = new EventResult(0, resultNumber, _event.ID, resultDate, Poco::NULL_GENERIC);
-                    _eventResults.push_back(pEventResult);
+					EventResult* pEventResult = new EventResult(0, resultNumber, _event.ID, resultDate, Poco::NULL_GENERIC);
+					_eventResults.push_back(pEventResult);
 				}
 				else
-                {
-                    poco_trace(Poco::Logger::root(),
-                                     "Failed scraping for data with ResultNumber [" + resultNumberStr
+				{
+					poco_trace(Poco::Logger::root(),
+									 "Failed scraping for data with ResultNumber [" + resultNumberStr
 										 + "], Date [" + resultDateStr + " (" + Poco::DateTimeFormatter::format(resultDate, "%Y-%m-%d") + ")]");
-                }
+				}
 			}
 		}
 	} // loop TRs
 
-    if(resultsFound != _eventResults.size())
-    {
-        poco_warning_f3(Poco::Logger::root(), "%s event has %u results but only %lu found to be valid.", _event.name, resultsFound, (unsigned long)_eventResults.size());
-    }
+	if(resultsFound != _eventResults.size())
+	{
+		poco_warning_f3(Poco::Logger::root(), "%s event has %u results but only %lu found to be valid.", _event.name, resultsFound, (unsigned long)_eventResults.size());
+	}
 
 	return result;
 }
@@ -346,8 +346,8 @@ bool EventHistoryScraper::parseTableDataDate(const GumboNode* pTableDataNode, st
 	{
 		resultDateStr = aHrefTextStr;
 
-        int timezoneDifferential = 0;
-        Poco::DateTimeParser::tryParse("%d/%m/%Y", resultDateStr, resultDate, timezoneDifferential);
+		int timezoneDifferential = 0;
+		Poco::DateTimeParser::tryParse("%d/%m/%Y", resultDateStr, resultDate, timezoneDifferential);
 
 		return true;
 	}

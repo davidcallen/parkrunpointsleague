@@ -34,41 +34,41 @@ HandlerFactory::HandlerFactory ()
 
 Poco::Net::HTTPRequestHandler * HandlerFactory::createRequestHandler (const Poco::Net::HTTPServerRequest &request)
 {
-    const std::string& requestURI = request.getURI();
+	const std::string& requestURI = request.getURI();
 
 	poco_debug(Poco::Logger::root(), "HTTP Request for " + requestURI);
 
-    std::vector<std::string> uriSegments;
-    Poco::URI uri(requestURI);
-    uri.getPathSegments(uriSegments);
+	std::vector<std::string> uriSegments;
+	Poco::URI uri(requestURI);
+	uri.getPathSegments(uriSegments);
 
 	if(uriSegments.size() == 0)
-    {
-        return new HomePageHandler();
-    }
-    else
-    {
-        if(uriSegments[0] == "getlatestresult")
-        {
-            return new GetLatestResultHandler();
-        }
-        else if(uriSegments[0] == "league")
-        {
-            return new EventLeagueHandler();
-        }
-        else if(uriSegments[0] == "athlete")
-        {
-            return new AthleteHandler();
-        }
-        else if(uriSegments[0] == "forceupdate")
-        {
-            return new ForceResultsUpdateHandler();
-        }
-        else
-        {
-            return new FileRequestHandler();
-        }
-    }
+	{
+		return new HomePageHandler();
+	}
+	else
+	{
+		if(uriSegments[0] == "getlatestresult")
+		{
+			return new GetLatestResultHandler();
+		}
+		else if(uriSegments[0] == "league")
+		{
+			return new EventLeagueHandler();
+		}
+		else if(uriSegments[0] == "athlete")
+		{
+			return new AthleteHandler();
+		}
+		else if(uriSegments[0] == "forceupdate")
+		{
+			return new ForceResultsUpdateHandler();
+		}
+		else
+		{
+			return new FileRequestHandler();
+		}
+	}
 
 	return NULL;
 }

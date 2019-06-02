@@ -38,12 +38,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class ResultsScraper : public Scraper
 {
 public:
-    ResultsScraper();
-    virtual ~ResultsScraper();
+	ResultsScraper();
+	virtual ~ResultsScraper();
 
 public:
-    bool execute(const Event& event, const EventResult& eventResult);
-    bool execute(const Event& event, const EventResult& eventResult, const std::string& html);
+	bool execute(const Event& event, const EventResult& eventResult);
+	bool execute(const Event& event, const EventResult& eventResult, const std::string& html);
 
 	Event getEvent();
 	EventResult getEventResult();
@@ -62,8 +62,8 @@ protected:
 	bool parseTableDataPosition(const GumboNode* pTableDataNode, std::string& positionStr);
 	bool parseTableDataAthlete(const GumboNode* pTableDataNode, std::string& athleteNumberStr, std::string& athleteName);
 	bool parseTableDataDuration(const GumboNode* pTableDataNode, std::string& durationStr);
-    bool parseTableDataGender(const GumboNode* pTableDataNode, std::string& genderStr);
-    bool parseTableDataGenderPosition(const GumboNode* pTableDataNode, std::string& genderPositionStr);
+	bool parseTableDataGender(const GumboNode* pTableDataNode, std::string& genderStr);
+	bool parseTableDataGenderPosition(const GumboNode* pTableDataNode, std::string& genderPositionStr);
 
 private:
 	Event _event;

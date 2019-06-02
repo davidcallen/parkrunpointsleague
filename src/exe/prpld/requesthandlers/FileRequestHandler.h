@@ -31,7 +31,7 @@ class FileRequestHandler: public BaseHandler
 {
 public:
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-    std::string getContentType(const std::string& requestURI, bool& binaryFile) const;
+	std::string getContentType(const std::string& requestURI, bool& binaryFile) const;
 };
 
 #endif // FileRequestHandler_INCLUDED

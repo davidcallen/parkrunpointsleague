@@ -51,8 +51,8 @@ ResultsCache::ResultsCache() : Cache()
 
 bool ResultsCache::checkExists(const std::string& eventName, const unsigned long resultNumber)
 {
-    poco_assert_dbg(!eventName.empty());
-    poco_assert_dbg(resultNumber != 0);
+	poco_assert_dbg(!eventName.empty());
+	poco_assert_dbg(resultNumber != 0);
 
 	std::string fileNameAndPath = getFilenameAndPath(eventName, resultNumber);
 
@@ -61,8 +61,8 @@ bool ResultsCache::checkExists(const std::string& eventName, const unsigned long
 
 bool ResultsCache::get(const std::string& eventName, const unsigned long resultNumber, std::string& html)
 {
-    poco_assert_dbg(!eventName.empty());
-    poco_assert_dbg(resultNumber != 0);
+	poco_assert_dbg(!eventName.empty());
+	poco_assert_dbg(resultNumber != 0);
 
 	std::string fileNameAndPath = getFilenameAndPath(eventName, resultNumber);
 	Poco::File file(fileNameAndPath);
@@ -72,12 +72,12 @@ bool ResultsCache::get(const std::string& eventName, const unsigned long resultN
 
 bool ResultsCache::save(const std::string& eventName, const unsigned long resultNumber, const std::string& html)
 {
-    poco_assert_dbg(!eventName.empty());
-    poco_assert_dbg(resultNumber != 0);
+	poco_assert_dbg(!eventName.empty());
+	poco_assert_dbg(resultNumber != 0);
 
-    std::string filePath = getEventDataPath(eventName);
-    Poco::File file(filePath);
-    file.createDirectories();
+	std::string filePath = getEventDataPath(eventName);
+	Poco::File file(filePath);
+	file.createDirectories();
 
 	std::string fileNameAndPath = getFilenameAndPath(eventName, resultNumber);
 
@@ -86,24 +86,24 @@ bool ResultsCache::save(const std::string& eventName, const unsigned long result
 
 std::string ResultsCache::getFilenameAndPath(const std::string& eventName, const unsigned long resultNumber)
 {
-    poco_assert_dbg(!eventName.empty());
-    poco_assert_dbg(resultNumber != 0);
+	poco_assert_dbg(!eventName.empty());
+	poco_assert_dbg(resultNumber != 0);
 
 	return getEventDataPath(eventName) + "/" + getFilename(resultNumber);
 }
 
 std::string ResultsCache::getEventDataPath(const std::string& eventName)
 {
-    poco_assert_dbg(!eventName.empty());
+	poco_assert_dbg(!eventName.empty());
 
 	return _dataResultsPath + eventName;
 }
 
 std::string ResultsCache::getFilename(const unsigned long resultNumber)
 {
-    poco_assert_dbg(resultNumber != 0);
+	poco_assert_dbg(resultNumber != 0);
 
-    return "results-" + Poco::NumberFormatter::format0(resultNumber, 6) + ".html";
+	return "results-" + Poco::NumberFormatter::format0(resultNumber, 6) + ".html";
 }
 
 

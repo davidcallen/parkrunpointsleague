@@ -34,7 +34,7 @@ public:
 	EventLeague(unsigned long _ID, unsigned long _eventID, unsigned long  _year, unsigned long latestEventResultID);
 
 public:
-    unsigned long ID;
+	unsigned long ID;
 	unsigned long eventID;
 	unsigned long year;
 	unsigned long latestEventResultID;

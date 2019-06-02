@@ -69,7 +69,7 @@ protected:
 	SchemaVersion getSchemaVersion();
 
 	int main(const std::vector<std::string> &args);
-    void startResultsHavester();
+	void startResultsHavester();
 
 private:
 	static PRPLHTTPServerApplication* _pInstance;
@@ -78,9 +78,9 @@ private:
 	bool _helpRequested;
 	std::string _appName;
 	SchemaVersion _schemaVersion;
-    Poco::Data::SessionPool* _pDbSessionPool;
-    bool _stopping;
-    Poco::Timer* _pResultsHarvesterTimer;
+	Poco::Data::SessionPool* _pDbSessionPool;
+	bool _stopping;
+	Poco::Timer* _pResultsHarvesterTimer;
 };
 
 

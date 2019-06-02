@@ -37,13 +37,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class EventHistoryScraper : public Scraper
 {
 public:
-    EventHistoryScraper();
-    virtual ~EventHistoryScraper();
+	EventHistoryScraper();
+	virtual ~EventHistoryScraper();
 
 public:
-    bool execute(const Event& event);
+	bool execute(const Event& event);
 
-    bool execute(const Event& event, const std::string& html);
+	bool execute(const Event& event, const std::string& html);
 
 	Event& getEvent();
 
@@ -64,7 +64,7 @@ protected:
 
 	bool parseTableDataResultNumber(const GumboNode* pTableDataNode, std::string& resultNumberStr);
 
-    bool parseTableDataDate(const GumboNode* pTableDataNode, std::string& resultDateStr, Poco::DateTime& resultDate);
+	bool parseTableDataDate(const GumboNode* pTableDataNode, std::string& resultDateStr, Poco::DateTime& resultDate);
 
 protected:
 	std::string _html;

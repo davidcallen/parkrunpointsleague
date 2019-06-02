@@ -36,10 +36,10 @@ public:
 //	virtual unsigned long getBirthdayDay();
 
 public:
-    unsigned long ID;
+	unsigned long ID;
 	std::string name;
 	std::string title;
-    Poco::Nullable<Poco::DateTime> birthday;
+	Poco::Nullable<Poco::DateTime> birthday;
 
 /*	std::string birthday;
 
@@ -47,9 +47,9 @@ protected:
 	virtual void splitBirthday();
 
 protected:
-    unsigned long _birthdayMonth;
-    unsigned long _birthdayDay;
-    */
+	unsigned long _birthdayMonth;
+	unsigned long _birthdayDay;
+	*/
 };
 
 typedef std::vector<Event*> Events;

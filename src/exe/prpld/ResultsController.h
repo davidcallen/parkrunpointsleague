@@ -42,13 +42,13 @@ public:
 	void onTimer(Poco::Timer& timer);
 
 private:
-    unsigned long _ignoreCounter;
+	unsigned long _ignoreCounter;
 };
 
 class ResultsController
 {
 public:
-    ResultsController();
+	ResultsController();
 
 public:
 //	void onTimer(Poco::Timer& timer);
@@ -58,8 +58,8 @@ public:
 protected:
 	bool processEventResult(const Event& event, const EventResult& eventResult, EventResultItems& eventResultItems, Athletes& athletes);
 	bool processEventLeagues(const Event& event, const std::set<unsigned long>& changedLeagueYears);
-    bool processEventLeagueForYear(const Event& event, const unsigned long year, const unsigned long latestEventResultID, EventLeagueItemsMapByAthlete& eventLeagueItemsMapByAthlete);
-    unsigned long getLeagueYear(const Poco::DateTime birthday, const Poco::DateTime date);
+	bool processEventLeagueForYear(const Event& event, const unsigned long year, const unsigned long latestEventResultID, EventLeagueItemsMapByAthlete& eventLeagueItemsMapByAthlete);
+	unsigned long getLeagueYear(const Poco::DateTime birthday, const Poco::DateTime date);
 
 };
 

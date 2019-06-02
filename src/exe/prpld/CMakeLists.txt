@@ -93,7 +93,6 @@ set (EXTRA_LIBS
     PocoData
     PocoDataMySQL
     PocoFoundation
-    ctemplate
     gumbo
     tidy
     ${PRPL_EXTRA_LIBS_PTHREADS}

@@ -36,14 +36,14 @@ EventLeagueItem::EventLeagueItem(const unsigned long _ID, const unsigned long _e
 
 STATIC unsigned long EventLeagueItem::calculatePoints(const unsigned long genderPosition, const unsigned long maxPoints)
 {
-    unsigned long points = 0;
-    if(genderPosition < maxPoints)
-    {
-        points = maxPoints - genderPosition + 1;
-        if(points < 0)
-        {
-            points = 0;
-        }
-    }
-    return points;
+	unsigned long points = 0;
+	if(genderPosition < maxPoints)
+	{
+		points = maxPoints - genderPosition + 1;
+		if(points < 0)
+		{
+			points = 0;
+		}
+	}
+	return points;
 }
