@@ -4,7 +4,7 @@ ADD ./DOCKER_IMAGE_TAG /
 
 WORKDIR /prpl
 
-RUN apk add --no-cache git gcc g++ binutils make cmake autoconf2.13 mariadb mariadb-dev openssl-dev libtool libltdl xmlstarlet
+RUN apk add --no-cache git gcc g++ binutils make cmake autoconf2.13 mariadb mariadb-client mariadb-dev openssl-dev libtool libltdl xmlstarlet
 
 RUN cd /prpl
 # Get source from GitHub

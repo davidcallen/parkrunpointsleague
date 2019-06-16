@@ -5,6 +5,7 @@ set -o nounset
 set -o errexit
 
 ARG_USE_PRPL_IMAGE_TAG=
+ARG_DEPLOY_TO_GCP=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -12,6 +13,10 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
+	fi
+	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
+		ARG_DEPLOY_TO_GCP=TRUE
+		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--tag" -o "$1" == "-t" ] ; then
 		shift 1
@@ -37,8 +42,10 @@ if [ "${ARG_USE_PRPL_IMAGE_TAG}" == "" ] ; then
 else
 	PRPL_DOCKER_IMAGE_TAG=${ARG_USE_PRPL_IMAGE_TAG}
 fi
-PRPL_DOCKER_IMAGE_REPO=
 PRPL_DOCKER_IMAGE_NAME=prpl
+if [ "${PRPL_DOCKER_REGISTRY_GCP}" == "TRUE" ] ; then
+    PRPL_DOCKER_REGISTRY=${PRPL_DOCKER_REGISTRY_GCP}
+fi
 
 YYYYMMDD_HHMMSS=`date +'%Y%m%d_%H%M%S'`
 # PRPL_DOCKER_CONTAINER_NAME=prpl
@@ -49,7 +56,6 @@ kubectl delete deployment ${PRPL_KUBERNETES_NAME} || true
 
 echo "`date '+%Y%m%d %H:%M:%S'` : Starting deployment ${PRPL_KUBERNETES_NAME}"
 export PRPL_DOCKER_IMAGE_TAG
-export PRPL_DOCKER_IMAGE_REPO
 #cat deployment.yaml | sed "s/{{PRPL_DOCKER_IMAGE_TAG}}/${PRPL_DOCKER_IMAGE_TAG}/g" | kubectl create -f -
 cat deployment.yaml | envsubst | kubectl create -f -
 
