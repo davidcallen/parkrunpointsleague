@@ -63,19 +63,21 @@ echo -e "\n----------------------------------- Stop container ------------------
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
+[ -f Dockerfile.tmp ] && rm -f Dockerfile.tmp
 cp Dockerfile Dockerfile.tmp
-sed -i "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${PRPL_BASE_DOCKER_IMAGE_TAG}/g" Dockerfile
+sed -i "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${PRPL_BASE_DOCKER_IMAGE_TAG}/g" Dockerfile.tmp
 if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
-	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>/#/g" Dockerfile
-	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>//g" Dockerfile
+	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>/\#/g" Dockerfile.tmp
+	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp
 else
-	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>//g" Dockerfile
-	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/#/g" Dockerfile
+	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp
+	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/\#/g" Dockerfile.tmp
 fi
-docker build -t ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} -t ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest .
-mv Dockerfile.tmp Dockerfile
+docker build --tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} --file=./Dockerfile.tmp .
+rm -f Dockerfile.tmp 
+docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
 echo
-docker images
+docker image ls
 echo
 
 # Cleanup

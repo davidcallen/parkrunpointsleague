@@ -43,7 +43,7 @@ else
 	PRPL_DOCKER_IMAGE_TAG=${ARG_USE_PRPL_IMAGE_TAG}
 fi
 PRPL_DOCKER_IMAGE_NAME=prpl
-if [ "${PRPL_DOCKER_REGISTRY_GCP}" == "TRUE" ] ; then
+if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
     PRPL_DOCKER_REGISTRY=${PRPL_DOCKER_REGISTRY_GCP}
 fi
 
@@ -56,12 +56,13 @@ kubectl delete deployment ${PRPL_KUBERNETES_NAME} || true
 
 echo "`date '+%Y%m%d %H:%M:%S'` : Starting deployment ${PRPL_KUBERNETES_NAME}"
 export PRPL_DOCKER_IMAGE_TAG
-#cat deployment.yaml | sed "s/{{PRPL_DOCKER_IMAGE_TAG}}/${PRPL_DOCKER_IMAGE_TAG}/g" | kubectl create -f -
-cat deployment.yaml | envsubst | kubectl create -f -
-
-# | kubectl create -f -
-
-# kubectl run ${PRPL_KUBERNETES_NAME} --image=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} --port=8080 --image-pull-policy=Never
+export PRPL_DOCKER_REGISTRY
+DEPLOYMENT_YAML_FILE=deployment.yaml
+if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
+    DEPLOYMENT_YAML_FILE=deployment-gcp.yaml
+fi
+#cat ${DEPLOYMENT_YAML_FILE} | sed "s/{{PRPL_DOCKER_IMAGE_TAG}}/${PRPL_DOCKER_IMAGE_TAG}/g" | kubectl create -f -
+cat ${DEPLOYMENT_YAML_FILE} | envsubst | kubectl create -f -
 
 echo
 kubectl get deployment ${PRPL_KUBERNETES_NAME}
