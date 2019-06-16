@@ -196,7 +196,7 @@ GumboNode* EventHistoryScraper::parsePageFindTable(const GumboNode* pContentNode
 	GumboNode* pTableNode = findChildNodeByTagAndId(pContentNode, GUMBO_TAG_TABLE, "results");
 	if (pTableNode == NULL)
 	{
-		return false;
+		return NULL;
 	}
 
 	if(_traceHTML)

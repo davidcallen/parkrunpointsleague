@@ -22,8 +22,8 @@ Building PRPL and installation
 	sudo yum install gcc gcc-c++ mariadb mariadb-devel openssl-devel libtool-ltdl-devel
 
 	# Use the --everything to ensure we get MySQL
-	./configure --everything --omit=Data/ODBC
-	make shared_release
+	./configure --everything --omit=Data/ODBC --no-samples --no-tests
+	make 
 	make install
 	
 cd prpl/src/externals
@@ -31,7 +31,7 @@ cd prpl/src/externals
 	cd gumbo-parser
 	sudo yum install libtool
 	./autogen.sh
-	./configure.sh
+	./configure
 	make
 	sudo make install
 
@@ -49,6 +49,7 @@ cd prpl/src/externals/libtidy
 - Now remove sudo from user prpl
 	sudo rm /etc/sudoers.d/91-prpl
 	sudo usermod -g prpl prpl
+	export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib
 	
 
 Libraries

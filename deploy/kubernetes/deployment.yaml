@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prpl
+  labels:
+    app: prpl
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: prpl
+  template:
+    metadata:
+      labels:
+        app: prpl
+    spec:
+      containers:
+      - name: prpl
+        image: ${PRPL_DOCKER_IMAGE_REPO}prpl:${PRPL_DOCKER_IMAGE_TAG}
+        env:
+        - name: PRPL_HTTP_PORT
+          value: "8080"
+        - name: PRPL_DATABASE_HOST
+          value: "mysql"
+        - name: PRPL_DATABASE_PORT
+          value: "3306"
+        - name: PRPL_DATABASE_NAME
+          value: "PRPL"
+        - name: PRPL_DATABASE_PWD
+          value: "parklife"
+        - name: PRPL_DEBUG_STAY_ALIVE
+          value: ""
+        - name: PRPL_SLEEP_SECS
+          value: "1"
+        - name: PRPL_SLEEP_TIMES
+          value: "60"
+        ports:
+        - containerPort: 8080

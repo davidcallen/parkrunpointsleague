@@ -46,5 +46,8 @@ if [ "${ARG_PRPL_PWD}" == "" ] ; then
 	exit 1
 fi
 
-
-cat ${ARG_DB_DUMP_FILE} | mysql -h localhost -u PRPL --password=${ARG_PRPL_PWD} -B 
+if [ "${ARG_DB_DUMP_FILE: -7}" == ".tar.gz" ] ; then
+	tar --to-stdout -xvf ${ARG_DB_DUMP_FILE} | mysql -h localhost -u PRPL --password=${ARG_PRPL_PWD} -B 
+else 
+	cat ${DB_DUMP_FILE} | mysql -h localhost -u PRPL --password=${ARG_PRPL_PWD} -B 
+fi

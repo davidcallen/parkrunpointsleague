@@ -85,6 +85,7 @@ LINK_DIRECTORIES(
 )
 
 include_directories("/usr/include")
+include_directories("/usr/local/include")
 
 set (EXTRA_LIBS
     PocoNet
