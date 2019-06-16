@@ -2,18 +2,22 @@
 set -o errexit 
 set -o nounset
 
+ARG_MYSQL_HOST=localhost
 ARG_PRPL_PWD=
 ARG_DB_DUMP_FILE=
-
 ARG_RECOGNISED=FALSE
 ARGS=$*
-
 # Check all args up front for early validation, since processing can take some time.
 while (( "$#" )); do
 	ARG_RECOGNISED=FALSE
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
+	fi
+	if [ "$1" == "--host" ] ; then
+		shift 1
+		ARG_MYSQL_HOST=$1
+		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--password" -o "$1" == "-p" ] ; then
 		shift 1
@@ -32,7 +36,6 @@ while (( "$#" )); do
 	shift
 done
 
-
 if [ "${ARG_DB_DUMP_FILE}" == "" ] ; then
 	echo "ERROR: --db-file for the mysql database dump file is required."
 	exit 1
@@ -47,7 +50,7 @@ if [ "${ARG_PRPL_PWD}" == "" ] ; then
 fi
 
 if [ "${ARG_DB_DUMP_FILE: -7}" == ".tar.gz" ] ; then
-	tar --to-stdout -xvf ${ARG_DB_DUMP_FILE} | mysql -h localhost -u PRPL --password=${ARG_PRPL_PWD} -B 
+	tar --to-stdout -xvf ${ARG_DB_DUMP_FILE} | mysql -h ${ARG_MYSQL_HOST} -u PRPL --password=${ARG_PRPL_PWD} -B 
 else 
-	cat ${DB_DUMP_FILE} | mysql -h localhost -u PRPL --password=${ARG_PRPL_PWD} -B 
+	cat ${DB_DUMP_FILE} | mysql -h ${ARG_MYSQL_HOST} -u PRPL --password=${ARG_PRPL_PWD} -B 
 fi

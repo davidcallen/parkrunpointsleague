@@ -68,6 +68,6 @@ CREATE TABLE PARAM (
 	PRIMARY KEY (NAME)
 ) ENGINE=InnoDB;
 
-GRANT ALL ON PRPL.* TO 'PRPL'@'localhost';
+GRANT ALL ON PRPL.* TO 'PRPL'@'%';
 
 insert into PARAM (NAME, VALUE) values ('SCHEMA_VERSION', '0.1.0.0');

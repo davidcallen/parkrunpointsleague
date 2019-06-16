@@ -1,4 +1,4 @@
 DROP DATABASE IF EXISTS PRPL;
 
-DROP USER 'PRPL'@'localhost';
+DROP USER 'PRPL'@'%';
 

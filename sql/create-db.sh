@@ -2,18 +2,21 @@
 set -o errexit 
 set -o nounset
 
+ARG_MYSQL_HOST=localhost
 ARG_PRPL_PWD=
-ARG_ROOT_PWD=$1
-
+ARG_ROOT_PWD=
 ARG_RECOGNISED=FALSE
 ARGS=$*
-
-# Check all args up front for early validation, since processing can take some time.
 while (( "$#" )); do
 	ARG_RECOGNISED=FALSE
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
+	fi
+	if [ "$1" == "--host" ] ; then
+		shift 1
+		ARG_MYSQL_HOST=$1
+		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--user-password" -o "$1" == "-p" ] ; then
 		shift 1
@@ -32,7 +35,6 @@ while (( "$#" )); do
 	shift
 done
 
-
 if [ "${ARG_PRPL_PWD}" == "" ] ; then
 	echo "ERROR: --user-password for mysql PRPL user pwd is needed"
 	exit 1
@@ -42,4 +44,4 @@ if [ "${ARG_ROOT_PWD}" == "" ] ; then
 	exit 1
 fi
 
-sed "s/xxxxxxxx/${ARG_PRPL_PWD}/g" create-db.sql | mysql -h localhost -u root --password=${ARG_ROOT_PWD} -B 
+sed "s/xxxxxxxx/${ARG_PRPL_PWD}/g" create-db.sql | mysql -h ${ARG_MYSQL_HOST} -u root --password=${ARG_ROOT_PWD} -B 
