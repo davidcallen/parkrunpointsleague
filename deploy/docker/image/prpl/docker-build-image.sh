@@ -26,7 +26,6 @@ while (( "$#" )); do
 done
 
 START_DATE=`date`
-set -x
 
 source ../../docker-config.sh
 
@@ -42,7 +41,6 @@ echo
 
 # If wanting to test docker build using our local sources
 if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
-	set -x
 	if [ -d ./prpl.srcs.tar.gz ] ; then
 		rm -rf prpl.srcs.tar.gz
 	fi
@@ -67,6 +65,13 @@ docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
 cp Dockerfile Dockerfile.tmp
 sed -i "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${PRPL_BASE_DOCKER_IMAGE_TAG}/g" Dockerfile
+if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
+	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>/#/g" Dockerfile
+	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>//g" Dockerfile
+else
+	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>//g" Dockerfile
+	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/#/g" Dockerfile
+fi
 docker build -t ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} -t ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest .
 mv Dockerfile.tmp Dockerfile
 echo

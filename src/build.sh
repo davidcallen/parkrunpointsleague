@@ -240,7 +240,9 @@ fi
 # Clean the bin dir and put the 3rd Party libs back in it
 if [ "${ARG_CLEAN}" == "TRUE" ]
 then
-	cd ${ROOT_PATH}/src
+	if [ ! -d ${ROOT_PATH}/bin/ ] ; then
+		mkdir ${ROOT_PATH}/bin
+	fi
 	if [ -d ${ROOT_PATH}/bin/.debug ] ; then
 		rm -rf ${ROOT_PATH}/bin/.debug
 	fi
@@ -305,7 +307,7 @@ else
 	fi
 fi
 
-rm make.log > /dev/null
+[ -f make.log ] && rm make.log > /dev/null
 touch make.log
 
 # Touch main file to update the build datetime within it
