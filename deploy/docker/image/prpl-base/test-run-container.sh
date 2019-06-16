@@ -7,7 +7,6 @@ set -o errexit
 ARG_LOGS_TAIL=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
-# Check all args up front for early validation, since processing can take some time.
 while (( "$#" )); do
 	ARG_RECOGNISED=FALSE
 

@@ -31,11 +31,11 @@ set -x
 source ../../docker-config.sh
 
 # Common settings for build and publish docker images
+PRPL_DOCKER_IMAGE_NAME=prpl
 export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
 export PRPL_BASE_DOCKER_IMAGE_TAG=`cat ../prpl-base/DOCKER_IMAGE_TAG`
-PRPL_DOCKER_IMAGE_NAME=prpl
 
 echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo

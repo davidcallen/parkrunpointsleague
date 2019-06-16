@@ -14,7 +14,8 @@ RUN cd /prpl/ \
 	&& ./autogen.sh \
 	&& ./configure \
 	&& make -j 2 \
-	&& make install
+	&& make install \
+	&& rm -rf /prpl/poco
 
 # Get and build LIBTIDY
 RUN mkdir /prpl/libtidy \
@@ -23,7 +24,8 @@ RUN mkdir /prpl/libtidy \
 	&& cd tidy-html5 \
 	&& cd build/cmake \
 	&& cmake ../.. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-	&& make install
+	&& make install \
+	&& /prpl/gumbo-parser
 
 # Get and build POCO
 RUN apk add --no-cache linux-headers
@@ -33,10 +35,11 @@ RUN cd /prpl/ \
 	&& cd poco \
 	&& ./configure --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
 	&& make -j 2 \
-	&& make install
+	&& make install \
+	&& /prpl/libtidy/tidy-html5
 
 # Now clean the sources...
-RUN rm -rf /prpl/poco /prpl/gumbo-parser /prpl/libtidy/tidy-html5
+# RUN rm -rf /prpl/poco /prpl/gumbo-parser /prpl/libtidy/tidy-html5
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh  \

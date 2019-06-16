@@ -4,19 +4,13 @@
 set -o errexit
 set -o nounset
 
-ARG_USE_LOCAL_SOURCES=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
-# Check all args up front for early validation, since processing can take some time.
 while (( "$#" )); do
 	ARG_RECOGNISED=FALSE
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
-	fi
-	if [ "$1" == "--use-local-sources" -o "$1" == "-l" ] ; then
-		ARG_USE_LOCAL_SOURCES=TRUE
-		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
 		echo "Invalid args : Unknown argument \"${1}\"."
@@ -30,11 +24,10 @@ START_DATE=`date`
 source ../../docker-config.sh
 
 # Common settings for build and publish docker images
+PRPL_DOCKER_IMAGE_NAME=prpl-base
 export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
-export PRPL_BASE_DOCKER_IMAGE_TAG=`cat ../prpl-base/DOCKER_IMAGE_TAG`
-PRPL_DOCKER_IMAGE_NAME=prpl-base
 
 echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
