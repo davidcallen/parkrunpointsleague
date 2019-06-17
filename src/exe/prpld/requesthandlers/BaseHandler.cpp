@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "BaseHandler.h"
+#include "../PRPLHTTPServerApplication.h"
 
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeFormat.h>
+#include <Poco/Environment.h>
 #include <Poco/NumberFormatter.h>
 #include <Poco/Timespan.h>
 
@@ -28,6 +30,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Poco/URI.h>
 
 #include <Poco/Util/Application.h>
+
+BaseHandler::BaseHandler() :
+	_showHostName(false)
+{
+	_showHostName = Poco::Util::Application::instance().config().getBool("logging.show-hostname", false);
+	if(Poco::Environment::has("PRPL_LOGGING_SHOW_HOSTNAME"))
+	{
+		_showHostName = Poco::NumberParser::parseBool(Poco::Environment::get("PRPL_LOGGING_SHOW_HOSTNAME"));
+	}
+}
 
 std::string BaseHandler::getHeader(const std::string& pageTitle, const bool includeJQuery, const std::string& additionalHeader) const
 {
@@ -67,6 +79,10 @@ std::string BaseHandler::getFooter() const
 {
 	std::string footer;
 	footer += "</div> <!-- class=\"content\" -->\n";
+	if(_showHostName)
+	{
+		footer += PRPLHTTPServerApplication::instance().getHostName();
+	}
 	footer += "</body></html>\n";
 
 	return footer;

@@ -11,9 +11,10 @@
 	</database>
 
 	<logging>
-		<level>trace</level>
+		<level>information</level>
 		<debug-html>false</debug-html>
 		<trace-html>false</trace-html>
+		<show-hostname>true<show-hostname>
 	</logging>
 
 	<results>

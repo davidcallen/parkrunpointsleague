@@ -34,6 +34,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Poco/FormattingChannel.h>
 #include <Poco/PatternFormatter.h>
 #include <Poco/NumberParser.h>
+#include <Poco/Environment.h>
 
 #include <Poco/UTF8String.h>
 
@@ -99,6 +100,11 @@ bool PRPLHTTPServerApplication::isStopping() const
 	return _stopping;
 }
 
+const std::string PRPLHTTPServerApplication::getHostName() const
+{
+	return _hostName;
+}
+
 void PRPLHTTPServerApplication::initialize(Application& self)
 {
 	loadConfiguration();
@@ -161,7 +167,8 @@ int PRPLHTTPServerApplication::getLogLevel(const std::string& logLevelName)
 
 void PRPLHTTPServerApplication::initializeLogging()
 {
-	const std::string logLevelName = config().getString("logging.level", "information");
+	std::string logLevelName = config().getString("logging.level", "information");
+	logLevelName = Poco::Environment::get("PRPL_LOGGING_LEVEL", logLevelName);
 	// const Poco::UInt32 logLevel = config().getInt("logging.level", Poco::Message::PRIO_INFORMATION);
 
 	Poco::Logger::root().setLevel(logLevelName);
@@ -202,13 +209,19 @@ bool PRPLHTTPServerApplication::connectDB()
 	Poco::Data::MySQL::Connector::registerConnector();
 
 	std::string dbConnectString = config().getString("database.connection-string", "");
+	dbConnectString = Poco::Environment::get("PRPL_DATABASE_CONNECT_STRING", dbConnectString);
 	if(dbConnectString.empty())
 	{
 		std::string databaseName = config().getString("database.name", "PRPL");
+		databaseName = Poco::Environment::get("PRPL_DATABASE_NAME", databaseName);
 		std::string databaseHost = config().getString("database.host", "localhost");
+		databaseHost = Poco::Environment::get("PRPL_DATABASE_HOST", databaseHost);
 		std::string databasePort = config().getString("database.port", "3306");
+		databasePort = Poco::Environment::get("PRPL_DATABASE_PORT", databasePort);
 		std::string databaseUser = config().getString("database.user", "PRPL");
+		databaseUser = Poco::Environment::get("PRPL_DATABASE_USER", databaseUser);
 		std::string databasePassword = config().getString("database.password", "");
+		databasePassword = Poco::Environment::get("PRPL_DATABASE_PWD", databasePassword);
 
 		dbConnectString = "host=";
 		dbConnectString += databaseHost;
@@ -291,11 +304,21 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 {
 	if (!_helpRequested)
 	{
-		const Poco::UInt16 port = config().getInt("http.port", 8080);
+		Poco::UInt16 port = config().getInt("http.port", 8080);
+		if(Poco::Environment::has("PRPL_HTTP_PORT"))
+		{
+			port = Poco::NumberParser::parse(Poco::Environment::get("PRPL_HTTP_PORT"));
+		}
 
 		initializeLogging();
 
-		poco_information(Poco::Logger::root(), _appName + " starting v0.1.0.0 (built on " __DATE__ " " __TIME__ ")");
+		char hostName[1024];
+		if(gethostname(hostName, 1024) == 0)
+		{
+			_hostName = std::string(hostName);
+		}
+
+		poco_information(Poco::Logger::root(), _appName + " starting v0.1.0.0 (built on " __DATE__ " " __TIME__ ") on host : " + _hostName);
 
 		if(!connectDB())
 		{

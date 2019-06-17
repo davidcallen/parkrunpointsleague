@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "ResultsCache.h"
 
+#include <Poco/Environment.h>
 #include <Poco/String.h>
 
 #include <Poco/DateTime.h>
@@ -58,7 +59,15 @@ Scraper::Scraper()
 	_traceHTML(false)
 {
 	_debugHTML = Poco::Util::Application::instance().config().getBool("logging.debug-html", false);
+	if(Poco::Environment::has("PRPL_LOGGING_DEBUG_HTML"))
+	{
+		_debugHTML = Poco::NumberParser::parseBool(Poco::Environment::get("PRPL_LOGGING_DEBUG_HTML"));
+	}
 	_traceHTML = Poco::Util::Application::instance().config().getBool("logging.trace-html", false);
+	if(Poco::Environment::has("PRPL_LOGGING_TRACE_HTML"))
+	{
+		_traceHTML = Poco::NumberParser::parseBool(Poco::Environment::get("PRPL_LOGGING_TRACE_HTML"));
+	}
 }
 
 VIRTUAL Scraper::~Scraper()

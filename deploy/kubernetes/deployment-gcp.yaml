@@ -30,6 +30,10 @@ spec:
           value: "PRPL"
         - name: PRPL_DATABASE_PWD
           value: "parklife"
+        - name: PRPL_LOGGING_LEVEL
+          value: "information"
+        - name: PRPL_LOGGING_SHOW_HOSTNAME
+          value: "true"
         - name: PRPL_DEBUG_STAY_ALIVE
           value: ""
         - name: PRPL_SLEEP_SECS

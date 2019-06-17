@@ -50,7 +50,7 @@ public:
 	Poco::Data::SessionPool* getDbSessionPool();
 
 	bool isStopping() const;
-
+	const std::string getHostName() const;
 
 protected:
 	void initialize(Application& self);
@@ -78,6 +78,7 @@ private:
 private:
 	bool _helpRequested;
 	std::string _appName;
+	std::string _hostName;
 	SchemaVersion _schemaVersion;
 	Poco::Data::SessionPool* _pDbSessionPool;
 	bool _stopping;
