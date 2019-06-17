@@ -13,7 +13,7 @@ RUN cd /prpl/ \
 	&& cd gumbo-parser \
 	&& ./autogen.sh \
 	&& ./configure \
-	&& make -j 2 \
+	&& make -j <<PRPL_MAKE_JOBS>> \
 	&& make install \
 	&& rm -rf /prpl/poco
 
@@ -34,12 +34,9 @@ RUN cd /prpl/ \
 	&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
 	&& cd poco \
 	&& ./configure --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
-	&& make -j 2 \
+	&& make -j <<PRPL_MAKE_JOBS>> \
 	&& make install \
-	&& rm -rf /prpl
-
-# Now clean the sources...
-RUN rm -rf /prpl
+	&& rm -rf /prpl/*
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh  \

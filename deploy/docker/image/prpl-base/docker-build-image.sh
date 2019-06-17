@@ -4,6 +4,7 @@
 set -o errexit
 set -o nounset
 
+ARG_MAKE_JOBS=2
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -11,6 +12,11 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
+	fi
+	if [ "$1" == "--make-jobs" -o  "$1" == "-j" ] ; then
+		shift 1
+		ARG_MAKE_JOBS=$1
+		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
 		echo "Invalid args : Unknown argument \"${1}\"."
@@ -40,7 +46,13 @@ echo -e "\n----------------------------------- Stop container ------------------
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
-docker build -t ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} -t ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest .
+[ -f Dockerfile.tmp ] && rm -f Dockerfile.tmp
+cp Dockerfile Dockerfile.tmp
+sed -i "s/<<PRPL_MAKE_JOBS>>/${ARG_MAKE_JOBS}/g" Dockerfile.tmp
+docker build --tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} --file=./Dockerfile.tmp .
+rm -f Dockerfile.tmp 
+docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
+
 echo
 docker images
 

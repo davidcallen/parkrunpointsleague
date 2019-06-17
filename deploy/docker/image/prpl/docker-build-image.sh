@@ -4,6 +4,7 @@
 set -o errexit
 set -o nounset
 
+ARG_MAKE_JOBS=2
 ARG_USE_LOCAL_SOURCES=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -13,6 +14,11 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
+	fi
+	if [ "$1" == "--make-jobs" -o  "$1" == "-j" ] ; then
+		shift 1
+		ARG_MAKE_JOBS=$1
+		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--use-local-sources" -o "$1" == "-l" ] ; then
 		ARG_USE_LOCAL_SOURCES=TRUE
@@ -73,6 +79,7 @@ else
 	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp
 	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/\#/g" Dockerfile.tmp
 fi
+sed -i "s/<<PRPL_MAKE_JOBS>>/${ARG_MAKE_JOBS}/g" Dockerfile.tmp
 docker build --tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} --file=./Dockerfile.tmp .
 rm -f Dockerfile.tmp 
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest

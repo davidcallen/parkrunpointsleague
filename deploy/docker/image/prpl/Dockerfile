@@ -15,7 +15,7 @@ RUN cd /prpl && pwd && ls -la
 
 WORKDIR /prpl
 
-RUN cd /prpl/src && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && ./build.sh -clean -cpu 2
+RUN cd /prpl/src && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && ./build.sh -clean -cpu <<PRPL_MAKE_JOBS>>
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh  \
