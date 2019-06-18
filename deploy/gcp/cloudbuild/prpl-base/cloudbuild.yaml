@@ -1,0 +1,22 @@
+# Invoke from gcloud shell with :
+#    gcloud builds submit --config cloudbuild.yaml ../../../../
+
+steps:
+# Clone a public repo and write its revision to a VERSION file.
+#- name: 'gcr.io/cloud-builders/git'
+#  args: ['clone', 'https://github.com/davidcallen/parkrunpointsleague.git']
+
+# Build the image (Dockerfile will git clone then make)
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl-base:${_PRPL_DOCKER_IMAGE_TAG}', '-f', 'deploy/docker/image/prpl-base/Dockerfile', 'deploy/docker/image/prpl-base']
+  timeout: 600s
+  
+substitutions:
+    _PRPL_DOCKER_IMAGE_TAG: ''
+    _PRPL_MAKE_JOBS: '2'
+
+images: [ 'eu.gcr.io/davidcallen/prpl-base' ]
+
+options:
+  substitution_option: 'ALLOW_LOOSE'  
+  logging: GCS_ONLY

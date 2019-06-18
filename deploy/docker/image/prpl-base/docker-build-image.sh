@@ -46,11 +46,10 @@ echo -e "\n----------------------------------- Stop container ------------------
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
-[ -f Dockerfile.tmp ] && rm -f Dockerfile.tmp
-cp Dockerfile Dockerfile.tmp
-sed -i "s/<<PRPL_MAKE_JOBS>>/${ARG_MAKE_JOBS}/g" Dockerfile.tmp
-docker build --tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} --file=./Dockerfile.tmp .
-rm -f Dockerfile.tmp 
+docker build \
+	--build-arg PRPL_MAKE_JOBS=${ARG_MAKE_JOBS} \
+	--tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} \
+	--file=./Dockerfile .
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
 
 echo

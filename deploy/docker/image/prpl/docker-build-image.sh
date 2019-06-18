@@ -5,7 +5,8 @@ set -o errexit
 set -o nounset
 
 ARG_MAKE_JOBS=2
-ARG_USE_LOCAL_SOURCES=FALSE
+ARG_USE_LOCAL_SOURCES=false
+ARG_DEPLOY_TO_GCP=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 # Check all args up front for early validation, since processing can take some time.
@@ -21,7 +22,11 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--use-local-sources" -o "$1" == "-l" ] ; then
-		ARG_USE_LOCAL_SOURCES=TRUE
+		ARG_USE_LOCAL_SOURCES=true
+		ARG_RECOGNISED=TRUE
+	fi
+	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
+		ARG_DEPLOY_TO_GCP=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
@@ -41,6 +46,9 @@ export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
 export PRPL_BASE_DOCKER_IMAGE_TAG=`cat ../prpl-base/DOCKER_IMAGE_TAG`
+if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
+    PRPL_DOCKER_REGISTRY=${PRPL_DOCKER_REGISTRY_GCP}
+fi
 
 echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
@@ -70,6 +78,7 @@ echo -e "\n----------------------------------- Build image  --------------------
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
 [ -f Dockerfile.tmp ] && rm -f Dockerfile.tmp
+set -x
 cp Dockerfile Dockerfile.tmp
 sed -i "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${PRPL_BASE_DOCKER_IMAGE_TAG}/g" Dockerfile.tmp
 if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
@@ -79,8 +88,12 @@ else
 	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp
 	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/\#/g" Dockerfile.tmp
 fi
-sed -i "s/<<PRPL_MAKE_JOBS>>/${ARG_MAKE_JOBS}/g" Dockerfile.tmp
-docker build --tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} --file=./Dockerfile.tmp .
+sed -i "s/<<PRPL_DOCKER_REGISTRY>>/${PRPL_DOCKER_REGISTRY}/g" Dockerfile.tmp
+docker build --build-arg PRPL_BASE_DOCKER_IMAGE_TAG=${PRPL_BASE_DOCKER_IMAGE_TAG} \
+	--build-arg PRPL_USE_LOCAL_SOURCES=${ARG_USE_LOCAL_SOURCES} \
+	--build-arg PRPL_MAKE_JOBS=${ARG_MAKE_JOBS} \
+	--tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} \
+	--file=./Dockerfile.tmp .
 rm -f Dockerfile.tmp 
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
 echo

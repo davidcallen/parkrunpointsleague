@@ -1,5 +1,9 @@
 FROM alpine:latest
 
+# Input args
+ARG PRPL_MAKE_JOBS
+RUN echo "Input arg PRPL_MAKE_JOBS=${PRPL_MAKE_JOBS}"
+
 COPY ./DOCKER_IMAGE_TAG /
 
 WORKDIR /prpl
@@ -7,17 +11,19 @@ WORKDIR /prpl
 RUN apk add --no-cache git gcc g++ binutils make cmake autoconf2.13 mariadb mariadb-dev openssl-dev libtool libltdl 
 
 # Get and build GUMBO
+RUN echo '----------------------------------- Build gumbo --------------------------------------------'
 RUN apk add --no-cache libtool automake autoconf file
 RUN cd /prpl/ \
 	&& git clone https://github.com/google/gumbo-parser \
 	&& cd gumbo-parser \
 	&& ./autogen.sh \
 	&& ./configure \
-	&& make -j <<PRPL_MAKE_JOBS>> \
+	&& make -j ${PRPL_MAKE_JOBS} \
 	&& make install \
 	&& rm -rf /prpl/poco
 
 # Get and build LIBTIDY
+RUN echo '----------------------------------- Build libtidy --------------------------------------------'
 RUN mkdir /prpl/libtidy \
 	&& cd /prpl/libtidy \
 	&& git clone https://github.com/htacg/tidy-html5 \
@@ -28,13 +34,14 @@ RUN mkdir /prpl/libtidy \
 	&& rm -rf /prpl/libtidy
 
 # Get and build POCO
+RUN echo '----------------------------------- Build poco --------------------------------------------'
 RUN apk add --no-cache linux-headers
 RUN cd /prpl/ \
 	&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
 	&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
 	&& cd poco \
 	&& ./configure --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
-	&& make -j <<PRPL_MAKE_JOBS>> \
+	&& make -j ${PRPL_MAKE_JOBS} \
 	&& make install \
 	&& rm -rf /prpl/*
 

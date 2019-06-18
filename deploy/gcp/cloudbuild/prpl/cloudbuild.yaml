@@ -1,0 +1,33 @@
+# Invoke from gcloud shell with :
+#    gcloud builds submit --config cloudbuild.yaml ../../../../
+
+steps:
+# Clone a public repo and write its revision to a VERSION file.
+#- name: 'gcr.io/cloud-builders/git'
+#  args: ['clone', 'https://github.com/davidcallen/parkrunpointsleague.git']
+
+# Prepare the Dockerfile, with variable substition (not do-able by "docker build --build-arg")  
+- name: 'ubuntu'
+  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && cd ./deploy/docker/image/prpl && ls -la && cat Dockerfile | sed "s/<<PRPL_DOCKER_REGISTRY>>/${_PRPL_DOCKER_REGISTRY}/g" | sed "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${_PRPL_BASE_DOCKER_IMAGE_TAG}/g" | sed "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/#/g"  > Dockerfile.tmp' ]
+  env:
+  - 'BUILD=$BUILD_ID'
+  - 'PROJECT=$PROJECT_ID'
+  - 'REV=$REVISION_ID'
+
+# Build the image (Dockerfile will git clone then make)
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '--build-arg', 'PRPL_USE_LOCAL_SOURCES=${_PRPL_USE_LOCAL_SOURCES}', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl:${_PRPL_DOCKER_IMAGE_TAG}', '-f', 'deploy/docker/image/prpl/Dockerfile.tmp', 'deploy/docker/image/prpl']
+  timeout: 600s
+  
+substitutions:
+    _PRPL_DOCKER_REGISTRY: 'eu.gcr.io\/davidcallen\/'
+    _PRPL_BASE_DOCKER_IMAGE_TAG: ''
+    _PRPL_DOCKER_IMAGE_TAG: ''
+    _PRPL_USE_LOCAL_SOURCES: 'false'
+    _PRPL_MAKE_JOBS: '2'
+
+images: [ 'eu.gcr.io/davidcallen/prpl' ]
+
+options:
+  substitution_option: 'ALLOW_LOOSE'  
+  logging: GCS_ONLY
