@@ -16,15 +16,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-html,body
+body
 {
 	font-family: Arial, Helvetica, sans-serif;
 	color: #55565a;
 	margin: 0px;
 	/* font-size: small; */
-    height: 100%;
-	width: 100%;
-	padding: 2px;
+	height: 100%;
+	width: -moz-calc(100% - 9px);
+	width: -webkit-calc(100% - 9px);
+	width: -o-calc(100% - 9px);
+	width: calc(100% - 9px);
+	padding: 4px;
 }
 h1
 {
@@ -348,7 +351,7 @@ div.content
     border-width: 1px;
     border-color: rgba(217, 144, 255, 0.45);
     border-radius: 10px;
-    padding: 10px 10px 10px 10px;
+    padding: 6px;
 }
 div.content form
 {
@@ -362,8 +365,17 @@ div.footer
 	/* background: #8AC007; DALLEN DEBUG green theme */
 	color: #55565a;
 	font-size: x-small;
-	width: 100%;
+	width: -moz-calc(100% - 9px);
+	width: -webkit-calc(100% - 9px);
+	width: -o-calc(100% - 9px);
+	width: calc(100% - 9px);
+	padding: 10px 4px 6px 4px;
 	height: 22px;
+}
+div.footer-right
+{
+	clear: both;
+	float: right;
 }
 div.footer-text
 {
