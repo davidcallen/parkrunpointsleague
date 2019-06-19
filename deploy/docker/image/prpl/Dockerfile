@@ -14,7 +14,7 @@ RUN cd / && rm -rf /prpl
 
 # Either :
 #   1) Get source from GitHub
-RUN if [ ${PRPL_USE_LOCAL_SOURCES} == false ] ; then git clone https://github.com/davidcallen/parkrunpointsleague.git /prpl ; fi
+RUN if [ "${PRPL_USE_LOCAL_SOURCES}" == "FALSE" ] ; then git clone https://github.com/davidcallen/parkrunpointsleague.git /prpl ; fi
 #   2) Use local sources zip file
 <<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>> ADD prpl.srcs.tar.gz /
 

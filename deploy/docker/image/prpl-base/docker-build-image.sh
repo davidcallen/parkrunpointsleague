@@ -4,6 +4,24 @@
 set -o errexit
 set -o nounset
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| docker-build-image - Build image                                     |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./docker-build-image.sh --make-jobs 4"
+    echo  ""
+    exit 1
+}
+
 ARG_MAKE_JOBS=2
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -19,8 +37,8 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
-		echo "Invalid args : Unknown argument \"${1}\"."
-		err 1
+		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
+		exit 1
 	fi
 	shift
 done

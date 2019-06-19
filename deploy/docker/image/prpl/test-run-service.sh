@@ -4,6 +4,24 @@
 set -o nounset
 set -o errexit
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| test-run-service.sh  - Test run of container image in docker service |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --tail [-t]               - [optional] Tail log file"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./test-run-container.sh --tail"
+    echo  ""
+    exit 1
+}
+
 ARG_LOGS_TAIL=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -19,8 +37,8 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
-		echo "Invalid args : Unknown argument \"${1}\"."
-		err 1
+		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
+		exit 1
 	fi
 	shift
 done

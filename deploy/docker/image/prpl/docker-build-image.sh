@@ -4,8 +4,28 @@
 set -o errexit
 set -o nounset
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| docker-build-image - Build image                                     |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
+    echo  "    --use-local-source [-l]  - [optional] Use local source files (useful for testing)"
+    echo  "    --gcp [-g]               - [optional] Build image, tag and push to GCP registry"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./docker-build-image.sh --make-jobs 4 --gcp"
+    echo  ""
+    exit 1
+}
+
 ARG_MAKE_JOBS=2
-ARG_USE_LOCAL_SOURCES=false
+ARG_USE_LOCAL_SOURCES=FALSE
 ARG_DEPLOY_TO_GCP=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -22,7 +42,7 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--use-local-sources" -o "$1" == "-l" ] ; then
-		ARG_USE_LOCAL_SOURCES=true
+		ARG_USE_LOCAL_SOURCES=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
@@ -30,8 +50,8 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
-		echo "Invalid args : Unknown argument \"${1}\"."
-		err 1
+		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
+		exit 1
 	fi
 	shift
 done
@@ -97,7 +117,7 @@ docker build --build-arg PRPL_BASE_DOCKER_IMAGE_TAG=${PRPL_BASE_DOCKER_IMAGE_TAG
 rm -f Dockerfile.tmp 
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
 echo
-docker image ls
+docker images 
 echo
 
 # Cleanup

@@ -31,8 +31,8 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
-		echo "Invalid args : Unknown argument \"${1}\"."
-		err 1
+		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
+		exit 1
 	fi
 	shift
 done

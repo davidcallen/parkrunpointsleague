@@ -4,6 +4,24 @@
 set -o errexit
 set -o nounset
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| docker-push-to-gcp.sh    - Push image to GCP                         |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --tag [-t]               - [mandatory] Image Tag"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./docker-push-to-gcp.sh --tag 20190619120823"
+    echo  ""
+    exit 1
+}
+
 ARG_USE_PRPL_IMAGE_TAG=
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -19,8 +37,8 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
-		echo "Invalid args : Unknown argument \"${1}\"."
-		err 1
+		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
+		exit 1
 	fi
 	shift
 done

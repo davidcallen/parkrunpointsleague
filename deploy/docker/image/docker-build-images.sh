@@ -4,6 +4,25 @@
 set -o errexit
 set -o nounset
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| docker-build-images - Build all PRPL images                          |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
+    echo  "    --use-local-source [-l]  - [optional] Use local source files (useful for testing)"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./docker-build-images.sh --make-jobs 4"
+    echo  ""
+    exit 1
+}
+
 ARG_USE_LOCAL_SOURCES=FALSE
 ARG_MAKE_JOBS=2
 ARG_RECOGNISED=FALSE
@@ -24,8 +43,8 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
-		echo "Invalid args : Unknown argument \"${1}\"."
-		err 1
+		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
+		exit 1
 	fi
 	shift
 done
