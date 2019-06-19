@@ -79,10 +79,13 @@ std::string BaseHandler::getFooter() const
 {
 	std::string footer;
 	footer += "</div> <!-- class=\"content\" -->\n";
+	footer += "  <div class=\"footer\">\n";
 	if(_showHostName)
 	{
-		footer += PRPLHTTPServerApplication::instance().getHostName();
+		footer += "v" + PRPLHTTPServerApplication::instance().getVersionString();
+		footer += " on " + PRPLHTTPServerApplication::instance().getHostName();
 	}
+	footer += "  </div>\n";
 	footer += "</body></html>\n";
 
 	return footer;

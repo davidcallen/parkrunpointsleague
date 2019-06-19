@@ -62,6 +62,11 @@ PRPLHTTPServerApplication::PRPLHTTPServerApplication() :
 	_stopping(false),
 	_pResultsHarvesterTimer(NULL)
 {
+	_version.major = 0;
+	_version.minor = 1;
+	_version.release = 0;
+	_version.hotfix = 0;
+
 	_schemaVersion.major = 0;
 	_schemaVersion.minor = 1;
 	_schemaVersion.release = 0;
@@ -103,6 +108,30 @@ bool PRPLHTTPServerApplication::isStopping() const
 const std::string PRPLHTTPServerApplication::getHostName() const
 {
 	return _hostName;
+}
+
+const PRPLHTTPServerApplication::Version PRPLHTTPServerApplication::getVersion() const
+{
+	return _version;
+}
+
+const std::string PRPLHTTPServerApplication::getVersionString() const
+{
+	std::string versionString;
+	Poco::NumberFormatter::append(versionString, _version.major);
+	versionString += ".";
+	Poco::NumberFormatter::append(versionString, _version.minor);
+	versionString += ".";
+	Poco::NumberFormatter::append(versionString, _version.release);
+	versionString += ".";
+	Poco::NumberFormatter::append(versionString, _version.hotfix);
+	
+	return versionString;
+}
+
+const PRPLHTTPServerApplication::Version PRPLHTTPServerApplication::getSchemaVersion() const
+{
+	return _schemaVersion;
 }
 
 void PRPLHTTPServerApplication::initialize(Application& self)
@@ -250,7 +279,7 @@ bool PRPLHTTPServerApplication::connectDB()
 		   Poco::Data::Keywords::into(param.value),
 		   Poco::Data::Keywords::range(0, 1); //  iterate over result set one row at a time
 
-	SchemaVersion schemaVersion = {0, 0, 0, 0};
+	Version schemaVersion = {0, 0, 0, 0};
 	std::string schemaVersionStr;
 	while (!select.done())
 	{
@@ -293,11 +322,6 @@ bool PRPLHTTPServerApplication::connectDB()
 						_schemaVersion.minor, _schemaVersion.release, _schemaVersion.hotfix);
 
 	return true;
-}
-
-PRPLHTTPServerApplication::SchemaVersion PRPLHTTPServerApplication::getSchemaVersion()
-{
-	return _schemaVersion;
 }
 
 int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)

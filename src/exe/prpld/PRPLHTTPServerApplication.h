@@ -39,7 +39,7 @@ public:
 	virtual ~PRPLHTTPServerApplication();
 	void cleanup();
 
-	struct SchemaVersion
+	struct Version
 	{
 		unsigned int major;
 		unsigned int minor;
@@ -51,6 +51,9 @@ public:
 
 	bool isStopping() const;
 	const std::string getHostName() const;
+	const Version getVersion() const;
+	const std::string getVersionString() const;
+	const Version getSchemaVersion() const;
 
 protected:
 	void initialize(Application& self);
@@ -67,8 +70,6 @@ protected:
 
 	bool connectDB();
 
-	SchemaVersion getSchemaVersion();
-
 	int main(const std::vector<std::string> &args);
 	void startResultsHavester();
 
@@ -79,7 +80,8 @@ private:
 	bool _helpRequested;
 	std::string _appName;
 	std::string _hostName;
-	SchemaVersion _schemaVersion;
+	Version _version;
+	Version _schemaVersion;
 	Poco::Data::SessionPool* _pDbSessionPool;
 	bool _stopping;
 	Poco::Timer* _pResultsHarvesterTimer;
