@@ -16,7 +16,7 @@ steps:
 
 # Build the image (Dockerfile will git clone then make)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--build-arg', 'PRPL_USE_LOCAL_SOURCES=${_PRPL_USE_LOCAL_SOURCES}', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl:${_PRPL_DOCKER_IMAGE_TAG}', '-f', 'deploy/docker/image/prpl/Dockerfile.tmp', 'deploy/docker/image/prpl']
+  args: ['build', '--build-arg', 'PRPL_USE_LOCAL_SOURCES=${_PRPL_USE_LOCAL_SOURCES}', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl:${COMMIT_SHA}', '-f', 'deploy/docker/image/prpl/Dockerfile.tmp', 'deploy/docker/image/prpl']
   timeout: 600s
     
 substitutions:

@@ -8,7 +8,7 @@ RUN echo "Input arg PRPL_MAKE_JOBS=${PRPL_MAKE_JOBS}"
 
 ADD ./DOCKER_IMAGE_TAG /
 
-RUN apk add --no-cache git gcc g++ binutils make cmake autoconf2.13 mariadb mariadb-client mariadb-dev openssl-dev libtool libltdl xmlstarlet
+RUN apk --update add --no-cache git gcc g++ binutils make cmake autoconf2.13 mariadb mariadb-client mariadb-dev openssl-dev libtool libltdl xmlstarlet
 
 RUN cd / && rm -rf /prpl
 

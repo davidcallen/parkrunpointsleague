@@ -59,7 +59,10 @@ if [ "${ARG_USE_LOCAL_SOURCES}" != "" ] ; then
 	GCLOUD_BUILD_SUBSTITUTIONS=${GCLOUD_BUILD_SUBSTITUTIONS},_PRPL_USE_LOCAL_SOURCES=${ARG_USE_LOCAL_SOURCES}
 fi
 
-gcloud builds submit ${GCLOUD_BUILD_SUBSTITUTIONS} --config cloudbuild.yaml ../../../../
+cat cloudbuild.yaml | sed "s/:\${COMMIT_SHA}/:\${_PRPL_DOCKER_IMAGE_TAG}/g" > cloudbuild.yaml.tmp
+
+gcloud builds submit ${GCLOUD_BUILD_SUBSTITUTIONS} --config cloudbuild.yaml.tmp ../../../../
+rm -f cloudbuild.yaml.tmp
 
 echo -e "\n----------"
 echo "Finished google cloud build of image '${PRPL_DOCKER_IMAGE_NAME}' with tag ${PRPL_DOCKER_IMAGE_TAG} at `date` (started at ${START_DATE})"
