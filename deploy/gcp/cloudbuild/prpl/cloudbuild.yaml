@@ -18,7 +18,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '--build-arg', 'PRPL_USE_LOCAL_SOURCES=${_PRPL_USE_LOCAL_SOURCES}', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl:${_PRPL_DOCKER_IMAGE_TAG}', '-f', 'deploy/docker/image/prpl/Dockerfile.tmp', 'deploy/docker/image/prpl']
   timeout: 600s
-  
+    
 substitutions:
     _PRPL_DOCKER_REGISTRY: 'eu.gcr.io\/davidcallen\/'
     _PRPL_BASE_DOCKER_IMAGE_TAG: ''
@@ -31,3 +31,4 @@ images: [ 'eu.gcr.io/davidcallen/prpl' ]
 options:
   substitution_option: 'ALLOW_LOOSE'  
   logging: GCS_ONLY
+  timeout: 610s

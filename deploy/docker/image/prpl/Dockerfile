@@ -24,7 +24,7 @@ RUN cd /prpl && pwd && ls -la
 
 WORKDIR /prpl
 
-RUN cd /prpl/src && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && ./build.sh -clean -cpu ${PRPL_MAKE_JOBS}
+RUN cd /prpl/src && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && ./build.sh -clean -cpu ${PRPL_MAKE_JOBS} && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/*
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh  \

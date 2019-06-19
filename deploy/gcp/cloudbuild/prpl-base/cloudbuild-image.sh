@@ -27,7 +27,7 @@ while (( "$#" )); do
 done
 
 START_DATE=`date`
-echo "\nStarted google cloud build at ${START_DATE}\n"
+echo -e "\nStarted google cloud build at ${START_DATE}\n"
 
 PRPL_DOCKER_IMAGE_NAME=prpl-base
 PRPL_DOCKER_BUILD_DATE=`date`
