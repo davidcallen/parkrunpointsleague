@@ -1,6 +1,40 @@
 #!/bin/bash
 #
 # Create standard testing cluster. g1-small, 3 nodes, auto-scale (1-5 nodes)
+
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| create-cluster-gcp.sh - Create test cluster on GCP k8s               |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  ""
+    echo  " Examples"
+    echo  "    ./create-cluster-gcp.sh"
+    echo  ""
+    exit 1
+}
+
+ARG_RECOGNISED=FALSE
+ARGS=$*
+while (( "$#" )); do
+	ARG_RECOGNISED=FALSE
+
+	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
+		usage
+	fi
+	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
+		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
+		exit 1
+	fi
+	shift
+done
+
+
 PROJECT_ID=davidcallen
 
 gcloud beta container --project "${PROJECT_ID}" clusters create "standard-cluster-1" \

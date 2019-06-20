@@ -4,7 +4,24 @@
 set -o nounset
 set -o errexit
 
-ARG_USE_PRPL_IMAGE_TAG=
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| deploy-scale.sh - Deploy scaling                                     |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --replicas [-r]         - Number of replicas to set"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./deploy-scale.sh --replicas 5"
+    echo  ""
+    exit 1
+}
+
 ARG_REPLICAS=
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -17,11 +34,6 @@ while (( "$#" )); do
 	if [ "$1" == "--replicas" -o "$1" == "-r" ] ; then
 		shift 1
 		ARG_REPLICAS=$1
-		ARG_RECOGNISED=TRUE
-	fi
-	if [ "$1" == "--tag" -o "$1" == "-t" ] ; then
-		shift 1
-		ARG_USE_PRPL_IMAGE_TAG=$1
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then

@@ -65,12 +65,12 @@ PRPLHTTPServerApplication::PRPLHTTPServerApplication() :
 	_version.major = 0;
 	_version.minor = 1;
 	_version.release = 0;
-	_version.hotfix = 0;
+	_version.hotfix = 1;
 
 	_schemaVersion.major = 0;
 	_schemaVersion.minor = 1;
 	_schemaVersion.release = 0;
-	_schemaVersion.hotfix = 0;
+	_schemaVersion.hotfix = 1;
 
 	_pInstance = this;
 }
