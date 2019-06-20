@@ -27,7 +27,7 @@ while (( "$#" )); do
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--use-local-sources" -o "$1" == "-l" ] ; then
-		ARG_USE_LOCAL_SOURCES=true
+		ARG_USE_LOCAL_SOURCES=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then

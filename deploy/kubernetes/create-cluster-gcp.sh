@@ -18,3 +18,8 @@ gcloud beta container --project "${PROJECT_ID}" clusters create "standard-cluste
 	--addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard \
 	--enable-autoupgrade \
 	--enable-autorepair
+
+
+# Can then get credentials with :
+#
+#   gcloud container clusters get-credentials standard-cluster-1 --zone europe-west2-a --project davidcallen

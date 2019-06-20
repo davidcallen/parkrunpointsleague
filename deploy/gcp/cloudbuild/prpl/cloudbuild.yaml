@@ -23,7 +23,7 @@ substitutions:
     _PRPL_DOCKER_REGISTRY: 'eu.gcr.io\/davidcallen\/'
     _PRPL_BASE_DOCKER_IMAGE_TAG: ''
     _PRPL_DOCKER_IMAGE_TAG: ''
-    _PRPL_USE_LOCAL_SOURCES: 'false'
+    _PRPL_USE_LOCAL_SOURCES: 'FALSE'
     _PRPL_MAKE_JOBS: '2'
 
 images: [ 'eu.gcr.io/davidcallen/prpl' ]
