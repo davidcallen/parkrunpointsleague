@@ -1,6 +1,6 @@
 #!/bin/bash
-# Example usage of container to start Icecream container
-#
+# 
+# Delete mysql deployment
 set -o nounset
 set -o errexit
 

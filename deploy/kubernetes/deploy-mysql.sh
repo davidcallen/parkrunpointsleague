@@ -1,6 +1,6 @@
 #!/bin/bash
-# Example usage of container to start Icecream container
-#
+# 
+# Deploy mysql 
 set -o nounset
 set -o errexit
 
@@ -13,4 +13,4 @@ echo
 kubectl apply -f deployment-mysql.yaml
 
 # Can test attaching to the mysql pod with :
-# kubectl run -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -ppassword
+# kubectl run -it --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h prpl-mysql -u root -p<your-root-password-here>

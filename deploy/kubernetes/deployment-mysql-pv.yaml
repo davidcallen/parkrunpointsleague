@@ -3,11 +3,12 @@ apiVersion: v1
 metadata:
   name: mysql-pv-volume
   labels:
+    app: prpl
     type: local
 spec:
   storageClassName: manual
   capacity:
-    storage: 1Gi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
@@ -17,10 +18,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pv-claim
+  labels:
+    app: prpl
 spec:
   storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 10Gi

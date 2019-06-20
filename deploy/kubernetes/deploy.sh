@@ -1,6 +1,6 @@
 #!/bin/bash
-# Example usage of container to start Icecream container
-#
+# 
+# Create deployment
 set -o nounset
 set -o errexit
 
@@ -50,13 +50,24 @@ fi
 YYYYMMDD_HHMMSS=`date +'%Y%m%d_%H%M%S'`
 # PRPL_DOCKER_CONTAINER_NAME=prpl
 PRPL_KUBERNETES_NAME=prpl
+PRPL_KUBERNETES_SERVICE_NAME=${PRPL_KUBERNETES_NAME}
 
 echo "`date '+%Y%m%d %H:%M:%S'` : Stopping deployment ${PRPL_KUBERNETES_NAME}"
+kubectl delete service ${PRPL_KUBERNETES_SERVICE_NAME} || true
 kubectl delete deployment ${PRPL_KUBERNETES_NAME} || true
 
 echo "`date '+%Y%m%d %H:%M:%S'` : Starting deployment ${PRPL_KUBERNETES_NAME}"
 export PRPL_DOCKER_IMAGE_TAG
 export PRPL_DOCKER_REGISTRY
+
+# Service
+DEPLOYMENT_SERVICE_YAML_FILE=deployment-service.yaml
+if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
+    DEPLOYMENT_SERVICE_YAML_FILE=deployment-service-gcp.yaml
+fi
+kubectl create -f ${DEPLOYMENT_SERVICE_YAML_FILE}
+
+# Deployment
 DEPLOYMENT_YAML_FILE=deployment.yaml
 if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
     DEPLOYMENT_YAML_FILE=deployment-gcp.yaml
@@ -66,3 +77,7 @@ cat ${DEPLOYMENT_YAML_FILE} | envsubst | kubectl create -f -
 
 echo
 kubectl get deployment ${PRPL_KUBERNETES_NAME}
+
+# If we are on minikube can get convenient URL for Service Endpoint :
+#   minikube service prpl
+

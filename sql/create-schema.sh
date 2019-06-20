@@ -2,8 +2,26 @@
 set -o errexit
 set -o nounset
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| create-schema.sh - Create database Schema                            |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  ""
+    echo  " Examples"
+    echo  "    ./create-schema.sh --host prpl-mysql -p XXXXXXXXX -k"
+    echo  ""
+    exit 1
+}
+
 ARG_MYSQL_HOST=localhost
 ARG_PRPL_PWD=
+ARG_USE_KUBECTL_RUN=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 # Check all args up front for early validation, since processing can take some time.
@@ -23,9 +41,13 @@ while (( "$#" )); do
 		ARG_PRPL_PWD=$1
 		ARG_RECOGNISED=TRUE
 	fi
+	if [ "$1" == "--use-kubectl-run" -o "$1" == "-k" ] ; then
+		ARG_USE_KUBECTL_RUN=TRUE
+		ARG_RECOGNISED=TRUE
+	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
-		echo "Invalid args : Unknown argument \"${1}\"."
-		err 1
+		echo "ERROR : Invalid args : Unknown argument \"${1}\"."
+		exit 1
 	fi
 	shift
 done
@@ -35,4 +57,9 @@ if [ "${ARG_PRPL_PWD}" == "" ] ; then
 	exit 1
 fi
 
-cat create-schema.sql | mysql -h ${ARG_MYSQL_HOST} -u PRPL --password=${ARG_PRPL_PWD} -B 
+if [ "${ARG_USE_KUBECTL_RUN}" == "TRUE" ] ; then
+	# ARG_MYSQL_HOST probably needs to be "prpl-mysql" if using std yaml to create mysql deployment
+	cat create-schema.sql | kubectl run --stdin=true --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h ${ARG_MYSQL_HOST} -u PRPL -p${ARG_PRPL_PWD} -B --
+else
+	cat create-schema.sql | mysql -h ${ARG_MYSQL_HOST} -u PRPL --password=${ARG_PRPL_PWD} -B 
+fi
