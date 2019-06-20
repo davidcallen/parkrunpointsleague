@@ -37,7 +37,10 @@ spec:
         env:
           # Use secret in real usage
         - name: MYSQL_ROOT_PASSWORD
-          value: parklife
+          valueFrom:
+            secretKeyRef:
+              name: prpl-secrets
+              key: PRPL_MYSQL_ROOT_PASSWORD
         ports:
         - containerPort: 3306
           name: mysql

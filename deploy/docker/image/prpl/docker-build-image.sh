@@ -98,7 +98,6 @@ echo -e "\n----------------------------------- Build image  --------------------
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
 [ -f Dockerfile.tmp ] && rm -f Dockerfile.tmp
-set -x
 cp Dockerfile Dockerfile.tmp
 sed -i "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${PRPL_BASE_DOCKER_IMAGE_TAG}/g" Dockerfile.tmp
 if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then

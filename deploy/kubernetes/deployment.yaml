@@ -29,7 +29,10 @@ spec:
         - name: PRPL_DATABASE_USER
           value: "PRPL"
         - name: PRPL_DATABASE_PWD
-          value: "parklife"
+          valueFrom:
+            secretKeyRef:
+              name: prpl-secrets
+              key: PRPL_DATABASE_PWD
         - name: PRPL_LOGGING_LEVEL
           value: "information"
         - name: PRPL_LOGGING_SHOW_HOSTNAME
