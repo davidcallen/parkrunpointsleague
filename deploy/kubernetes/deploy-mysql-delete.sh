@@ -6,6 +6,6 @@ set -o errexit
 
 echo "`date '+%Y%m%d %H:%M:%S'` : Deleting Mysql Deployment and Persistent Volume..."
 echo
-kubectl delete deployment,svc prpl-mysql
-kubectl delete pvc mysql-pv-claim
-kubectl delete pv mysql-pv-volume
+kubectl delete deployment,svc prpl-mysql || true
+kubectl delete pvc mysql-pv-claim || true
+kubectl delete pv mysql-pv-volume || true

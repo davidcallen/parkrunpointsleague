@@ -4,7 +4,27 @@
 set -o nounset
 set -o errexit
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| deploy-set-image.sh - Change deploy image on k8s                     |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --gcp [-g]         - [optional] Deploy to GCP"
+    echo  "    --tag [-t]         - [optional] PRPL image tag"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./docker-build-image.sh --make-jobs 4"
+    echo  ""
+    exit 1
+}
+
 ARG_USE_PRPL_IMAGE_TAG=
+ARG_DEPLOY_TO_GCP=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -16,6 +36,10 @@ while (( "$#" )); do
 	if [ "$1" == "--tag" -o "$1" == "-t" ] ; then
 		shift 1
 		ARG_USE_PRPL_IMAGE_TAG=$1
+		ARG_RECOGNISED=TRUE
+	fi
+	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
+		ARG_DEPLOY_TO_GCP=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
@@ -38,7 +62,11 @@ PRPL_KUBERNETES_NAME=prpl
 echo
 kubectl get deployment ${PRPL_KUBERNETES_NAME}
 
-kubectl set image deployment/${PRPL_KUBERNETES_NAME} prpl=${PRPL_DOCKER_REGISTRY_GCP}${PRPL_KUBERNETES_NAME}:${ARG_USE_PRPL_IMAGE_TAG}
+if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
+	kubectl set image deployment/${PRPL_KUBERNETES_NAME} prpl=${PRPL_DOCKER_REGISTRY_GCP}${PRPL_KUBERNETES_NAME}:${ARG_USE_PRPL_IMAGE_TAG}
+else
+	kubectl set image deployment/${PRPL_KUBERNETES_NAME} prpl=${PRPL_KUBERNETES_NAME}:${ARG_USE_PRPL_IMAGE_TAG}
+fi
 
 echo
 sleep 1

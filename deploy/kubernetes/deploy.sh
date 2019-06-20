@@ -4,6 +4,25 @@
 set -o nounset
 set -o errexit
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| deploy.sh - Deploy to k8s                                            |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --gcp [-g]         - [optional] Deploy to GCP"
+    echo  "    --tag [-t]         - [optional] PRPL image tag"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./docker-build-image.sh --make-jobs 4"
+    echo  ""
+    exit 1
+}
+
 ARG_USE_PRPL_IMAGE_TAG=
 ARG_DEPLOY_TO_GCP=FALSE
 ARG_RECOGNISED=FALSE

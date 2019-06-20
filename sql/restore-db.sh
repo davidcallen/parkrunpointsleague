@@ -81,8 +81,8 @@ if [ "${ARG_DB_DUMP_FILE: -7}" == ".tar.gz" ] ; then
 else 
 	if [ "${ARG_USE_KUBECTL_RUN}" == "TRUE" ] ; then
 		# ARG_MYSQL_HOST probably needs to be "prpl-mysql" if using std yaml to create mysql deployment
-		cat ${DB_DUMP_FILE} | kubectl run --stdin=true --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h ${ARG_MYSQL_HOST} -u PRPL -p${ARG_PRPL_PWD} -B --
+		cat ${ARG_DB_DUMP_FILE} | kubectl run --stdin=true --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h ${ARG_MYSQL_HOST} -u PRPL -p${ARG_PRPL_PWD} -B --
 	else
-		cat ${DB_DUMP_FILE} | mysql -h ${ARG_MYSQL_HOST} -u PRPL --password=${ARG_PRPL_PWD} -B 
+		cat ${ARG_DB_DUMP_FILE} | mysql -h ${ARG_MYSQL_HOST} -u PRPL --password=${ARG_PRPL_PWD} -B 
 	fi
 fi

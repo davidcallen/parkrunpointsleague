@@ -65,13 +65,15 @@ if [ "${ARG_ROOT_PWD}" == "" ] ; then
 	echo "ERROR: --root-password for mysql root user pwd is needed"
 	exit 1
 fi
-
+set -x
 if [ "${ARG_USE_KUBECTL_RUN}" == "TRUE" ] ; then
 	# ARG_MYSQL_HOST probably needs to be "prpl-mysql" if using std yaml to create mysql deployment
-	sed "s/xxxxxxxx/${ARG_PRPL_PWD}/g" create-db.sql | kubectl run --stdin=true --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h ${ARG_MYSQL_HOST} -u root -p${ARG_ROOT_PWD} --
+	sed "s/xxxxxxxx/${ARG_PRPL_PWD}/g" create-db.sql | kubectl run --stdin=true --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h ${ARG_MYSQL_HOST} -u root -p${ARG_ROOT_PWD}
 else
 	sed "s/xxxxxxxx/${ARG_PRPL_PWD}/g" create-db.sql | mysql -h ${ARG_MYSQL_HOST} -u root --password=${ARG_ROOT_PWD} -B 
 fi
 
 # Useful for connecting to and inspecting database pod :
+#   kubectl run -it --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h prpl-mysql -u root -p
+#
 #   kubectl run -it --rm --image=mysql:5.7 --restart=Never mysql-client -- mysql -h prpl-mysql -u PRPL --database=PRPL -p
