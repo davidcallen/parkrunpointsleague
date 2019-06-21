@@ -38,7 +38,7 @@ done
 PROJECT_ID=davidcallen
 
 gcloud beta container --project "${PROJECT_ID}" clusters create "standard-cluster-1" \
-	--zone "europe-west2-a" --no-enable-basic-auth --cluster-version "1.13.6-gke.6" \
+	--zone "europe-west2-a" --no-enable-basic-auth --cluster-version "1.13.6-gke.13" \
 	--machine-type "g1-small" --image-type "COS" \
 	--disk-type "pd-standard" --disk-size "30" \
 	--metadata disable-legacy-endpoints=true --scopes "https://www.googleapis.com/auth/cloud-platform" \
