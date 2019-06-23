@@ -9,7 +9,6 @@ ARG_MAKE_JOBS=
 ARG_USE_LOCAL_SOURCES=
 ARG_RECOGNISED=FALSE
 ARGS=$*
-# Check all args up front for early validation, since processing can take some time.
 while (( "$#" )); do
 	ARG_RECOGNISED=FALSE
 

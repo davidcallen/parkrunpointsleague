@@ -1,0 +1,10 @@
+image:
+  registry: eu.gcr.io/davidcallen/
+  tag: 81ae63d82dd05964ae44d2ce20b18eb6481da3d2
+
+mysql:
+  host: 10.106.96.3
+
+service:
+  type: LoadBalancer
+  loadBalancerIP: 35.189.99.129

@@ -18,7 +18,7 @@ function usage()
     echo  "    --tag [-t]         - [optional] PRPL image tag"
     echo  ""
     echo  " Examples"
-    echo  "    ./docker-build-image.sh --make-jobs 4"
+    echo  "    ./deploy-set-image.sh --gcp --tag 40e9210d233448854e67d41605fd4a62cbb3ecda"
     echo  ""
     exit 1
 }

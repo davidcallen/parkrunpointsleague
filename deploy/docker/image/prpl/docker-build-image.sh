@@ -14,6 +14,7 @@ function usage()
     echo  ""
     echo  "Usage: "
     echo  ""
+    echo  "    --base-tag [-t]          - [optional] The image tag for prpl-base"
     echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
     echo  "    --use-local-source [-l]  - [optional] Use local source files (useful for testing)"
     echo  "    --gcp [-g]               - [optional] Build image, tag and push to GCP registry"
@@ -24,6 +25,7 @@ function usage()
     exit 1
 }
 
+ARG_USE_PRPL_BASE_IMAGE_TAG=
 ARG_MAKE_JOBS=2
 ARG_USE_LOCAL_SOURCES=FALSE
 ARG_DEPLOY_TO_GCP=FALSE
@@ -35,6 +37,11 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
+	fi
+	if [ "$1" == "--base-tag" -o "$1" == "-t" ] ; then
+		shift 1
+		ARG_USE_PRPL_BASE_IMAGE_TAG=$1
+		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--make-jobs" -o  "$1" == "-j" ] ; then
 		shift 1
@@ -65,7 +72,11 @@ PRPL_DOCKER_IMAGE_NAME=prpl
 export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
-export PRPL_BASE_DOCKER_IMAGE_TAG=`cat ../prpl-base/DOCKER_IMAGE_TAG`
+PRPL_BASE_DOCKER_IMAGE_TAG=`cat ../prpl-base/DOCKER_IMAGE_TAG`
+if [ "${ARG_USE_PRPL_BASE_IMAGE_TAG}" != "" ] ; then
+	PRPL_BASE_DOCKER_IMAGE_TAG=${ARG_USE_PRPL_BASE_IMAGE_TAG}
+fi
+export PRPL_BASE_DOCKER_IMAGE_TAG
 if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
     PRPL_DOCKER_REGISTRY=${PRPL_DOCKER_REGISTRY_GCP}
 fi

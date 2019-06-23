@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prpl
+  labels:
+    app: prpl
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: prpl
+  type: {{ .Values.service.type }}
+{{- if .Values.service.loadBalancerIPenabled }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIPenabled }}
+{{- end }}

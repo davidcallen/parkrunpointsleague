@@ -1,0 +1,11 @@
+image:
+  registry: ''
+  tag: ''
+
+replicas: 1
+
+mysql:
+  host: prpl-mysql
+
+service:
+  type: NodePort
