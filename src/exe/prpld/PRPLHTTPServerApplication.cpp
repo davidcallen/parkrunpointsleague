@@ -361,16 +361,15 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 
 		poco_information_f1(Poco::Logger::root(), "HTTP listening on port %hu", port);
 
-		startResultsHavester();
-
+		startResultsHarvester();
+		
 		waitForTerminationRequest();
 
 		poco_information(Poco::Logger::root(), "Stop request received.");
 		_stopping = true;
 
 		poco_information(Poco::Logger::root(), "Stopping results harvester...");
-		_pResultsHarvesterTimer->stop();
-		delete _pResultsHarvesterTimer;
+		stopResultsHarvester();
 
 		poco_information(Poco::Logger::root(), "Stopping HTTP server...");
 
@@ -385,12 +384,31 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 }
 
 
-void PRPLHTTPServerApplication::startResultsHavester()
+void PRPLHTTPServerApplication::startResultsHarvester()
 {
+	bool resultsScrapingEnabled = config().getBool("results.scraping-enabled", true);
+	if(Poco::Environment::has("PRPL_RESULTS_SCRAPING_ENABLED"))
+	{
+		resultsScrapingEnabled = Poco::NumberParser::parseBool(Poco::Environment::get("PRPL_RESULTS_SCRAPING_ENABLED"));
+	}
+	if(!resultsScrapingEnabled)
+	{
+		return;
+	}
+	
 	const unsigned long resultsSleepBetweenRuns = config().getInt("results.sleep-between-runs-seconds", 360);
 
 	_pResultsHarvesterTimer = new Poco::Timer(1000, resultsSleepBetweenRuns * 1000);
 
 	ResultsControllerTimer resultsControllerTimer;
 	_pResultsHarvesterTimer->start(Poco::TimerCallback<ResultsControllerTimer>(resultsControllerTimer, &ResultsControllerTimer::onTimer));
+}
+
+void PRPLHTTPServerApplication::stopResultsHarvester()
+{
+	if(_pResultsHarvesterTimer != NULL)
+	{
+		_pResultsHarvesterTimer->stop();
+		delete _pResultsHarvesterTimer;
+	}
 }

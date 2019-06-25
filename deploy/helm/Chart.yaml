@@ -2,4 +2,4 @@ apiVersion: v1
 name: prpl
 version: 1.0.0
 appVersion: 1.0.0
-description: helm
+description: ParkRunPointsLeague

@@ -18,6 +18,7 @@
 	</logging>
 
 	<results>
+		<scraping-enabled>true</scraping-enabled>
 		<data-path>../data/results/</data-path>
 		<sleep-between-runs-seconds>360</sleep-between-runs-seconds>
 		<non-parkrun-day-slow-down-factor>4</non-parkrun-day-slow-down-factor>

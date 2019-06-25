@@ -71,7 +71,8 @@ protected:
 	bool connectDB();
 
 	int main(const std::vector<std::string> &args);
-	void startResultsHavester();
+	void startResultsHarvester();
+	void stopResultsHarvester();
 
 private:
 	static PRPLHTTPServerApplication* _pInstance;
