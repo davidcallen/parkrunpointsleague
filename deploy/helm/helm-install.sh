@@ -25,6 +25,7 @@ function usage()
 
 ARG_USE_PRPL_IMAGE_TAG=
 ARG_DEPLOY_TO_GCP=FALSE
+ARG_USE_MARIADB=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -40,6 +41,10 @@ while (( "$#" )); do
 	fi
 	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
 		ARG_DEPLOY_TO_GCP=TRUE
+		ARG_RECOGNISED=TRUE
+	fi
+	if [ "$1" == "--mariadb" -o "$1" == "-m" ] ; then
+		ARG_USE_MARIADB=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
@@ -69,8 +74,12 @@ helm del --purge prpl || true
 
 PRPL_HELM_ARGS=
 if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
-	echo "gcp"
+	echo "Deploying to GCP"
 	PRPL_HELM_ARGS="--values=config-gcp.yaml"
+fi
+if [ "${ARG_USE_MARIADB}" == "TRUE" ] ; then
+	echo "Using MariaDB"
+	PRPL_HELM_ARGS="--values=config-mariadb.yaml"
 fi
 helm install --name prpl ../helm --values=values.yaml ${PRPL_HELM_ARGS} --set-string=image.tag="${PRPL_DOCKER_IMAGE_TAG}"
 
