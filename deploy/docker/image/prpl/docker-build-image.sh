@@ -104,7 +104,6 @@ echo -e "\n----------------------------------- Stop container ------------------
 #docker stop ${PRPL_DOCKER_IMAGE_NAME} || true
 #docker rm ${PRPL_DOCKER_IMAGE_NAME} || true
 #docker ps
-
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
@@ -118,7 +117,8 @@ else
 	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp
 	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/\#/g" Dockerfile.tmp
 fi
-sed -i "s/<<PRPL_DOCKER_REGISTRY>>/${PRPL_DOCKER_REGISTRY}/g" Dockerfile.tmp
+sed -i "s+<<PRPL_DOCKER_REGISTRY>>+${PRPL_DOCKER_REGISTRY}+g" Dockerfile.tmp
+
 docker build --build-arg PRPL_BASE_DOCKER_IMAGE_TAG=${PRPL_BASE_DOCKER_IMAGE_TAG} \
 	--build-arg PRPL_USE_LOCAL_SOURCES=${ARG_USE_LOCAL_SOURCES} \
 	--build-arg PRPL_MAKE_JOBS=${ARG_MAKE_JOBS} \

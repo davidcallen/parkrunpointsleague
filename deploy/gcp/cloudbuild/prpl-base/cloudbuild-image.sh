@@ -4,6 +4,24 @@
 set -o errexit
 set -o nounset
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| cloudbuild-image.sh - Create docker image using GCP Cloudbuild       |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
+    echo  ""
+    echo  " Examples"
+    echo  "    ./cloudbuild-image.sh --make-jobs 2"
+    echo  ""
+    exit 1
+}
+
 ARG_MAKE_JOBS=
 ARG_RECOGNISED=FALSE
 ARGS=$*

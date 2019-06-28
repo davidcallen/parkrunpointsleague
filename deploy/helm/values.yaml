@@ -9,3 +9,6 @@ mysql:
 
 service:
   type: NodePort
+
+httpServer:
+  port: 8080

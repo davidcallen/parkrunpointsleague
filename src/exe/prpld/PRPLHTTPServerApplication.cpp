@@ -264,14 +264,30 @@ bool PRPLHTTPServerApplication::connectDB()
 		dbConnectString += databasePassword;
 		dbConnectString += ";compress=true;auto-reconnect=true";
 	}
-	poco_information_f1(Poco::Logger::root(), "Connecting to database using '%s'", dbConnectString);
+	poco_information_f1(Poco::Logger::root(), "Create database session pool using '%s'", dbConnectString);
 
 	_pDbSessionPool = new Poco::Data::SessionPool("MySQL", dbConnectString);
-	Poco::Data::Session session = _pDbSessionPool->get();
 
-	poco_information(Poco::Logger::root(), "Connected to database PRPL");
+	// Check if we can connect
+	try
+	{
+		poco_information(Poco::Logger::root(), "Get database session");
+		Poco::Data::Session session = _pDbSessionPool->get();
+	}
+	catch (Poco::Exception& e)
+	{
+		poco_error(Poco::Logger::root(), "Failed to connected to database");
+		poco_warning(Poco::Logger::root(), "Failed to check database schema version");
+
+		return false;
+	}
+
+	Poco::Data::Session session = _pDbSessionPool->get();
+	poco_information(Poco::Logger::root(), "Connected to database");
 
 	// Check Schema version is valid
+	poco_information_f2(Poco::Logger::root(), "Checking Schema Version. Expecting %u.%u",
+						_schemaVersion.major, _schemaVersion.minor);
 	Param param;
 	Poco::Data::Statement select(session);
 	select << "SELECT NAME, VALUE FROM PARAM WHERE NAME = 'SCHEMA_VERSION'",
@@ -344,10 +360,7 @@ int PRPLHTTPServerApplication::main(const std::vector<std::string> &args)
 
 		poco_information(Poco::Logger::root(), _appName + " starting v0.1.0.0 (built on " __DATE__ " " __TIME__ ") on host : " + _hostName);
 
-		if(!connectDB())
-		{
-			return Application::EXIT_DATAERR;
-		}
+		connectDB();
 
 		Poco::Net::ServerSocket socket(port);
 

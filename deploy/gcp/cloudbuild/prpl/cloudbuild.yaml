@@ -8,7 +8,7 @@ steps:
 
 # Prepare the Dockerfile, with variable substition (not do-able by "docker build --build-arg")  
 - name: 'ubuntu'
-  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && cd ./deploy/docker/image/prpl && ls -la && cat Dockerfile | sed "s/<<PRPL_DOCKER_REGISTRY>>/${_PRPL_DOCKER_REGISTRY}/g" | sed "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${_PRPL_BASE_DOCKER_IMAGE_TAG}/g" | sed "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/#/g"  > Dockerfile.tmp' ]
+  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && cd ./deploy/docker/image/prpl && ls -la && cat Dockerfile | sed "s/<<PRPL_DOCKER_REGISTRY>>/${_PRPL_DOCKER_REGISTRY}/g" | sed "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${_PRPL_BASE_DOCKER_IMAGE_TAG}/g" > Dockerfile.tmp && if [ "${_PRPL_USE_LOCAL_SOURCES}" == "TRUE" ] ; then sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp ; else sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/#/g" Dockerfile.tmp; fi' ]
   env:
   - 'BUILD=$BUILD_ID'
   - 'PROJECT=$PROJECT_ID'

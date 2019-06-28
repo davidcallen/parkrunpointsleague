@@ -25,6 +25,7 @@ function usage()
 
 ARG_USE_PRPL_IMAGE_TAG=
 ARG_DEPLOY_TO_GCP=FALSE
+ARG_REPLICAS=
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -32,6 +33,11 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
+	fi
+	if [ "$1" == "--replicas" -o "$1" == "-r" ] ; then
+		shift 1
+		ARG_REPLICAS=$1
+		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
 		ARG_DEPLOY_TO_GCP=TRUE
@@ -55,8 +61,15 @@ HELM_RELEASE=prpl-db
 #if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
 #	echo "gcp"
 #fi
+PRPL_HELM_ARGS=
+if [ "${ARG_REPLICAS}" != "" ] ; then
+	PRPL_HELM_ARGS="${PRPL_HELM_ARGS} --set=slave.replicas=${ARG_REPLICAS}"
+fi
 helm install --name ${HELM_RELEASE} \
 	--set rootUser.password=$(kubectl get secret --namespace default prpl-secrets -o jsonpath="{.data.PRPL_MYSQL_ROOT_PASSWORD}" | base64 --decode) \
+	--set master.persistence.size=4Gi \
+	--set slave.persistence.size=4Gi \
+	${PRPL_HELM_ARGS} \
 	stable/mariadb
 
 # To connect a client to the db :

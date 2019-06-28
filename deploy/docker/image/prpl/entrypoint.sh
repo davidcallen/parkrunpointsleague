@@ -81,7 +81,7 @@ function check_database_server_alive_mysql()
 cd /prpl/bin
 if [ ! -f prpld.xml ] ; then
 	echo "Creating prpld.xml..."
-    set -x
+	set -x
 	cp ../doc/prpld-example-mkpc004.xml prpld.xml
 	# TODO : Change prpld to accept env vars which override the XML file - so no sed-ing needed
 	if [ "${PRPL_HTTP_PORT}" != "" ] ; then
@@ -104,11 +104,11 @@ if [ ! -f prpld.xml ] ; then
 fi
 
 # Wait until mysql server becomes available
-echo -e "\n----------------------------------  MySQL : wait till server ready ---------------------------------------\n"
-check_database_server_alive_mysql ${PRPL_DATABASE_HOST} root ${PRPL_DATABASE_PWD} ${PRPL_DATABASE_PORT}
-if [ ${CHECK_DATABASE_SERVER_ALIVE_MYSQL_EXIT_CODE} -ne 0 ] ; then
-	exit 1
-fi
+#echo -e "\n----------------------------------  MySQL : wait till server ready ---------------------------------------\n"
+#check_database_server_alive_mysql ${PRPL_DATABASE_HOST} root ${PRPL_DATABASE_PWD} ${PRPL_DATABASE_PORT}
+#if [ ${CHECK_DATABASE_SERVER_ALIVE_MYSQL_EXIT_CODE} -ne 0 ] ; then
+#	exit 1
+#fi
 
 echo "Running prpld..."
 ./prpld

@@ -4,6 +4,26 @@
 set -o errexit
 set -o nounset
 
+function usage()
+{
+    echo  "+----------------------------------------------------------------------+"
+    echo  "| cloudbuild-image.sh - Create docker image using GCP Cloudbuild       |"
+    echo  "+----------------------------------------------------------------------+"
+    echo  ""
+    echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
+    echo  ""
+    echo  "Usage: "
+    echo  ""
+    echo  "    --base-tag [-t]          - [optional] The image tag for prpl-base"
+    echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
+    echo  "    --use-local-source [-l]  - [optional] Use local source files (useful for testing)"    
+    echo  ""
+    echo  " Examples"
+    echo  "    ./cloudbuild-image.sh --base-tag 20190617184216 --make-jobs 2 --use-local-sources"
+    echo  ""
+    exit 1
+}
+
 ARG_USE_PRPL_BASE_IMAGE_TAG=
 ARG_MAKE_JOBS=
 ARG_USE_LOCAL_SOURCES=

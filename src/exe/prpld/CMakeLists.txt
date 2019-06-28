@@ -37,6 +37,7 @@ set(PROJECT_SRCS
     ${PROJECT_SOURCE_DIR}/requesthandlers/FileRequestHandler.cpp
     ${PROJECT_SOURCE_DIR}/requesthandlers/GetLatestResultHandler.cpp
     ${PROJECT_SOURCE_DIR}/requesthandlers/HomePageHandler.cpp
+    ${PROJECT_SOURCE_DIR}/requesthandlers/HealthPageHandler.cpp
 )
 
 # --------------------------- headers --------------------------------------------------------------
@@ -71,6 +72,7 @@ set(PROJECT_INCS
     ${PROJECT_SOURCE_DIR}/requesthandlers/ForceResultsUpdateHandler.h
     ${PROJECT_SOURCE_DIR}/requesthandlers/GetLatestResultHandler.h
     ${PROJECT_SOURCE_DIR}/requesthandlers/HomePageHandler.h
+    ${PROJECT_SOURCE_DIR}/requesthandlers/HealthPageHandler.h
 )
 
 # ---------------------------- resources -----------------------------------------------------------

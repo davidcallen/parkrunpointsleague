@@ -46,7 +46,21 @@ spec:
         - name: PRPL_SLEEP_TIMES
           value: "60"
         ports:
-        - containerPort: 8080
+        - name: http-port
+          containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
         resources:
           requests:
             memory: "100Mi"

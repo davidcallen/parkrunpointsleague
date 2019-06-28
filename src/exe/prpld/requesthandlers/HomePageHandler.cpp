@@ -75,7 +75,7 @@ void HomePageHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 
 		responseStream << "<p>If you prefer not to see your athlete name on this site, just drop us an email and we'll remove you.</p>\n";
 
-		responseStream << "</body></html>\n";
+		responseStream << getFooter();
 
 		EventDataModel::free(events);
 	}

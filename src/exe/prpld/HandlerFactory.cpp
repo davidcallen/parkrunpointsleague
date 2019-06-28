@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "requesthandlers/ForceResultsUpdateHandler.h"
 #include "requesthandlers/FileRequestHandler.h"
 #include "requesthandlers/HomePageHandler.h"
+#include "requesthandlers/HealthPageHandler.h"
 
 #include <Poco/Logger.h>
 #include <Poco/URI.h>
@@ -63,6 +64,10 @@ Poco::Net::HTTPRequestHandler * HandlerFactory::createRequestHandler (const Poco
 		else if(uriSegments[0] == "forceupdate")
 		{
 			return new ForceResultsUpdateHandler();
+		}
+		else if(uriSegments[0] == "health")
+		{
+			return new HealthPageHandler();
 		}
 		else
 		{

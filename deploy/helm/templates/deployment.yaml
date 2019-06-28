@@ -19,7 +19,7 @@ spec:
         image: "{{ .Values.image.registry }}prpl:{{ .Values.image.tag }}"
         env:
         - name: PRPL_HTTP_PORT
-          value: "8080"
+          value: "{{ .Values.httpServer.port}}"
         - name: PRPL_DATABASE_HOST
           value: "{{ .Values.mysql.host }}"
         - name: PRPL_DATABASE_PORT
@@ -46,7 +46,21 @@ spec:
         - name: PRPL_SLEEP_TIMES
           value: "60"
         ports:
-        - containerPort: 8080
+        - name: http-port
+          containerPort: {{ .Values.httpServer.port}}
+        livenessProbe:
+          tcpSocket:
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
         resources:
           requests:
             memory: "100Mi"

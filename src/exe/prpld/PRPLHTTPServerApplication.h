@@ -48,6 +48,7 @@ public:
 	};
 
 	Poco::Data::SessionPool* getDbSessionPool();
+	// Poco::Data::Session* getDbSession();
 
 	bool isStopping() const;
 	const std::string getHostName() const;

@@ -56,13 +56,11 @@ source ../docker/docker-config.sh
 # Common settings for build and publish docker images
 HELM_RELEASE=prpl-db
 
-set -x
 PRPL_HELM_ARGS=
 if [ "${ARG_REPLICAS}" != "" ] ; then
 	PRPL_HELM_ARGS="${PRPL_HELM_ARGS} --set=slave.replicas=${ARG_REPLICAS}"
 fi
 helm upgrade ${HELM_RELEASE} \
-	--set rootUser.password=$(kubectl get secret --namespace default prpl-secrets -o jsonpath="{.data.PRPL_MYSQL_ROOT_PASSWORD}" | base64 --decode) \
 	${PRPL_HELM_ARGS} \
 	stable/mariadb
 
