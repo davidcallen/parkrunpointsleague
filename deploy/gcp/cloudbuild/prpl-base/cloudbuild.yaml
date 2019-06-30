@@ -6,9 +6,33 @@ steps:
 #- name: 'gcr.io/cloud-builders/git'
 #  args: ['clone', 'https://github.com/davidcallen/parkrunpointsleague.git']
 
+# Build libtidy
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '--rm', '--volume=/workspace/build-output:/prpl', '--volume=/prpl-srcs', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/htacg/tidy-html5 && cd tidy-html5 && cd build/cmake && cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release && make install && chmod -R 777 /prpl']
+  timeout: 600s
+
+- name: 'ubuntu'
+  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace && ls -la /workspace/build-output/*' ]
+
+# Build gumbo
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '--rm', '--volume=/workspace/build-output:/prpl', '--volume=/prpl-srcs', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/google/gumbo-parser && cd gumbo-parser && ./autogen.sh && ./configure --prefix=/prpl && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  timeout: 600s
+  
+- name: 'ubuntu'
+  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace && ls -la /workspace/build-output/*' ]
+  
+# Build poco
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '--rm', '--volume=/workspace/build-output:/prpl', '--volume=/prpl-srcs', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git && cd poco && ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  timeout: 600s
+  
+- name: 'ubuntu'
+  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace && ls -la /workspace/build-output/*' ]
+  
 # Build the image (Dockerfile will git clone then make)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl-base:${COMMIT_SHA}', '-f', 'deploy/docker/image/prpl-base/Dockerfile', 'deploy/docker/image/prpl-base']
+  args: ['build', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl-base:${COMMIT_SHA}', '-f', 'Dockerfile', '.']
   timeout: 600s
   
 substitutions:

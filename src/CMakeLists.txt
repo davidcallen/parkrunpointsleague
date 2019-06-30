@@ -436,7 +436,6 @@ endif(${PRPL_MYSQL} STREQUAL "TRUE")
 # --------------------- include directories --------------------------------------------------------
 
 include_directories("${CMAKE_SOURCE_DIR}/../include")
-include_directories("${CMAKE_SOURCE_DIR}/../lib")
 include_directories("/usr/include")
 include_directories("/usr/local/include")
 include_directories("${CMAKE_SOURCE_DIR}/apps")
