@@ -61,7 +61,7 @@ source ../docker/docker-config.sh
 # Common settings for build and publish docker images
 PRPL_DOCKER_IMAGE_NAME=prpl
 PRPL_DOCKER_IMAGE_TAG=`cat ../docker/image/prpl/DOCKER_IMAGE_TAG`
-PRPL_DOCKER_IMAGE_TAG=latest
+# PRPL_DOCKER_IMAGE_TAG=latest
 if [ "${ARG_USE_PRPL_IMAGE_TAG}" != "" ] ; then
 	PRPL_DOCKER_IMAGE_TAG=${ARG_USE_PRPL_IMAGE_TAG}
 fi

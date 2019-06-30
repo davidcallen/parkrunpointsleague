@@ -1,0 +1,8 @@
+**/db-backups
+**/.git
+**/.o
+**/.a
+**/.la
+**/libPoco*d.so
+**/libPoco*d.so.*
+**/.debug

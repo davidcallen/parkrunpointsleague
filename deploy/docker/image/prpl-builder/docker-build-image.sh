@@ -15,7 +15,6 @@ function usage()
     echo  "Usage: "
     echo  ""
     echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
-    echo  "    --image-build-only [-i]  - [optional] Only build the image - no compiling of libraries into build-output directory"
     echo  ""
     echo  " Examples"
     echo  "    ./docker-build-image.sh --make-jobs 4"
@@ -24,7 +23,6 @@ function usage()
 }
 
 ARG_MAKE_JOBS=2
-ARG_IMAGE_BUILD_ONLY=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -36,10 +34,6 @@ while (( "$#" )); do
 	if [ "$1" == "--make-jobs" -o  "$1" == "-j" ] ; then
 		shift 1
 		ARG_MAKE_JOBS=$1
-		ARG_RECOGNISED=TRUE
-	fi
-	if [ "$1" == "--image-build-only" -o  "$1" == "-i" ] ; then
-		ARG_IMAGE_BUILD_ONLY=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
@@ -54,7 +48,7 @@ START_DATE=`date`
 source ../../docker-config.sh
 
 # Common settings for build and publish docker images
-PRPL_DOCKER_IMAGE_NAME=prpl-base
+PRPL_DOCKER_IMAGE_NAME=prpl-builder
 export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
@@ -62,45 +56,11 @@ echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
 echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
 
-if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then 
-	[ -d build-output ] && rm -rf build-output
-	mkdir build-output
-
-	echo '----------------------------------- Build libtidy --------------------------------------------'
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
-		&& git clone https://github.com/htacg/tidy-html5 \
-		&& cd tidy-html5 \
-		&& cd build/cmake \
-		&& cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release \
-		&& make install \
-		&& chmod -R 777 /prpl'
-		
-	echo '----------------------------------- Build gumbo --------------------------------------------'
-
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
-		&& git clone https://github.com/google/gumbo-parser \
-		&& cd gumbo-parser \
-		&& ./autogen.sh \
-		&& ./configure --prefix=/prpl \
-		&& make -j ${PRPL_MAKE_JOBS} \
-		&& make install \
-		&& chmod -R 777 /prpl'
-
-	echo '----------------------------------- Build poco --------------------------------------------'
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
-		&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
-		&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
-		&& cd poco \
-		&& ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
-		&& make -j ${PRPL_MAKE_JOBS} \
-		&& make install \
-		&& chmod -R 777 /prpl'
-fi
-
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
 docker build \
+	--build-arg PRPL_MAKE_JOBS=${ARG_MAKE_JOBS} \
 	--tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} \
 	--file=./Dockerfile .
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest

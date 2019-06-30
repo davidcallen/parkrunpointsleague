@@ -110,6 +110,8 @@ fi
 #	exit 1
 #fi
 
+export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib
+
 echo "Running prpld..."
 ./prpld
 

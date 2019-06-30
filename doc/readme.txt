@@ -15,32 +15,33 @@ Building PRPL and installation
 	sudo yum install git cmake
 
 - Build poco into prpl/src - follow instructions in section "Building Poco library framework"
-	cd prpl/src
+	cd prpl/src/external
 	git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git
 
 	# On Centos 7 :
 	sudo yum install gcc gcc-c++ mariadb mariadb-devel openssl-devel libtool-ltdl-devel
 
 	# Use the --everything to ensure we get MySQL
-	./configure --everything --omit=Data/ODBC --no-samples --no-tests
+	cd poco
+	./configure --prefix=$PWD/../../../prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests
 	make 
 	make install
 	
-cd prpl/src/externals
+cd prpl/src/external
 	git clone https://github.com/google/gumbo-parser
 	cd gumbo-parser
 	sudo yum install libtool
 	./autogen.sh
-	./configure
+	./configure --prefix=$PWD/../../../prpl
 	make
-	sudo make install
+	make install
 
-cd prpl/src/externals/libtidy
+cd prpl/src/externals/
 	git clone https://github.com/htacg/tidy-html5
 	cd tidy-html5
 	cd build/cmake
 	./build-me.sh
-	sudo make install
+	make install
 
 - Can now build PRPL into /opt/prpl
 	cd prpl/src
@@ -68,7 +69,7 @@ Building Poco library framework
 --------------------------------
 - if choosing to install from source
 
-	cd prpl/src
+	cd prpl/src/external/
 	git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git
 
 	# On Centos 7 :
@@ -76,7 +77,8 @@ Building Poco library framework
 	
 	Use the --everything to ensure we get MySQL
 
-	$ ./configure --everything
+	$ cd poco
+	$ ./configure --prefix=$PWD/../../../prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests
 
 
 	# Will need unixODBC-devel for installing poco/Data and prevent it complaining about missing sqlext.h
@@ -101,9 +103,9 @@ cd tidy
 patch -p1 -b < tidy-20091203cvs-format.patch
 chmod +x ./build/gnuauto/setup.sh
 ./build/gnuauto/setup.sh
-./configure --disable-static --disable-dependency-tracking
+./configure --prefix=$PWD/../../../prpl --disable-static --disable-dependency-tracking
 make -j 4
-sudo make install
+make install
 
 
 SystemD setup 

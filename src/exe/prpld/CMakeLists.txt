@@ -82,6 +82,7 @@ if(WIN32)
 endif(WIN32)
 
 LINK_DIRECTORIES(
+    ${CMAKE_BINARY_DIR}/../lib
     ${CMAKE_BINARY_DIR}
     ${PROJECT_BINARY_DIR}
 )

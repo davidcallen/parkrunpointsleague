@@ -18,6 +18,7 @@ function usage()
     echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
     echo  "    --use-local-source [-l]  - [optional] Use local source files (useful for testing)"
     echo  "    --gcp [-g]               - [optional] Build image, tag and push to GCP registry"
+    echo  "    --image-build-only [-i]  - [optional] Only build the image - no compiling of libraries into build-output directory"
     echo  ""
     echo  " Examples"
     echo  "    ./docker-build-image.sh --make-jobs 4 --gcp"
@@ -25,10 +26,11 @@ function usage()
     exit 1
 }
 
-ARG_USE_PRPL_BASE_IMAGE_TAG=
+ARG_USE_PRPL_BASE_IMAGE_TAG=latest
 ARG_MAKE_JOBS=2
 ARG_USE_LOCAL_SOURCES=FALSE
 ARG_DEPLOY_TO_GCP=FALSE
+ARG_IMAGE_BUILD_ONLY=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 # Check all args up front for early validation, since processing can take some time.
@@ -56,6 +58,10 @@ while (( "$#" )); do
 		ARG_DEPLOY_TO_GCP=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
+	if [ "$1" == "--image-build-only" -o  "$1" == "-i" ] ; then
+		ARG_IMAGE_BUILD_ONLY=TRUE
+		ARG_RECOGNISED=TRUE
+	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
 		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
 		exit 1
@@ -64,6 +70,7 @@ while (( "$#" )); do
 done
 
 START_DATE=`date`
+START_PATH=${PWD}
 
 source ../../docker-config.sh
 
@@ -80,30 +87,74 @@ export PRPL_BASE_DOCKER_IMAGE_TAG
 if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
     PRPL_DOCKER_REGISTRY=${PRPL_DOCKER_REGISTRY_GCP}
 fi
+PRPL_TEMP_DIR=
 
 echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
 
-# If wanting to test docker build using our local sources
-if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
-	if [ -d ./prpl.srcs.tar.gz ] ; then
-		rm -rf prpl.srcs.tar.gz
+if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then 
+	# If wanting to test docker build using our local sources
+	if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
+		if [ -f prpl.srcs.tar.gz ] ; then
+			rm -rf prpl.srcs.tar.gz
+		fi
+		PRPL_TEMP_DIR=`mktemp -d`
+		tar --exclude='../../../../../prpl/src/poco' \
+			--exclude='../../../../../prpl/data/*' \
+			--exclude='../../../../../prpl/src/external/*' \
+			--exclude='../../../../../prpl/bin/*' \
+			--exclude='../../../../../prpl/lib' \
+			--exclude='../../../../../prpl/include' \
+			--exclude='.git' \
+			--exclude='CMakeFiles' \
+			--exclude='../../../../../prpl/src/exe/prpld/CMakeFiles' \
+			--exclude='build-output' \
+			-cf ${PRPL_TEMP_DIR}/prpl.srcs.tar.gz ../../../../../prpl 
+		cp -r ${PRPL_TEMP_DIR}/prpl.srcs.tar.gz .
+		trap "[ -d ${PRPL_TEMP_DIR} ] && rm -rf ${PRPL_TEMP_DIR}" EXIT
 	fi
-	PRPL_TEMP_DIR=`mktemp -d`
-	tar --exclude='../../../../../prpl/src/poco' \
-		--exclude='../../../../../prpl/data/*' \
-		--exclude='../../../../../prpl/src/external/*' \
-		--exclude='../../../../../prpl/bin/*' \
-		--exclude='../../../../../prpl/.git' \
-		--exclude='../../../../../prpl/src/exe/prpld/CMakeFiles' \
-		-cvf ${PRPL_TEMP_DIR}/prpl.srcs.tar.gz ../../../../../prpl
-	cp -r ${PRPL_TEMP_DIR}/prpl.srcs.tar.gz .
-fi
 
-echo -e "\n----------------------------------- Stop container -------------------------------------------\n"
-#docker stop ${PRPL_DOCKER_IMAGE_NAME} || true
-#docker rm ${PRPL_DOCKER_IMAGE_NAME} || true
-#docker ps
+	#echo -e "\n----------------------------------- Stop container -------------------------------------------\n"
+	#docker stop ${PRPL_DOCKER_IMAGE_NAME} || true
+	#docker rm ${PRPL_DOCKER_IMAGE_NAME} || true
+	#docker ps
+
+	[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output
+	mkdir ${START_PATH}/build-output
+	cd ${START_PATH}/build-output
+
+	echo -e '\n----------------------------------- Get lib dependancy binaries --------------------------------------\n'
+	# Extract the libs from prpl-base image for use in this image build
+	docker run --rm --volume=${START_PATH}/build-output:/prpl-tmp prpl-base:${ARG_USE_PRPL_BASE_IMAGE_TAG} \
+		/bin/sh -c 'cp -r /prpl-libs/* /prpl-tmp && chmod -R 777 /prpl-libs'
+
+	echo -e '\n----------------------------------- Build binaries--------------------------------------------\n'
+	if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
+		mv ${PRPL_TEMP_DIR}/prpl.srcs.tar.gz ${START_PATH}/build-output
+		cd ${START_PATH}/build-output
+		tar xf prpl.srcs.tar.gz
+		mv ${START_PATH}/build-output/prpl/* .
+		rm -rf ${START_PATH}/build-output/prpl
+		cd ..
+		
+		docker run --volume=${START_PATH}/build-output:/prpl --volume=${START_PATH}/../prpl-base/build-output:/prpl-libs prpl-builder:latest \
+			/bin/sh -c "cd /prpl \
+			&& cd /prpl/src \
+			&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib \
+			&& ./build.sh -clean -cpu ${ARG_MAKE_JOBS} && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/* \
+			&& chmod -R 777 /prpl"
+	else
+		docker run --volume=${START_PATH}/build-output:/prpl prpl-builder:latest \
+			/bin/sh -c "cd / \
+			&& git clone https://github.com/davidcallen/parkrunpointsleague.git prpl \
+			&& cd /prpl/src \
+			&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib \
+			&& ./build.sh -clean -cpu ${ARG_MAKE_JOBS} -v && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/* \
+			&& chmod -R 777 /prpl"
+	fi
+fi
+cd ${START_PATH}
+
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
@@ -119,7 +170,7 @@ else
 fi
 sed -i "s+<<PRPL_DOCKER_REGISTRY>>+${PRPL_DOCKER_REGISTRY}+g" Dockerfile.tmp
 
-docker build --build-arg PRPL_BASE_DOCKER_IMAGE_TAG=${PRPL_BASE_DOCKER_IMAGE_TAG} \
+docker build \
 	--build-arg PRPL_USE_LOCAL_SOURCES=${ARG_USE_LOCAL_SOURCES} \
 	--build-arg PRPL_MAKE_JOBS=${ARG_MAKE_JOBS} \
 	--tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} \
@@ -127,20 +178,18 @@ docker build --build-arg PRPL_BASE_DOCKER_IMAGE_TAG=${PRPL_BASE_DOCKER_IMAGE_TAG
 rm -f Dockerfile.tmp 
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
 echo
-docker images 
+echo "REPOSITORY                        TAG                 IMAGE ID            CREATED             SIZE"
+docker images | grep ${PRPL_DOCKER_IMAGE_NAME}
 echo
 
 # Cleanup
 # If wanting to test docker build using our local sources
 if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
-	rm -rf ${PRPL_TEMP_DIR}
+	[ -d ${PRPL_TEMP_DIR} ] && rm -rf ${PRPL_TEMP_DIR}
 	if [ -f ./prpl.srcs.tar.gz ] ; then
 		rm -f prpl.srcs.tar.gz
 	fi
 fi
-
-echo -e "\n--------------------------------------- Tag image --------------------------------------------\n"
-# docker tag ${PRPL_DOCKER_IMAGE_NAME} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}
 
 if [ "${PRPL_DOCKER_REGISTRY}" != "" ] ; then
 	echo -e "\n-------------------------------- Push image to Registry --------------------------------------\n"
