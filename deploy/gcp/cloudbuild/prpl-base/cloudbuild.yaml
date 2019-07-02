@@ -1,40 +1,68 @@
 # Invoke from gcloud shell with :
-#    gcloud builds submit --config cloudbuild.yaml ../../../../
+#    gcloud builds submit --config cloudbuild.yaml ../../../docker/image/prpl-base
 
 steps:
-# Clone a public repo and write its revision to a VERSION file.
-#- name: 'gcr.io/cloud-builders/git'
-#  args: ['clone', 'https://github.com/davidcallen/parkrunpointsleague.git']
 
 # Build libtidy
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=/workspace/build-output:/prpl', '--volume=/prpl-srcs', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/htacg/tidy-html5 && cd tidy-html5 && cd build/cmake && cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release && make install && chmod -R 777 /prpl']
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/htacg/tidy-html5 && cd tidy-html5 && cd build/cmake && cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release && make install && chmod -R 777 /prpl']
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
   timeout: 600s
 
-- name: 'ubuntu'
-  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace && ls -la /workspace/build-output/*' ]
+# Debug : check resultant output files
+- name: 'alpine'
+  args: ['sh', '-c', 'set -x && echo `pwd` && ls -la && ls -la / && ls -la /*' ]
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
 
 # Build gumbo
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=/workspace/build-output:/prpl', '--volume=/prpl-srcs', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/google/gumbo-parser && cd gumbo-parser && ./autogen.sh && ./configure --prefix=/prpl && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/google/gumbo-parser && cd gumbo-parser && ./autogen.sh && ./configure --prefix=/prpl && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
   timeout: 600s
-  
-- name: 'ubuntu'
-  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace && ls -la /workspace/build-output/*' ]
+
+# Debug : check resultant output files
+- name: 'alpine'
+  args: ['sh', '-c', 'set -x && echo `pwd` && ls -la && ls -la / && ls -la /*' ]
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
   
 # Build poco
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=/workspace/build-output:/prpl', '--volume=/prpl-srcs', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git && cd poco && ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', 'eu.gcr.io/davidcallen/prpl-builder:20190630174939', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git && cd poco && ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
   timeout: 600s
-  
-- name: 'ubuntu'
-  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace && ls -la /workspace/build-output/*' ]
+
+# Debug : check resultant output files
+- name: 'alpine'
+  args: ['sh', '-c', 'set -x && echo `pwd` && ls -la && ls -la / && ls -la /*' ]
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
   
 # Build the image (Dockerfile will git clone then make)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl-base:${COMMIT_SHA}', '-f', 'Dockerfile', '.']
+  args: ['build', '--volume=build-output-vol:/', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl-base:${COMMIT_SHA}', '-f', 'Dockerfile', '.']
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
   timeout: 600s
-  
+
+# Debug : check resultant output files
+- name: 'alpine'
+  args: ['sh', '-c', 'set -x && echo `pwd` && ls -la && ls -la / && ls -la /*' ]
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
+
 substitutions:
     _PRPL_DOCKER_IMAGE_TAG: ''
     _PRPL_MAKE_JOBS: '2'

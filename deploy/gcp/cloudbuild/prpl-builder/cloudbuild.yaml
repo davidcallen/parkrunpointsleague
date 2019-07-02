@@ -1,5 +1,5 @@
 # Invoke from gcloud shell with :
-#    gcloud builds submit --config cloudbuild.yaml ../../../../
+#    gcloud builds submit --config cloudbuild.yaml ../../../docker/image/prpl-builder
 
 steps:
 # Build the image (Dockerfile will git clone then make)

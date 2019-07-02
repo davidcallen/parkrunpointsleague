@@ -1,29 +1,44 @@
 # Invoke from gcloud shell with :
-#    gcloud builds submit --config cloudbuild.yaml ../../../../
+#    gcloud builds submit --config cloudbuild.yaml ../../../docker/image/prpl
 
 steps:
-# Clone a public repo and write its revision to a VERSION file.
-#- name: 'gcr.io/cloud-builders/git'
-#  args: ['clone', 'https://github.com/davidcallen/parkrunpointsleague.git']
+# Extract the 3rd-party dependancy libs from prpl-base image for use in this image build
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '--rm', '--volume=prpl-libs-vol:/prpl-tmp', 'eu.gcr.io/davidcallen/prpl-base:${_PRPL_BASE_DOCKER_IMAGE_TAG}', '/bin/sh', '-c', 'cp -r /prpl-libs/* /prpl-tmp && chmod -R 777 /prpl-libs']
+  volumes:
+  - name: 'prpl-libs-vol'
+    path: '/workspace/prpl-libs'
+  timeout: 600s
 
-# Prepare the Dockerfile, with variable substition (not do-able by "docker build --build-arg")  
-- name: 'ubuntu'
-  args: ['bash', '-c', 'set -x && echo `pwd` && ls -la && cd ./deploy/docker/image/prpl && ls -la && cat Dockerfile | sed "s/<<PRPL_DOCKER_REGISTRY>>/${_PRPL_DOCKER_REGISTRY}/g" | sed "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${_PRPL_BASE_DOCKER_IMAGE_TAG}/g" > Dockerfile.tmp && if [ "${_PRPL_USE_LOCAL_SOURCES}" == "TRUE" ] ; then sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp ; else sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/#/g" Dockerfile.tmp; fi' ]
-  env:
-  - 'BUILD=$BUILD_ID'
-  - 'PROJECT=$PROJECT_ID'
-  - 'REV=$REVISION_ID'
+# Build prpl
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', '--volume=prpl-libs-vol:/prpl-libs', 'eu.gcr.io/davidcallen/prpl-builder:latest', '/bin/sh', '-c', 'cd / && git clone https://github.com/davidcallen/parkrunpointsleague.git prpl && mv /prpl-libs/* /prpl/ && cd /prpl/src && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib && ./build.sh -clean -cpu ${_PRPL_MAKE_JOBS} -v && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/* && chmod -R 777 /prpl']
+  volumes:
+  - name: 'build-output-vol'
+    path: '/persistent_volume/build-output'
+  - name: 'prpl-libs-vol'
+    path: '/workspace/prpl-libs'
+  timeout: 600s
 
+# Debug : check resultant output files
+- name: 'alpine'
+  args: ['sh', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace/build-output/*' ]
+  volumes:
+  - name: 'build-output-vol'
+    path: '/workspace/build-output'
+    
 # Build the image (Dockerfile will git clone then make)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--build-arg', 'PRPL_USE_LOCAL_SOURCES=${_PRPL_USE_LOCAL_SOURCES}', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl:${COMMIT_SHA}', '-f', 'deploy/docker/image/prpl/Dockerfile.tmp', 'deploy/docker/image/prpl']
+  args: ['build', '-t', 'eu.gcr.io/davidcallen/prpl:${COMMIT_SHA}', '-t', 'eu.gcr.io/davidcallen/prpl:latest', '-f', 'Dockerfile', '.']
+  volumes:
+  - name: 'build-output-vol'
+    path: '/workspace/build-output'
   timeout: 600s
-    
+
 substitutions:
     _PRPL_DOCKER_REGISTRY: 'eu.gcr.io\/davidcallen\/'
     _PRPL_BASE_DOCKER_IMAGE_TAG: ''
     _PRPL_DOCKER_IMAGE_TAG: ''
-    _PRPL_USE_LOCAL_SOURCES: 'FALSE'
     _PRPL_MAKE_JOBS: '2'
 
 images: [ 'eu.gcr.io/davidcallen/prpl' ]

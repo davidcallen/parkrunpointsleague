@@ -16,3 +16,6 @@
 /src/make.log
 /src/prpl.cbp
 /src/poco
+/src/external/libtidy/tidy-html5/
+*.patch
+no

@@ -145,8 +145,9 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 			&& chmod -R 777 /prpl"
 	else
 		docker run --volume=${START_PATH}/build-output:/prpl prpl-builder:latest \
-			/bin/sh -c "cd / \
+			/bin/sh -c "mkdir /prpl-libs && mv /prpl/* /prpl-libs/ && cd / \
 			&& git clone https://github.com/davidcallen/parkrunpointsleague.git prpl \
+			&& mv /prpl-libs/* /prpl \
 			&& cd /prpl/src \
 			&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib \
 			&& ./build.sh -clean -cpu ${ARG_MAKE_JOBS} -v && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/* \
@@ -158,24 +159,9 @@ cd ${START_PATH}
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
 docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
-[ -f Dockerfile.tmp ] && rm -f Dockerfile.tmp
-cp Dockerfile Dockerfile.tmp
-sed -i "s/<<PRPL_BASE_DOCKER_IMAGE_TAG>>/${PRPL_BASE_DOCKER_IMAGE_TAG}/g" Dockerfile.tmp
-if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
-	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>/\#/g" Dockerfile.tmp
-	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp
-else
-	sed -i "s/<<COMMENT_OUT_IF_USE_LOCAL_SOURCES>>//g" Dockerfile.tmp
-	sed -i "s/<<COMMENT_OUT_IF_NOT_USE_LOCAL_SOURCES>>/\#/g" Dockerfile.tmp
-fi
-sed -i "s+<<PRPL_DOCKER_REGISTRY>>+${PRPL_DOCKER_REGISTRY}+g" Dockerfile.tmp
-
 docker build \
-	--build-arg PRPL_USE_LOCAL_SOURCES=${ARG_USE_LOCAL_SOURCES} \
-	--build-arg PRPL_MAKE_JOBS=${ARG_MAKE_JOBS} \
 	--tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} \
-	--file=./Dockerfile.tmp .
-rm -f Dockerfile.tmp 
+	--file=./Dockerfile .
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
 echo
 echo "REPOSITORY                        TAG                 IMAGE ID            CREATED             SIZE"
