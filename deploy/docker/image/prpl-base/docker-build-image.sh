@@ -77,24 +77,25 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		
 	echo '----------------------------------- Build gumbo --------------------------------------------'
 
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
+	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& git clone https://github.com/google/gumbo-parser \
 		&& cd gumbo-parser \
 		&& ./autogen.sh \
 		&& ./configure --prefix=/prpl \
-		&& make -j ${PRPL_MAKE_JOBS} \
+		&& make -j ${ARG_MAKE_JOBS} \
 		&& make install \
-		&& chmod -R 777 /prpl'
+		&& chmod -R 777 /prpl"
 
 	echo '----------------------------------- Build poco --------------------------------------------'
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
+	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "set -x && mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
 		&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
 		&& cd poco \
 		&& ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
-		&& make -j ${PRPL_MAKE_JOBS} \
+		&& echo Making with ${ARG_MAKE_JOBS} jobs... \
+		&& make -j ${ARG_MAKE_JOBS} \
 		&& make install \
-		&& chmod -R 777 /prpl'
+		&& chmod -R 777 /prpl"
 fi
 
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
@@ -102,7 +103,7 @@ docker rmi ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} || true
 echo
 docker build \
 	--tag=${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} \
-	--file=./Dockerfile ./build-output
+	--file=./Dockerfile .
 docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:latest
 
 echo
