@@ -45,4 +45,3 @@ images: [ 'eu.gcr.io/davidcallen/prpl' ]
 
 options:
   substitution_option: 'ALLOW_LOOSE'  
-  logging: GCS_ONLY

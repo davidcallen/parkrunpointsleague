@@ -14,4 +14,3 @@ images: [ 'eu.gcr.io/davidcallen/prpl-builder' ]
 
 options:
   substitution_option: 'ALLOW_LOOSE'  
-  logging: GCS_ONLY
