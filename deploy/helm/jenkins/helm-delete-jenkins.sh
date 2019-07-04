@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# Helm install mariadb
+# Helm install jenkins
 set -o errexit
 set -o nounset
 
 function usage()
 {
     echo  "+----------------------------------------------------------------------+"
-    echo  "| helm-delete-mariadb - Helm delete Mariadb                            |"
+    echo  "| helm-delete-jenkins - Helm delete jenkins                            |"
     echo  "+----------------------------------------------------------------------+"
     echo  ""
     echo  "(C) Copyright David C Allen.  2019 All Rights Reserved."
@@ -17,7 +17,7 @@ function usage()
     echo  "    --gcp [-g]               - [optional] Build image, tag and push to GCP registry"
     echo  ""
     echo  " Examples"
-    echo  "    ./helm-delete-mariadb.sh --gcp"
+    echo  "    ./helm-delete-jenkins.sh --gcp"
     echo  ""
     exit 1
 }
@@ -48,10 +48,10 @@ START_DATE=`date`
 source ../../docker/docker-config.sh
 
 # Common settings for build and publish docker images
-HELM_RELEASE=prpl-db
+HELM_RELEASE=prpl-jenkins
 
 helm del --purge ${HELM_RELEASE} || true
 
 
 echo -e "\n----------"
-echo "Finished helm delete of mariadb at `date` (started at ${START_DATE})"
+echo "Finished helm delete of jenkins at `date` (started at ${START_DATE})"
