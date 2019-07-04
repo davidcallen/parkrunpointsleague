@@ -54,11 +54,14 @@ read -p "Enter Database ROOT user password 'PRPL_MYSQL_ROOT_PASSWORD' : " PRPL_M
 
 read -p "Enter Database PRPL app user password 'PRPL_DATABASE_PWD' : " PRPL_DATABASE_PWD
 
+read -p "Enter Jenkins admin user password 'PRPL_JENKINS_ADMIN_PASSWORD' : " PRPL_JENKINS_ADMIN_PASSWORD
+
 # echo PRPL_MYSQL_ROOT_PASSWORD=${PRPL_MYSQL_ROOT_PASSWORD}  PRPL_DATABASE_PWD=${PRPL_DATABASE_PWD} 
 
 kubectl create secret generic ${PRPL_KUBERNETES_SECRETS_NAME} --type=string \
 	--from-literal=PRPL_DATABASE_PWD="${PRPL_DATABASE_PWD}" \
-	--from-literal=PRPL_MYSQL_ROOT_PASSWORD="${PRPL_MYSQL_ROOT_PASSWORD}"
+	--from-literal=PRPL_MYSQL_ROOT_PASSWORD="${PRPL_MYSQL_ROOT_PASSWORD}" \
+	--from-literal=jenkins-admin-password="${PRPL_JENKINS_ADMIN_PASSWORD}"
 
 # Check secrets with :
 kubectl get secrets
