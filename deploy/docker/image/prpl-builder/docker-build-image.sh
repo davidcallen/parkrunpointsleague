@@ -14,15 +14,12 @@ function usage()
     echo  ""
     echo  "Usage: "
     echo  ""
-    echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
-    echo  ""
     echo  " Examples"
-    echo  "    ./docker-build-image.sh --make-jobs 4"
+    echo  "    ./docker-build-image.sh "
     echo  ""
     exit 1
 }
 
-ARG_MAKE_JOBS=2
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -30,11 +27,6 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
-	fi
-	if [ "$1" == "--make-jobs" -o  "$1" == "-j" ] ; then
-		shift 1
-		ARG_MAKE_JOBS=$1
-		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
 		echo "ERROR: Invalid args : Unknown argument \"${1}\"."

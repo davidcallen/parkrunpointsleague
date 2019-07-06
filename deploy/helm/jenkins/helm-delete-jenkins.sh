@@ -24,6 +24,7 @@ function usage()
 
 ARG_USE_PRPL_IMAGE_TAG=
 ARG_DEPLOY_TO_GCP=FALSE
+ARG_DELETE_PV=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -34,6 +35,10 @@ while (( "$#" )); do
 	fi
 	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
 		ARG_DEPLOY_TO_GCP=TRUE
+		ARG_RECOGNISED=TRUE
+	fi
+	if [ "$1" == "--delete-pv" -o "$1" == "-d" ] ; then
+		ARG_DELETE_PV=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
@@ -52,6 +57,11 @@ HELM_RELEASE=prpl-jenkins
 
 helm del --purge ${HELM_RELEASE} || true
 
+if [ "${ARG_DELETE_PV}" == "TRUE" ] ; then
+	echo "Deleting pv and pvc..."
+	kubectl delete pvc ${HELM_RELEASE}-pvc || true
+	kubectl delete pv ${HELM_RELEASE}-pv || true
+fi
 
 echo -e "\n----------"
 echo "Finished helm delete of jenkins at `date` (started at ${START_DATE})"

@@ -65,15 +65,17 @@ PRPL_HELM_ARGS=
 if [ "${ARG_REPLICAS}" != "" ] ; then
 	PRPL_HELM_ARGS="${PRPL_HELM_ARGS} --set=slave.replicas=${ARG_REPLICAS}"
 fi
+set -x
+if [ "`kubectl config current-context`" == "minikube" ] ; then
+	kubectl apply -f jenkins-volume-minikube.yaml
+	PRPL_HELM_ARGS="${PRPL_HELM_ARGS} --set=persistence.existingClaim=prpl-jenkins-pvc"
+fi
+
 helm install --name ${HELM_RELEASE} \
-	--set=persistence.size="2Gi" \
-	--set=master.adminPassword="$(kubectl get secret --namespace default prpl-secrets -o jsonpath="{.data.PRPL_JENKINS_ADMIN_PASSWORD}" | base64 --decode)" \
+	-f values.yaml \
+	--set=master.adminPassword=`echo $(kubectl get secret --namespace default prpl-secrets -o jsonpath="{.data.PRPL_JENKINS_ADMIN_PASSWORD}" | base64 --decode)` \
 	${PRPL_HELM_ARGS} \
 	stable/jenkins
-
-# To connect a client to the db :
-
-#  kubectl run prpl-db-mariadb-client --rm --tty -i --restart='Never' --image  docker.io/bitnami/mariadb:10.3.16-debian-9-r0 --namespace default --command -- jenkins -h prpl-db-mariadb -u PRPL --database=PRPL -p
 
 echo -e "\n----------"
 echo "Finished helm install of jenkins at `date` (started at ${START_DATE})"

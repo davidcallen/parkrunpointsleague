@@ -77,6 +77,8 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		
 	echo '----------------------------------- Build gumbo --------------------------------------------'
 
+	ls -la $PWD/build-output
+
 	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& git clone https://github.com/google/gumbo-parser \
 		&& cd gumbo-parser \
@@ -85,6 +87,8 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& make -j ${ARG_MAKE_JOBS} \
 		&& make install \
 		&& chmod -R 777 /prpl"
+
+	ls -la $PWD/build-output
 
 	echo '----------------------------------- Build poco --------------------------------------------'
 	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "set -x && mkdir -p /prpl-srcs/ && cd /prpl-srcs \
@@ -96,6 +100,8 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& make -j ${ARG_MAKE_JOBS} \
 		&& make install \
 		&& chmod -R 777 /prpl"
+
+	ls -la $PWD/build-output
 fi
 
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
