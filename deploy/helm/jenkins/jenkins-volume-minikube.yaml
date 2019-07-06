@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prpl-jenkins-pv
+  labels:
+    app: prpl-jenkins
+    type: local
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 3Gi
+  persistentVolumeReclaimPolicy: Recycle
+  hostPath:
+    path: /data/jenkins-master/
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prpl-jenkins-pvc
+  labels:
+    app: prpl-jenkins
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
