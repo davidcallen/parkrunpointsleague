@@ -1,0 +1,116 @@
+podTemplate(label: 'mypod', 
+	containers: [
+	containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+	containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
+	containerTemplate(name: 'prpl-builder', image: 'prpl-builder', command: 'cat', ttyEnabled: true)
+	],
+	volumes: [
+		hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+	]
+) {
+	node('mypod') {
+		stage('Check running containers') {
+			container('docker') {
+				sh """
+					set -o errexit
+					set -o nounset
+					hostname
+					hostname -i
+					echo
+					docker images | grep prpl || true
+				"""
+			}
+		}
+		stage('Clone repository') {
+			container('git') {
+				sh """whoami
+					set -o errexit
+					set -o nounset
+					hostname -i
+					echo PWD=\$PWD
+					git clone -b master https://github.com/davidcallen/parkrunpointsleague.git prpl
+					ls -la prpl
+					cd prpl/deploy/docker/image/prpl-builder
+					touch xxxxxxxxxx-test.txt
+					cd ../prpl
+					touch xxxxxxxxxx-prpl.test
+				"""
+				
+			}
+		}
+		stage('Build docker image : prpl : get libs and build') {
+			container('docker') {
+				 sh """
+					 echo '----------------------------------- Get Libs --------------------------------------------'
+					 set -o errexit
+					 set -o nounset
+					 set +x
+					 cd prpl
+					 DOCKER_CONTAINER_ID=\$(docker create prpl-base:latest)
+					 docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/include .
+					 docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/lib .
+					 docker rm \${DOCKER_CONTAINER_ID}
+					 echo PWD=\$PWD
+					 ARG_MAKE_JOBS=1
+					 ls -la
+				 """
+			}
+		}
+		stage('Build docker image : prpl') {
+			container('prpl-builder') {
+				 sh """
+					 echo '----------------------------------- Build prpl --------------------------------------------'
+					 set -o errexit
+					 set -o nounset
+					 set -x
+					 echo PWD=\$PWD
+					 ARG_MAKE_JOBS=2
+					 cd prpl
+					 ls -la lib
+					 ls -la include
+					 cd src
+					 ls -la
+					 export LD_LIBRARY_PATH=\$PWD/../lib:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib
+					 ./build.sh -clean -cpu \${ARG_MAKE_JOBS}
+					 rm -rf exe/prpld/CMakeFiles
+					 rm -f ../sql/db-backups/*
+					 chmod -R 777 ..
+					 cd ..
+					 echo
+					 ls -la bin/
+					 mkdir deploy/docker/image/prpl/build-output
+					 cp -r bin deploy/docker/image/prpl/build-output/
+					 cp -r lib deploy/docker/image/prpl/build-output/
+					 cp -r assets/ deploy/docker/image/prpl/build-output/
+					 cp -r sql/ deploy/docker/image/prpl/build-output/
+					 cp -r doc/ deploy/docker/image/prpl/build-output/
+					 echo
+				 """
+			}
+		}
+		stage('Build docker image : prpl') {
+			container('docker') {
+				sh """
+					 echo -e '\n----------------------------------- Build image  ---------------------------------------------\n'
+					 set -o errexit
+					 set -o nounset
+					 cd prpl/deploy/docker/image/prpl
+					 ls -la build-output/*
+					 source ../../docker-config.sh
+					 # Common settings for build and publish docker images
+					 PRPL_DOCKER_IMAGE_NAME=prpl
+					 export PRPL_DOCKER_BUILD_DATE=`date`
+					 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
+					 echo \${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
+					 echo 'Building image \${PRPL_DOCKER_IMAGE_NAME} for tag \${PRPL_DOCKER_IMAGE_TAG}'
+					 docker rmi \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME} || true
+					 echo
+					 docker build --tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} --file=./Dockerfile .
+					 docker tag \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest
+					 echo
+					 docker images | grep prpl || true 
+				"""
+			}
+		}
+	}
+}
