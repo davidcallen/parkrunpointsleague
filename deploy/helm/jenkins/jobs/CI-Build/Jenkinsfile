@@ -105,8 +105,7 @@ podTemplate(label: 'mypod',
 					 echo 'Building image \${PRPL_DOCKER_IMAGE_NAME} for tag \${PRPL_DOCKER_IMAGE_TAG}'
 					 docker rmi \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME} || true
 					 echo
-					 docker build --tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} --file=./Dockerfile .
-					 docker tag \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest
+					 docker build --tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} --tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest --file=./Dockerfile .
 					 echo
 					 docker images | grep prpl || true 
 				"""
