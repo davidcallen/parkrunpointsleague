@@ -1,5 +1,8 @@
 /bin/
 /data/results/*
+*.yaml.tmp
+/include
+/lib
 /sql/db-backup/*
 /src/CMakeCache.txt
 /src/CMakeFiles/
@@ -13,6 +16,7 @@
 /src/exe/prpld/Makefile
 /src/exe/prpld/cmake_install.cmake
 /src/exe/prpld/prpld.cbp
+/src/exeternal/poco
 /src/make.log
 /src/prpl.cbp
 /src/poco

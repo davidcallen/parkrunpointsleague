@@ -99,7 +99,7 @@ master:
         <properties/>
         <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.70">
           <script>
-            podTemplate(label: 'mypod', containers: [
+            podTemplate(label: 'mypod', podRetention: always(), containers: [
                 containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
                 containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
                 containerTemplate(name: 'prpl-builder', image: 'prpl-builder', command: 'cat', ttyEnabled: true)
@@ -325,21 +325,31 @@ master:
                         container('prpl-builder') {
                              sh """
                                  echo '----------------------------------- Build prpl --------------------------------------------'
-                                 set +x
-                                 ${params.debug} && set -x
+                                 set -o errexit
+                                 set -o nounset
+                                 set -x
+                                 # ${params.debug} && set -x
                                  echo PWD=\$PWD
                                  ARG_MAKE_JOBS=2
+                                 cd prpl
+                                 ls -la lib
+                                 ls -la include
+                                 cd src
                                  ls -la
-                                 cd prpl/src
-                                 ls -la
-                                 export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
+                                 export LD_LIBRARY_PATH=\$PWD/../lib:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
                                    && ./build.sh -clean -cpu \${ARG_MAKE_JOBS} \
                                    && rm -rf exe/prpld/CMakeFiles \
-                                   && rm -f /prpl/sql/db-backups/* \
-                                   && chmod -R 777 /prpl
-                                 cd ../..
+                                   && rm -f ../sql/db-backups/* \
+                                   && chmod -R 777 ..
+                                 cd ..
                                  echo
-                                 ls -la ../bin/
+                                 ls -la bin/
+                                 mkdir deploy/docker/image/prpl/build-output
+                                 cp -r bin deploy/docker/image/prpl/build-output/
+                                 cp -r lib deploy/docker/image/prpl/build-output/
+                                 cp -r assets/ deploy/docker/image/prpl/build-output/
+                                 cp -r sql/ deploy/docker/image/prpl/build-output/
+                                 cp -r doc/ deploy/docker/image/prpl/build-output/
                                  echo
                              """
                         }
