@@ -1,0 +1,51 @@
+podTemplate(label: 'mypod', containers: [
+		containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+		containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
+	],
+		volumes: [
+			hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+	]
+) {
+	node('mypod') {
+		stage('Check running containers') {
+			container('docker') {
+				sh """
+					hostname
+					hostname -i
+					echo
+					docker images | grep prpl- || true
+				"""
+			}
+		}
+		stage('Clone repository') {
+			container('git') {
+				sh """whoami
+					hostname -i
+					echo PWD=\$PWD
+					git clone -b master https://github.com/davidcallen/parkrunpointsleague.git prpl
+					ls -la prpl
+					cd prpl/deploy/docker/image/prpl-builder
+					touch xxxxxxxxxx-test.txt
+					cd ../prpl-base
+					touch xxxxxxxxxx-prpl-base.test
+				"""
+				
+			}
+		}
+		stage('Build docker image : prpl-builder') {
+			container('docker') {
+				 sh """
+					 set +x
+					 set -x
+					 echo PWD=\$PWD
+					 ls -la
+					 cd prpl/deploy/docker/image/prpl-builder
+					 ls -la
+					 source ./docker-build-image.sh
+					 echo
+					 docker images | grep prpl- || true
+				 """
+			}
+		}
+	}
+}
