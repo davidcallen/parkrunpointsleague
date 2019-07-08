@@ -15,14 +15,16 @@ function usage()
     echo  "Usage: "
     echo  ""
     echo  "    --tag [-t]               - [mandatory] Image Tag"
+    echo  "    --gcp-registry [-r]      - [mandatory] GCP Image Registry url e.g. eu.gcr.io/davidcallen"
     echo  ""
     echo  " Examples"
-    echo  "    ./docker-push-to-gcp.sh --tag 20190619120823"
+    echo  "    ./docker-push-to-gcp.sh --tag 20190619120823 --gcp-registry eu.gcr.io/davidcallen"
     echo  ""
     exit 1
 }
 
 ARG_USE_PRPL_IMAGE_TAG=
+ARG_GCP_REGISTRY_URL=
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -36,6 +38,11 @@ while (( "$#" )); do
 		ARG_USE_PRPL_IMAGE_TAG=$1
 		ARG_RECOGNISED=TRUE
 	fi
+	if [ "$1" == "--gcp-registry" -o "$1" == "-r" ] ; then
+		shift 1
+		ARG_GCP_REGISTRY_URL=$1
+		ARG_RECOGNISED=TRUE
+	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
 		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
 		exit 1
@@ -44,8 +51,6 @@ while (( "$#" )); do
 done
 
 START_DATE=`date`
-
-source ../../docker-config.sh
 
 # Common settings for build and publish docker images
 PRPL_DOCKER_IMAGE_NAME=prpl-builder
@@ -64,13 +69,9 @@ else
 fi
 echo "Push image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG} to GCP"
 echo
-docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY_GCP}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG}
-docker push ${PRPL_DOCKER_REGISTRY_GCP}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG}
 
-echo "Push image ${PRPL_DOCKER_IMAGE_NAME} for tag latest to GCP"
-echo
-docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${PRPL_DOCKER_REGISTRY_GCP}${PRPL_DOCKER_IMAGE_NAME}:latest
-docker push ${PRPL_DOCKER_REGISTRY_GCP}${PRPL_DOCKER_IMAGE_NAME}:latest
+docker tag ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG} ${ARG_GCP_REGISTRY_URL}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG}
+docker push ${ARG_GCP_REGISTRY_URL}${PRPL_DOCKER_IMAGE_NAME}:${PRPL_DOCKER_IMAGE_TAG}
 
 echo -e "\n----------"
 echo "Finished push image ${PRPL_DOCKER_IMAGE_NAME} tag ${PRPL_DOCKER_IMAGE_TAG} to GCP at `date` (started at ${START_DATE})"

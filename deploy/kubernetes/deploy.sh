@@ -14,7 +14,6 @@ function usage()
     echo  ""
     echo  "Usage: "
     echo  ""
-    echo  "    --gcp [-g]         - [optional] Deploy to GCP"
     echo  "    --tag [-t]         - [optional] PRPL image tag"
     echo  ""
     echo  " Examples"
@@ -24,7 +23,6 @@ function usage()
 }
 
 ARG_USE_PRPL_IMAGE_TAG=
-ARG_DEPLOY_TO_GCP=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -32,10 +30,6 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
-	fi
-	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
-		ARG_DEPLOY_TO_GCP=TRUE
-		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--tag" -o "$1" == "-t" ] ; then
 		shift 1
@@ -49,8 +43,6 @@ while (( "$#" )); do
 	shift
 done
 
-source ../docker/docker-config.sh
-
 if [ "${ARG_USE_PRPL_IMAGE_TAG}" == "" ] ; then
 	IMAGE_TAG_FILE=../docker/image/prpl/DOCKER_IMAGE_TAG
 	if [ ! -f ${IMAGE_TAG_FILE} ] ; then
@@ -62,9 +54,6 @@ else
 	PRPL_DOCKER_IMAGE_TAG=${ARG_USE_PRPL_IMAGE_TAG}
 fi
 PRPL_DOCKER_IMAGE_NAME=prpl
-if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
-    PRPL_DOCKER_REGISTRY=${PRPL_DOCKER_REGISTRY_GCP}
-fi
 
 YYYYMMDD_HHMMSS=`date +'%Y%m%d_%H%M%S'`
 # PRPL_DOCKER_CONTAINER_NAME=prpl
@@ -81,15 +70,15 @@ export PRPL_DOCKER_REGISTRY
 
 # Service
 DEPLOYMENT_SERVICE_YAML_FILE=deployment-service.yaml
-if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
-    DEPLOYMENT_SERVICE_YAML_FILE=deployment-service-gcp.yaml
+if [ "${PRPL_DOCKER_ENVIRONMENT}" != "" ] ; then
+    DEPLOYMENT_SERVICE_YAML_FILE=deployment-service-${PRPL_DOCKER_ENVIRONMENT}.yaml
 fi
 kubectl create -f ${DEPLOYMENT_SERVICE_YAML_FILE}
 
 # Deployment
 DEPLOYMENT_YAML_FILE=deployment.yaml
-if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
-    DEPLOYMENT_YAML_FILE=deployment-gcp.yaml
+if [ "${PRPL_DOCKER_ENVIRONMENT}" != "" ] ; then
+    DEPLOYMENT_YAML_FILE=deployment-${PRPL_DOCKER_ENVIRONMENT}.yaml
 fi
 #cat ${DEPLOYMENT_YAML_FILE} | sed "s/{{PRPL_DOCKER_IMAGE_TAG}}/${PRPL_DOCKER_IMAGE_TAG}/g" | kubectl create -f -
 cat ${DEPLOYMENT_YAML_FILE} | envsubst | kubectl create -f -

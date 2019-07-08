@@ -23,7 +23,6 @@ function usage()
 }
 
 ARG_USE_PRPL_IMAGE_TAG=
-ARG_DEPLOY_TO_GCP=FALSE
 ARG_REPLICAS=
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -38,10 +37,6 @@ while (( "$#" )); do
 		ARG_REPLICAS=$1
 		ARG_RECOGNISED=TRUE
 	fi
-	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
-		ARG_DEPLOY_TO_GCP=TRUE
-		ARG_RECOGNISED=TRUE
-	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
 		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
 		exit 1
@@ -50,8 +45,6 @@ while (( "$#" )); do
 done
 
 START_DATE=`date`
-
-source ../../docker/docker-config.sh
 
 # Common settings for build and publish docker images
 HELM_RELEASE=prpl-jenkins

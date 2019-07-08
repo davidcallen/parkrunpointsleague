@@ -50,8 +50,7 @@ while (( "$#" )); do
 done
 
 START_DATE=`date`
-
-source ../../docker-config.sh
+START_PATH=`pwd`
 
 # Common settings for build and publish docker images
 PRPL_DOCKER_IMAGE_NAME=prpl-base
@@ -65,6 +64,7 @@ echo
 if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then 
 	[ -d build-output ] && rm -rf build-output
 	mkdir build-output
+	trap "[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output" EXIT
 
 	echo '----------------------------------- Build libtidy --------------------------------------------'
 	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \

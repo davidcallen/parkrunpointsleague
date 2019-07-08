@@ -14,16 +14,15 @@ function usage()
     echo  ""
     echo  "Usage: "
     echo  ""
-    echo  "    --gcp [-g]               - [optional] Build image, tag and push to GCP registry"
+    echo  "    --delete-pv [-d]          - [optional] Delete the PersistentVolume and Claim"
     echo  ""
     echo  " Examples"
-    echo  "    ./helm-delete-jenkins.sh --gcp"
+    echo  "    ./helm-delete-jenkins.sh"
     echo  ""
     exit 1
 }
 
 ARG_USE_PRPL_IMAGE_TAG=
-ARG_DEPLOY_TO_GCP=FALSE
 ARG_DELETE_PV=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -32,10 +31,6 @@ while (( "$#" )); do
 
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
-	fi
-	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
-		ARG_DEPLOY_TO_GCP=TRUE
-		ARG_RECOGNISED=TRUE
 	fi
 	if [ "$1" == "--delete-pv" -o "$1" == "-d" ] ; then
 		ARG_DELETE_PV=TRUE
@@ -49,8 +44,6 @@ while (( "$#" )); do
 done
 
 START_DATE=`date`
-
-source ../../docker/docker-config.sh
 
 # Common settings for build and publish docker images
 HELM_RELEASE=prpl-jenkins

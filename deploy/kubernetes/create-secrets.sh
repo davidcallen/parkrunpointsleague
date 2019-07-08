@@ -14,7 +14,6 @@ function usage()
     echo  ""
     echo  "Usage: "
     echo  ""
-    echo  "    --gcp [-g]         - [optional] Deploy to GCP"
     echo  ""
     echo  " Examples"
     echo  "    ./create-secrets.sh"
@@ -22,7 +21,6 @@ function usage()
     exit 1
 }
 
-ARG_DEPLOY_TO_GCP=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
 while (( "$#" )); do
@@ -31,18 +29,12 @@ while (( "$#" )); do
 	if [ "$1" == "--help" -o  "$1" == "-h" ] ; then
 		usage
 	fi
-	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
-		ARG_DEPLOY_TO_GCP=TRUE
-		ARG_RECOGNISED=TRUE
-	fi
 	if [ "${ARG_RECOGNISED}" == "FALSE" ]; then
 		echo "ERROR: Invalid args : Unknown argument \"${1}\"."
 		exit 1
 	fi
 	shift
 done
-
-source ../docker/docker-config.sh
 
 
 # PRPL_DOCKER_CONTAINER_NAME=prpl

@@ -37,8 +37,6 @@ done
 
 START_DATE=`date`
 
-source ../../docker-config.sh
-
 # Common settings for build and publish docker images
 PRPL_DOCKER_IMAGE_NAME=prpl-builder
 export PRPL_DOCKER_BUILD_DATE=`date`

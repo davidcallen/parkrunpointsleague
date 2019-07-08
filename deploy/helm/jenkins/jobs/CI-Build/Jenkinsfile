@@ -40,74 +40,74 @@ podTemplate(label: 'mypod',
 		}
 		stage('Build docker image : prpl : get libs and build') {
 			container('docker') {
-				 sh """
-					 echo '----------------------------------- Get Libs --------------------------------------------'
-					 set -o errexit
-					 set -o nounset
-					 set +x
-					 cd prpl
-					 DOCKER_CONTAINER_ID=\$(docker create prpl-base:latest)
-					 docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/include .
-					 docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/lib .
-					 docker rm \${DOCKER_CONTAINER_ID}
-					 echo PWD=\$PWD
-					 ARG_MAKE_JOBS=1
-					 ls -la
-				 """
+			sh """
+				echo '----------------------------------- Get Libs --------------------------------------------'
+				set -o errexit
+				set -o nounset
+				set +x
+				cd prpl
+				DOCKER_CONTAINER_ID=\$(docker create prpl-base:latest)
+				docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/include .
+				docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/lib .
+				docker rm \${DOCKER_CONTAINER_ID}
+				echo PWD=\$PWD
+				ARG_MAKE_JOBS=1
+				ls -la
+			"""
 			}
 		}
 		stage('Build docker image : prpl') {
 			container('prpl-builder') {
-				 sh """
-					 echo '----------------------------------- Build prpl --------------------------------------------'
-					 set -o errexit
-					 set -o nounset
-					 set -x
-					 echo PWD=\$PWD
-					 ARG_MAKE_JOBS=2
-					 cd prpl
-					 ls -la lib
-					 ls -la include
-					 cd src
-					 ls -la
-					 export LD_LIBRARY_PATH=\$PWD/../lib:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib
-					 ./build.sh -clean -cpu \${ARG_MAKE_JOBS}
-					 rm -rf exe/prpld/CMakeFiles
-					 rm -f ../sql/db-backups/*
-					 chmod -R 777 ..
-					 cd ..
-					 echo
-					 ls -la bin/
-					 mkdir deploy/docker/image/prpl/build-output
-					 cp -r bin deploy/docker/image/prpl/build-output/
-					 cp -r lib deploy/docker/image/prpl/build-output/
-					 cp -r assets/ deploy/docker/image/prpl/build-output/
-					 cp -r sql/ deploy/docker/image/prpl/build-output/
-					 cp -r doc/ deploy/docker/image/prpl/build-output/
-					 echo
-				 """
+			sh """
+				echo '----------------------------------- Build prpl --------------------------------------------'
+				set -o errexit
+				set -o nounset
+				set -x
+				echo PWD=\$PWD
+				ARG_MAKE_JOBS=2
+				cd prpl
+				ls -la lib
+				ls -la include
+				cd src
+				ls -la
+				export LD_LIBRARY_PATH=\$PWD/../lib:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib
+				./build.sh -clean -cpu \${ARG_MAKE_JOBS}
+				rm -rf exe/prpld/CMakeFiles
+				rm -f ../sql/db-backups/*
+				chmod -R 777 ..
+				cd ..
+				echo
+				ls -la bin/
+				mkdir deploy/docker/image/prpl/build-output
+				cp -r bin deploy/docker/image/prpl/build-output/
+				cp -r lib deploy/docker/image/prpl/build-output/
+				cp -r assets/ deploy/docker/image/prpl/build-output/
+				cp -r sql/ deploy/docker/image/prpl/build-output/
+				cp -r doc/ deploy/docker/image/prpl/build-output/
+				echo
+			"""
 			}
 		}
 		stage('Build docker image : prpl') {
 			container('docker') {
 				sh """
-					 echo -e '\n----------------------------------- Build image  ---------------------------------------------\n'
-					 set -o errexit
-					 set -o nounset
-					 cd prpl/deploy/docker/image/prpl
-					 ls -la build-output/*
-					 source ../../docker-config.sh
-					 # Common settings for build and publish docker images
-					 PRPL_DOCKER_IMAGE_NAME=prpl
-					 export PRPL_DOCKER_BUILD_DATE=`date`
-					 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
-					 echo \${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
-					 echo 'Building image \${PRPL_DOCKER_IMAGE_NAME} for tag \${PRPL_DOCKER_IMAGE_TAG}'
-					 docker rmi \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME} || true
-					 echo
-					 docker build --tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} --tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest --file=./Dockerfile .
-					 echo
-					 docker images | grep prpl || true 
+				echo -e '\n----------------------------------- Build image  ---------------------------------------------\n'
+				set -o errexit
+				set -o nounset
+				cd prpl/deploy/docker/image/prpl
+				ls -la build-output/*
+				PRPL_DOCKER_IMAGE_NAME=prpl
+				export PRPL_DOCKER_BUILD_DATE=`date`
+				export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
+				echo \${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
+				echo 'Building image \${PRPL_DOCKER_IMAGE_NAME} for tag \${PRPL_DOCKER_IMAGE_TAG}'
+				docker rmi \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME} || true
+				echo
+				docker build --tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} \
+					--tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest \
+					--file=./Dockerfile .
+				echo
+				docker images | grep prpl || true 
 				"""
 			}
 		}

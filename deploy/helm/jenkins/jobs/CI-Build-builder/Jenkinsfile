@@ -11,6 +11,8 @@ podTemplate(label: 'mypod',
 		stage('Check running containers') {
 			container('docker') {
 				sh """
+					set -o errexit
+					set -o nounset
 					hostname
 					hostname -i
 					echo
@@ -21,6 +23,8 @@ podTemplate(label: 'mypod',
 		stage('Clone repository') {
 			container('git') {
 				sh """whoami
+					set -o errexit
+					set -o nounset
 					hostname -i
 					echo PWD=\$PWD
 					git clone -b master https://github.com/davidcallen/parkrunpointsleague.git prpl
@@ -35,17 +39,30 @@ podTemplate(label: 'mypod',
 		}
 		stage('Build docker image : prpl-builder') {
 			container('docker') {
-				 sh """
-					 set +x
-					 set -x
-					 echo PWD=\$PWD
-					 ls -la
-					 cd prpl/deploy/docker/image/prpl-builder
-					 ls -la
-					 source ./docker-build-image.sh
-					 echo
-					 docker images | grep prpl- || true
-				 """
+			sh """
+					set -o errexit
+					set -o nounset
+					set -x
+					echo PWD=\$PWD
+					ls -la
+					cd prpl/deploy/docker/image/prpl-builder
+					ls -la
+					PRPL_DOCKER_IMAGE_NAME=prpl-builder
+					export PRPL_DOCKER_BUILD_DATE=`date`
+					export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
+					echo \${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
+					echo "Building image \${PRPL_DOCKER_IMAGE_NAME} for tag \${PRPL_DOCKER_IMAGE_TAG}"
+					echo
+					echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
+					docker rmi \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME} || true
+					echo
+					docker build \
+						--tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} \
+						--tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest \
+						--file=./Dockerfile .
+					echo
+					docker images | grep prpl- || true
+			"""
 			}
 		}
 	}

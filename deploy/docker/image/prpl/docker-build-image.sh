@@ -17,11 +17,10 @@ function usage()
     echo  "    --base-tag [-t]          - [optional] The image tag for prpl-base"
     echo  "    --make-jobs [-j]         - [optional] Number of make jobs, for parallelising build"
     echo  "    --use-local-source [-l]  - [optional] Use local source files (useful for testing)"
-    echo  "    --gcp [-g]               - [optional] Build image, tag and push to GCP registry"
     echo  "    --image-build-only [-i]  - [optional] Only build the image - no compiling of libraries into build-output directory"
     echo  ""
     echo  " Examples"
-    echo  "    ./docker-build-image.sh --make-jobs 4 --gcp"
+    echo  "    ./docker-build-image.sh --make-jobs 4"
     echo  ""
     exit 1
 }
@@ -29,7 +28,6 @@ function usage()
 ARG_USE_PRPL_BASE_IMAGE_TAG=latest
 ARG_MAKE_JOBS=2
 ARG_USE_LOCAL_SOURCES=FALSE
-ARG_DEPLOY_TO_GCP=FALSE
 ARG_IMAGE_BUILD_ONLY=FALSE
 ARG_RECOGNISED=FALSE
 ARGS=$*
@@ -54,10 +52,6 @@ while (( "$#" )); do
 		ARG_USE_LOCAL_SOURCES=TRUE
 		ARG_RECOGNISED=TRUE
 	fi
-	if [ "$1" == "--gcp" -o "$1" == "-g" ] ; then
-		ARG_DEPLOY_TO_GCP=TRUE
-		ARG_RECOGNISED=TRUE
-	fi
 	if [ "$1" == "--image-build-only" -o  "$1" == "-i" ] ; then
 		ARG_IMAGE_BUILD_ONLY=TRUE
 		ARG_RECOGNISED=TRUE
@@ -72,8 +66,6 @@ done
 START_DATE=`date`
 START_PATH=${PWD}
 
-source ../../docker-config.sh
-
 # Common settings for build and publish docker images
 PRPL_DOCKER_IMAGE_NAME=prpl
 export PRPL_DOCKER_BUILD_DATE=`date`
@@ -84,9 +76,6 @@ if [ "${ARG_USE_PRPL_BASE_IMAGE_TAG}" != "" ] ; then
 	PRPL_BASE_DOCKER_IMAGE_TAG=${ARG_USE_PRPL_BASE_IMAGE_TAG}
 fi
 export PRPL_BASE_DOCKER_IMAGE_TAG
-if [ "${ARG_DEPLOY_TO_GCP}" == "TRUE" ] ; then
-    PRPL_DOCKER_REGISTRY=${PRPL_DOCKER_REGISTRY_GCP}
-fi
 PRPL_TEMP_DIR=
 
 echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
@@ -122,6 +111,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 	[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output
 	mkdir ${START_PATH}/build-output
 	cd ${START_PATH}/build-output
+	trap "[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output" EXIT
 
 	echo -e '\n----------------------------------- Get lib dependancy binaries --------------------------------------\n'
 	# Extract the libs from prpl-base image for use in this image build

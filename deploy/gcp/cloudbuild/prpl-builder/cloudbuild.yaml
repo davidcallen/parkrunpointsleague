@@ -4,13 +4,15 @@
 steps:
 # Build the image (Dockerfile will git clone then make)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'eu.gcr.io/davidcallen/prpl-builder:${COMMIT_SHA}', '-t', 'eu.gcr.io/davidcallen/prpl-builder:latest', '-f', 'Dockerfile', '.']
+  args: ['build', '-t', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder:${COMMIT_SHA}', '-t', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder:latest', '-f', 'Dockerfile', '.']
   timeout: 600s
   
 substitutions:
+    _PRPL_DOCKER_REGISTRY: 'eu.gcr.io'
+    _PRPL_GCP_PROJECT_NAME: 'davidcallen'
     _PRPL_DOCKER_IMAGE_TAG: ''
 
-images: [ 'eu.gcr.io/davidcallen/prpl-builder' ]
+images: [ '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder' ]
 
 options:
   substitution_option: 'ALLOW_LOOSE'  

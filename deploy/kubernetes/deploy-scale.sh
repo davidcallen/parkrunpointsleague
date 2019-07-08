@@ -48,7 +48,6 @@ if [ "${ARG_REPLICAS}" == "" ] ; then
 	exit 1
 fi
 
-source ../docker/docker-config.sh
 YYYYMMDD_HHMMSS=`date +'%Y%m%d_%H%M%S'`
 
 PRPL_KUBERNETES_NAME=prpl

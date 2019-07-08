@@ -43,8 +43,6 @@ while (( "$#" )); do
 	shift
 done
 
-source ../../docker-config.sh
-
 if [ ! -f ./DOCKER_IMAGE_TAG ] ; then
 	echo "ERROR : cannot find file ./DOCKER_IMAGE_TAG"
 	exit 1

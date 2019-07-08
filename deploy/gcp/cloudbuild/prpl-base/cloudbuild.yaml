@@ -5,7 +5,7 @@ steps:
 
 # Build libtidy
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=build-output-vol:/prpl', 'eu.gcr.io/davidcallen/prpl-builder:latest', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/htacg/tidy-html5 && cd tidy-html5 && cd build/cmake && cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release && make install && chmod -R 777 /prpl']
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder:latest', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/htacg/tidy-html5 && cd tidy-html5 && cd build/cmake && cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release && make install && chmod -R 777 /prpl']
   volumes:
   - name: 'build-output-vol'
     path: '/workspace/build-output'
@@ -20,7 +20,7 @@ steps:
 
 # Build gumbo
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=build-output-vol:/prpl', 'eu.gcr.io/davidcallen/prpl-builder:latest', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/google/gumbo-parser && cd gumbo-parser && ./autogen.sh && ./configure --prefix=/prpl && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder:latest', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && git clone https://github.com/google/gumbo-parser && cd gumbo-parser && ./autogen.sh && ./configure --prefix=/prpl && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
   volumes:
   - name: 'build-output-vol'
     path: '/workspace/build-output'
@@ -35,7 +35,7 @@ steps:
   
 # Build poco
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=build-output-vol:/prpl', 'eu.gcr.io/davidcallen/prpl-builder:latest', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git && cd poco && ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder:latest', '/bin/sh', '-c', 'mkdir -p /prpl-srcs/ && cd /prpl-srcs && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib && git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git && cd poco && ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests && make -j ${_PRPL_MAKE_JOBS} && make install && chmod -R 777 /prpl']
   volumes:
   - name: 'build-output-vol'
     path: '/workspace/build-output'
@@ -50,7 +50,7 @@ steps:
   
 # Build the image (Dockerfile will git clone then make)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--volume=build-output-vol:/workspace/build-output', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', 'eu.gcr.io/davidcallen/prpl-base:${COMMIT_SHA}', '-f', 'Dockerfile', '.']
+  args: ['build', '--volume=build-output-vol:/workspace/build-output', '--build-arg', 'PRPL_MAKE_JOBS=${_PRPL_MAKE_JOBS}', '-t', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-base:${COMMIT_SHA}', '-f', 'Dockerfile', '.']
   volumes:
   - name: 'build-output-vol'
     path: '/workspace/build-output'
@@ -64,10 +64,12 @@ steps:
     path: '/workspace/build-output'
 
 substitutions:
+    _PRPL_DOCKER_REGISTRY: 'eu.gcr.io'
+    _PRPL_GCP_PROJECT_NAME: 'davidcallen'
     _PRPL_DOCKER_IMAGE_TAG: ''
     _PRPL_MAKE_JOBS: '2'
 
-images: [ 'eu.gcr.io/davidcallen/prpl-base' ]
+images: [ '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-base' ]
 
 options:
   substitution_option: 'ALLOW_LOOSE'  
