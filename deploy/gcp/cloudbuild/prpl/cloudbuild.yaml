@@ -4,7 +4,7 @@
 steps:
 # Extract the 3rd-party dependancy libs from prpl-base image for use in this image build
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=prpl-libs-vol:/prpl-tmp', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-base:${_PRPL_BASE_DOCKER_IMAGE_TAG}', '/bin/sh', '-c', 'cp -r /prpl-libs/* /prpl-tmp && chmod -R 777 /prpl-libs']
+  args: ['run', '--rm', '--volume=prpl-libs-vol:/prpl-tmp', '${_PRPL_DOCKER_REGISTRY_HOSTNAME}/${_PRPL_GCP_PROJECT_NAME}/prpl-base:${_PRPL_BASE_DOCKER_IMAGE_TAG}', '/bin/sh', '-c', 'set -x  && cp -r /prpl-libs/* /prpl-tmp && chmod -R 777 /prpl-libs']
   volumes:
   - name: 'prpl-libs-vol'
     path: '/workspace/prpl-libs'
@@ -12,36 +12,36 @@ steps:
 
 # Build prpl
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--rm', '--volume=build-output-vol:/prpl', '--volume=prpl-libs-vol:/prpl-libs', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder:latest', '/bin/sh', '-c', 'cd / && git clone https://github.com/davidcallen/parkrunpointsleague.git prpl && mv /prpl-libs/* /prpl/ && cd /prpl/src && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib && ./build.sh -clean -cpu ${_PRPL_MAKE_JOBS} -v && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/* && chmod -R 777 /prpl']
+  args: ['run', '--rm', '--volume=build-output-vol:/prpl', '--volume=prpl-libs-vol:/prpl-libs', '${_PRPL_DOCKER_REGISTRY_HOSTNAME}/${_PRPL_GCP_PROJECT_NAME}/prpl-builder:latest', '/bin/sh', '-c', 'set -x && cd / && git clone https://github.com/davidcallen/parkrunpointsleague.git prpl && ls -la /prpl-libs && mv /prpl-libs/* /prpl/ && rm -f /prpl/lib/*.a && rm -f /prpl/lib/*.la && cd /prpl/src && export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib && ./build.sh -clean -cpu ${_PRPL_MAKE_JOBS} -v && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/* && mkdir /prpl/deploy/docker/image/prpl/build-output && cp -r /prpl/bin /prpl/lib /prpl/doc /prpl/sql /prpl/assets /prpl/deploy/docker/image/prpl/build-output && chmod -R 777 /prpl/deploy/docker/image/prpl/build-output']
   volumes:
   - name: 'build-output-vol'
-    path: '/persistent_volume/build-output'
+    path: '/workspace/prpl'
   - name: 'prpl-libs-vol'
     path: '/workspace/prpl-libs'
   timeout: 600s
 
 # Debug : check resultant output files
 - name: 'alpine'
-  args: ['sh', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace/build-output/*' ]
+  args: ['sh', '-c', 'set -x && echo `pwd` && ls -la && ls -la /workspace/prpl/deploy/docker/image/prpl/build-output/*' ]
   volumes:
   - name: 'build-output-vol'
-    path: '/workspace/build-output'
+    path: '/workspace/prpl'
     
 # Build the image (Dockerfile will git clone then make)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl:${COMMIT_SHA}', '-t', '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl:latest', '-f', 'Dockerfile', '.']
+  args: ['build', '-t', '${_PRPL_DOCKER_REGISTRY_HOSTNAME}/${_PRPL_GCP_PROJECT_NAME}/prpl:${COMMIT_SHA}', '-t', '${_PRPL_DOCKER_REGISTRY_HOSTNAME}/${_PRPL_GCP_PROJECT_NAME}/prpl:latest', '-f', '/workspace/prpl/deploy/docker/image/prpl/Dockerfile', '/workspace/prpl/deploy/docker/image/prpl/']
   volumes:
   - name: 'build-output-vol'
-    path: '/workspace/build-output'
+    path: '/workspace/prpl'
   timeout: 600s
 
 substitutions:
-    _PRPL_DOCKER_REGISTRY: 'eu.gcr.io'
+    _PRPL_DOCKER_REGISTRY_HOSTNAME: 'eu.gcr.io'
     _PRPL_GCP_PROJECT_NAME: 'davidcallen'
-    _PRPL_DOCKER_IMAGE_TAG: ''
+    _PRPL_DOCKER_IMAGE_TAG: 'latest'
     _PRPL_MAKE_JOBS: '2'
 
-images: [ '${_PRPL_DOCKER_REGISTRY}/${_PRPL_GCP_PROJECT_NAME}/prpl' ]
+images: [ '${_PRPL_DOCKER_REGISTRY_HOSTNAME}/${_PRPL_GCP_PROJECT_NAME}/prpl' ]
 
 options:
   substitution_option: 'ALLOW_LOOSE'  

@@ -51,7 +51,6 @@ podTemplate(label: 'mypod',
 				ls -la /prpl-libs
 				cp -r /prpl-libs/* .
 				echo PWD=\$PWD
-				ARG_MAKE_JOBS=1
 				ls -la
 			"""
 			}
@@ -64,14 +63,13 @@ podTemplate(label: 'mypod',
 				set -o nounset
 				set -x
 				echo PWD=\$PWD
-				ARG_MAKE_JOBS=2
 				cd prpl
 				ls -la lib
 				ls -la include
 				cd src
 				ls -la
 				export LD_LIBRARY_PATH=\$PWD/../lib:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib
-				./build.sh -clean -cpu \${ARG_MAKE_JOBS}
+				./build.sh -clean -cpu ${PRPL_MAKE_JOBS}
 				rm -rf exe/prpld/CMakeFiles
 				rm -f ../sql/db-backups/*
 				chmod -R 777 ..

@@ -46,7 +46,6 @@ podTemplate(label: 'mypod',
 				set -o nounset
 				set +x
 				echo PWD=\$PWD
-				ARG_MAKE_JOBS=1
 				ls -la
 				cd prpl/deploy/docker/image/prpl-base
 				[ ! -d lib-srcs ] && mkdir lib-srcs
@@ -75,7 +74,6 @@ podTemplate(label: 'mypod',
 				echo '----------------------------------- Build gumbo --------------------------------------------'
 				set +x
 				echo PWD=\$PWD
-				ARG_MAKE_JOBS=1
 				ls -la
 				cd prpl/deploy/docker/image/prpl-base
 				[ ! -d lib-srcs ] && mkdir lib-srcs
@@ -85,7 +83,7 @@ podTemplate(label: 'mypod',
 				cd gumbo-parser
 				./autogen.sh
 				./configure --prefix=/prpl
-				make -j \${ARG_MAKE_JOBS}
+				make -j ${PRPL_MAKE_JOBS}
 				make install
 				chmod -R 777 /prpl
 				cd ../..
@@ -107,7 +105,6 @@ podTemplate(label: 'mypod',
 				set -o nounset
 				set +x
 				echo PWD=\$PWD
-				ARG_MAKE_JOBS=1
 				ls -la
 				cd prpl/deploy/docker/image/prpl-base
 				[ ! -d lib-srcs ] && mkdir lib-srcs
@@ -117,8 +114,8 @@ podTemplate(label: 'mypod',
 				git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git
 				cd poco
 				./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests
-				echo Making with \${ARG_MAKE_JOBS} jobs...
-				make -j \${ARG_MAKE_JOBS}
+				echo Making with ${PRPL_MAKE_JOBS} jobs...
+				make -j ${PRPL_MAKE_JOBS}
 				make install
 				chmod -R 777 /prpl
 				cd ../..
