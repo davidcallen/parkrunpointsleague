@@ -2,7 +2,8 @@ podTemplate(label: 'mypod',
 	containers: [
 	containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
 	containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-	containerTemplate(name: 'prpl-builder', image: '${env.PRPL_DOCKER_REGISTRY}prpl-builder', command: 'cat', ttyEnabled: true)
+	containerTemplate(name: 'prpl-builder', image: "${env.PRPL_DOCKER_REGISTRY}prpl-builder", command: 'cat', ttyEnabled: true),
+	containerTemplate(name: 'prpl-base', image: "${env.PRPL_DOCKER_REGISTRY}prpl-base", command: 'cat', ttyEnabled: true)
 	],
 	volumes: [
 		hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
@@ -39,17 +40,16 @@ podTemplate(label: 'mypod',
 			}
 		}
 		stage('Build docker image : prpl : get libs and build') {
-			container('docker') {
+			container('prpl-base') {
 			sh """
 				echo '----------------------------------- Get Libs --------------------------------------------'
 				set -o errexit
 				set -o nounset
-				set +x
+				set -x
 				cd prpl
-				DOCKER_CONTAINER_ID=\$(docker create prpl-base:latest)
-				docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/include .
-				docker cp \${DOCKER_CONTAINER_ID}:/prpl-libs/lib .
-				docker rm \${DOCKER_CONTAINER_ID}
+				ls -la
+				ls -la /prpl-libs
+				cp -r /prpl-libs/* .
 				echo PWD=\$PWD
 				ARG_MAKE_JOBS=1
 				ls -la

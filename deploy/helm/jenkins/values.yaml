@@ -8,7 +8,8 @@ agent:
       mountPath: /var/run/docker.sock
   podName: 'prpl-jenkins-agent'
   idleMinutes: 120
-
+  resources: {requests: {cpu: 200m, memory: 256Mi}, limits: {cpu: 2000m, memory: 2Gi}}
+  
 master:
 #  runAsUser: 1000
 #  fsGroup: 1000
@@ -20,6 +21,8 @@ master:
     - git:3.10.1
     - greenballs:1.15
     - build-with-parameters:1.4
+    - google-oauth-plugin:0.8 
+    - google-container-registry-auth:0.3
   healthProbes: true
   healthProbesTimeout: 120
 
