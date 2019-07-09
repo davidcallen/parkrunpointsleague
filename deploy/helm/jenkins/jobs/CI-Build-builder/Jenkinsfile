@@ -4,7 +4,7 @@ podTemplate(label: 'mypod',
 		containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
 	],
 	volumes: [
-			hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+		hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 	]
 ) {
 	node('mypod') {
@@ -39,30 +39,44 @@ podTemplate(label: 'mypod',
 		}
 		stage('Build docker image : prpl-builder') {
 			container('docker') {
-			sh """
-					set -o errexit
-					set -o nounset
-					set -x
-					echo PWD=\$PWD
-					ls -la
-					cd prpl/deploy/docker/image/prpl-builder
-					ls -la
-					PRPL_DOCKER_IMAGE_NAME=prpl-builder
-					export PRPL_DOCKER_BUILD_DATE=`date`
-					export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
-					echo \${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
-					echo "Building image \${PRPL_DOCKER_IMAGE_NAME} for tag \${PRPL_DOCKER_IMAGE_TAG}"
-					echo
-					echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
-					docker rmi \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME} || true
-					echo
-					docker build \
-						--tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} \
-						--tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest \
-						--file=./Dockerfile .
-					echo
-					docker images | grep prpl- || true
-			"""
+				def shellScript = """
+						set -o errexit
+						set -o nounset
+						set -x
+						echo PWD=\$PWD
+						ls -la
+						cd prpl/deploy/docker/image/prpl-builder
+						ls -la
+						PRPL_DOCKER_IMAGE_NAME=prpl-builder
+						export PRPL_DOCKER_BUILD_DATE=`date`
+						export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
+						echo \${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
+						echo "Building image \${PRPL_DOCKER_IMAGE_NAME} for tag \${PRPL_DOCKER_IMAGE_TAG}"
+						echo
+						echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
+						docker rmi \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME} || true
+						echo
+						docker build \
+							--tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG} \
+							--tag=\${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest \
+							--file=./Dockerfile .
+
+						docker push \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:\${PRPL_DOCKER_IMAGE_TAG}
+						docker push \${PRPL_DOCKER_REGISTRY}\${PRPL_DOCKER_IMAGE_NAME}:latest
+						echo
+						docker images | grep prpl- || true
+					"""
+				if("${PRPL_DOCKER_REGISTRY}" != "")
+				{
+					docker.withRegistry("https://${PRPL_DOCKER_REGISTRY_HOSTNAME}", "gcr:${PRPL_GCP_PROJECT_NAME}")
+					{
+						sh(script: shellScript) 
+					}
+				}
+				else
+				{
+					sh(script: shellScript) 
+				}
 			}
 		}
 	}
