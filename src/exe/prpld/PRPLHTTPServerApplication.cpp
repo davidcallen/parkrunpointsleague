@@ -222,7 +222,9 @@ void PRPLHTTPServerApplication::initializeLogging()
 
 	Poco::PatternFormatter* pPatternFormatter = new Poco::PatternFormatter();
 	//pPatternFormatter->setProperty(Poco::PatternFormatter::PROP_PATTERN, "%Y%m%d %H:%M:%S %q %T [%I] %s: %t");
-	pPatternFormatter->setProperty(Poco::PatternFormatter::PROP_PATTERN, "%Y%m%d %H:%M:%S %q [%I] %s: %t");
+	pPatternFormatter->setProperty(Poco::PatternFormatter::PROP_PATTERN, "{\"log\":\"%Y%m%d %H:%M:%S %q %T [%I] %s: %t\", \"severity\":\"%p\", \"stream\":\"stderr\", ,\"time\":\"%Y-%m-%dT%H:%M:%S.%F%z\"}");
+
+	// {"log":"2014/09/25 21:15:03 Got request with path wombat\\n", "stream":"stderr", "time":"2014-09-25T21:15:03.499185026Z"}
 
 	Poco::FormattingChannel* pFormattingChannel = new Poco::FormattingChannel(pPatternFormatter, pSplitterChannel);
 

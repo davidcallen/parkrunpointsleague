@@ -43,7 +43,7 @@ export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
 
-echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
+echo "Building image ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
 
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"
@@ -75,5 +75,5 @@ if [ "${PRPL_DOCKER_REGISTRY}" != "" ] ; then
 fi
 
 echo -e "\n----------"
-echo "Finished image ${PRPL_DOCKER_IMAGE_NAME} tag ${PRPL_DOCKER_IMAGE_TAG} at `date` (started at ${START_DATE})"
+echo "Finished image ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} tag ${PRPL_DOCKER_IMAGE_TAG} at `date` (started at ${START_DATE})"
 echo 

@@ -4,8 +4,15 @@
 
 PRPL_DOCKER_ENVIRONMENT=
 KUBECTL_CONTEXT=`kubectl config current-context`
-if [ "${KUBECTL_CONTEXT}" == "minikube" ] ; then
+if [ "${KUBECTL_CONTEXT}" == "" ] ; then
+	export PRPL_DOCKER_ENVIRONMENT=local
+	export PRPL_GCP_PROJECT_NAME=
+	export PRPL_DOCKER_REGISTRY_HOSTNAME=
+	export PRPL_DOCKER_REGISTRY=
+elif [ "${KUBECTL_CONTEXT}" == "minikube" ] ; then
 	export PRPL_DOCKER_ENVIRONMENT=minikube
+	export PRPL_GCP_PROJECT_NAME=
+	export PRPL_DOCKER_REGISTRY_HOSTNAME=
 	export PRPL_DOCKER_REGISTRY=
 elif [ "${KUBECTL_CONTEXT:0:3}" == "gke" ] ; then
 	export PRPL_DOCKER_ENVIRONMENT=gke

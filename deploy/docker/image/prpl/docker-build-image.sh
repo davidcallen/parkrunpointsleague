@@ -78,7 +78,7 @@ fi
 export PRPL_BASE_DOCKER_IMAGE_TAG
 PRPL_TEMP_DIR=
 
-echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
+echo "Building image ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
 
 if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then 
@@ -111,12 +111,15 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 	[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output
 	mkdir ${START_PATH}/build-output
 	cd ${START_PATH}/build-output
+
 	trap "[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output" EXIT
 
 	echo -e '\n----------------------------------- Get lib dependancy binaries --------------------------------------\n'
 	# Extract the libs from prpl-base image for use in this image build
-	docker run --rm --volume=${START_PATH}/build-output:/prpl-tmp prpl-base:${ARG_USE_PRPL_BASE_IMAGE_TAG} \
-		/bin/sh -c 'cp -r /prpl-libs/* /prpl-tmp && chmod -R 777 /prpl-libs'
+	DOCKER_BASE_LIBS_ID=`docker create prpl-base:${ARG_USE_PRPL_BASE_IMAGE_TAG}`
+	docker cp ${DOCKER_BASE_LIBS_ID}:/prpl-libs/include ${START_PATH}/build-output
+	docker cp ${DOCKER_BASE_LIBS_ID}:/prpl-libs/lib ${START_PATH}/build-output
+	docker rm ${DOCKER_BASE_LIBS_ID}
 
 	echo -e '\n----------------------------------- Build binaries--------------------------------------------\n'
 	if [ "${ARG_USE_LOCAL_SOURCES}" == "TRUE" ] ; then
@@ -126,8 +129,9 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		mv ${START_PATH}/build-output/prpl/* .
 		rm -rf ${START_PATH}/build-output/prpl
 		cd ..
-		
-		docker run --volume=${START_PATH}/build-output:/prpl --volume=${START_PATH}/../prpl-base/build-output:/prpl-libs prpl-builder:latest \
+		ls -al ${START_PATH}/build-output
+
+		docker run --volume=${START_PATH}/build-output:/prpl prpl-builder:latest \
 			/bin/sh -c "cd /prpl \
 			&& cd /prpl/src \
 			&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib \
@@ -189,4 +193,4 @@ if [ "${PRPL_DOCKER_REGISTRY}" != "" ] ; then
 fi
 
 echo -e "\n----------"
-echo "Finished image ${PRPL_DOCKER_IMAGE_NAME} tag ${PRPL_DOCKER_IMAGE_TAG} at `date` (started at ${START_DATE})"
+echo "Finished image ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} tag ${PRPL_DOCKER_IMAGE_TAG} at `date` (started at ${START_DATE})"

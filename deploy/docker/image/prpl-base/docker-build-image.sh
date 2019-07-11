@@ -58,7 +58,7 @@ export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
 
-echo "Building image ${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
+echo "Building image ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
 
 if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then 
@@ -73,12 +73,12 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& cd build/cmake \
 		&& cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release \
 		&& make install \
-		&& chmod -R 777 /prpl'
+		&& chmod -R 777 /prpl \
+		&& ls -la /prpl/*'
 		
-	echo '----------------------------------- Build gumbo --------------------------------------------'
-
 	ls -la $PWD/build-output
 
+	echo '----------------------------------- Build gumbo --------------------------------------------'
 	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& git clone https://github.com/google/gumbo-parser \
 		&& cd gumbo-parser \
@@ -86,12 +86,13 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& ./configure --prefix=/prpl \
 		&& make -j ${ARG_MAKE_JOBS} \
 		&& make install \
-		&& chmod -R 777 /prpl"
+		&& chmod -R 777 /prpl \
+		&& ls -la /prpl/"
 
 	ls -la $PWD/build-output
 
 	echo '----------------------------------- Build poco --------------------------------------------'
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "set -x && mkdir -p /prpl-srcs/ && cd /prpl-srcs \
+	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
 		&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
 		&& cd poco \
@@ -99,7 +100,8 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& echo Making with ${ARG_MAKE_JOBS} jobs... \
 		&& make -j ${ARG_MAKE_JOBS} \
 		&& make install \
-		&& chmod -R 777 /prpl"
+		&& chmod -R 777 /prpl \
+		&& ls -la /prpl/"
 
 	ls -la $PWD/build-output
 fi
@@ -133,5 +135,5 @@ if [ "${PRPL_DOCKER_REGISTRY}" != "" ] ; then
 fi
 
 echo -e "\n----------"
-echo "Finished image ${PRPL_DOCKER_IMAGE_NAME} tag ${PRPL_DOCKER_IMAGE_TAG} at `date` (started at ${START_DATE})"
+echo "Finished image ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} tag ${PRPL_DOCKER_IMAGE_TAG} at `date` (started at ${START_DATE})"
 echo 
