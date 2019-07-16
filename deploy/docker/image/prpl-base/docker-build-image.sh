@@ -97,11 +97,13 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
 		&& cd poco \
 		&& ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
+		&& mkdir cmake_build && cd cmake_build \
+		&& cmake .. -DCMAKE_INSTALL_PREFIX=/prpl -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_PDF=OFF -DENABLE_TESTS=OFF -DENABLE_MONGODB=OFF -DENABLE_ZIP=OFF \
 		&& echo Making with ${ARG_MAKE_JOBS} jobs... \
-		&& make -j ${ARG_MAKE_JOBS} \
+		&& make -j ${ARG_MAKE_JOBS} VERBOSE=1 \
 		&& make install \
 		&& chmod -R 777 /prpl \
-		&& ls -la /prpl/"
+		&& ls -la /prpl/*"
 
 	ls -la $PWD/build-output
 fi
