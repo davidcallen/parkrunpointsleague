@@ -1,0 +1,26 @@
+{
+  "variables": {
+    "project_id": null,
+    "zone":     "europe-west2-a"
+  },
+  "builders": [
+    {
+      "type": "googlecompute",
+      "image_name": "prpl-{{timestamp}}",
+      "image_family": "prpl",
+      "image_description": "ParkRunPointsLeague",
+      "project_id": "{{user `project_id`}}",
+      "source_image_family" : "prpl-libs",
+      "machine_type": "n1-standard-1",
+      "ssh_username": "packer",
+      "zone": "{{user `zone`}}",
+      "ssh_pty": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "./image-setup.sh"
+    }
+  ]
+}

@@ -89,6 +89,7 @@ LINK_DIRECTORIES(
 
 include_directories("/usr/include")
 include_directories("/usr/local/include")
+include_directories(${CMAKE_BINARY_DIR}/../include)
 
 set (EXTRA_LIBS
     PocoNet

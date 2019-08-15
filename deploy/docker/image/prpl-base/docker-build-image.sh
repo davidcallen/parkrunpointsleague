@@ -58,16 +58,22 @@ export PRPL_DOCKER_BUILD_DATE=`date`
 export PRPL_DOCKER_IMAGE_TAG=`date +%Y%m%d%H%M%S`
 echo ${PRPL_DOCKER_IMAGE_TAG} > DOCKER_IMAGE_TAG
 
+if [ ! -z ${DOCKER_HOST:-} ] ; then
+	echo "ERROR : the DOCKER_HOST is set. Building image against a remote docker host is not allowed (Problems with bind-mounting volumes)"
+	exit 1
+fi
+
 echo "Building image ${PRPL_DOCKER_REGISTRY}${PRPL_DOCKER_IMAGE_NAME} for tag ${PRPL_DOCKER_IMAGE_TAG}"
 echo
 
 if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then 
 	[ -d build-output ] && rm -rf build-output
 	mkdir build-output
-	trap "[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output" EXIT
+#	docker volume rm build-output || true
+#	trap "[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output" EXIT
 
 	echo '----------------------------------- Build libtidy --------------------------------------------'
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
+	docker run -i --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& git clone https://github.com/htacg/tidy-html5 \
 		&& cd tidy-html5 \
 		&& cd build/cmake \
@@ -75,7 +81,8 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& make install \
 		&& chmod -R 777 /prpl \
 		&& ls -la /prpl/*'
-		
+
+	echo -e "\nContents of $PWD/build-output : \n"
 	ls -la $PWD/build-output
 
 	echo '----------------------------------- Build gumbo --------------------------------------------'
@@ -89,6 +96,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& chmod -R 777 /prpl \
 		&& ls -la /prpl/"
 
+	echo -e "\nContents of $PWD/build-output : \n"
 	ls -la $PWD/build-output
 
 	echo '----------------------------------- Build poco --------------------------------------------'
@@ -105,6 +113,8 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		&& chmod -R 777 /prpl \
 		&& ls -la /prpl/*"
 
+	# docker cp --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest
+	echo -e "\nContents of $PWD/build-output : \n"
 	ls -la $PWD/build-output
 fi
 

@@ -1,0 +1,37 @@
+{
+  "variables": {
+    "project_id": null,
+    "zone":     "europe-west2-a"
+  },
+  "builders": [
+    {
+      "type": "googlecompute",
+      "image_name": "prpl-libs-{{timestamp}}",
+      "image_family": "prpl-libs",
+      "image_description": "ParkRunPointsLeague 3rd-party Libraries",
+      "project_id": "{{user `project_id`}}",
+      "source_image_family" : "centos-7",
+      "machine_type": "n1-standard-1",
+      "ssh_username": "packer",
+      "zone": "{{user `zone`}}",
+      "ssh_pty": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "motd",
+      "destination": "/tmp/motd"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo cp /tmp/motd /etc/motd"
+      ]
+    },
+    {
+      "type": "shell",
+      "script": "./image-setup.sh"
+    }
+  ]
+}
