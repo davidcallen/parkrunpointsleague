@@ -32,7 +32,7 @@ sudo -S sh -c "export LD_LIBRARY_PATH=.:/opt/prpl/src/../bin:/lib64:/lib:/usr/li
  && git clone https://github.com/google/gumbo-parser \
  && cd gumbo-parser \
  && ./autogen.sh \
- && ./configure --prefix=/prpl \
+ && ./configure --prefix=/opt/prpl \
  && make -j ${PRPL_MAKE_JOBS} \
  && make install"
 
@@ -42,11 +42,13 @@ sudo -S sh -c "export LD_LIBRARY_PATH=.:/opt/prpl/src/../bin:/lib64:/lib:/usr/li
  && cd /tmp/prpl-srcs \
  && git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
  && cd poco \
- && ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
+ && ./configure --prefix=/opt/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
  && mkdir cmake_build \
  && cd cmake_build \
- && cmake .. -DCMAKE_INSTALL_PREFIX=/prpl -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_PDF=OFF -DENABLE_TESTS=OFF -DENABLE_MONGODB=OFF -DENABLE_ZIP=OFF \
+ && cmake .. -DCMAKE_INSTALL_PREFIX=/opt/prpl -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_PDF=OFF -DENABLE_TESTS=OFF -DENABLE_MONGODB=OFF -DENABLE_ZIP=OFF \
  && make -j ${PRPL_MAKE_JOBS} VERBOSE=1 \
  && make install"
 
-sudo -S sh -c 'chown prpl:prpl /prpl'
+sudo -S sh -c 'chown -R prpl:prpl /opt/prpl'
+
+ls -la /opt/prpl/*
