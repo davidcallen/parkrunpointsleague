@@ -37,13 +37,16 @@ done
 
 PROJECT_ID=davidcallen
 
-gcloud beta container clusters create "standard-cluster-1" \
-	--project "${PROJECT_ID}" \
+# Using 
+#  --preemptible 						VMs for 80% discount but a) live for 24hrs max, b) may be spun down if google needs space.
+#  --machine-type "n1-standard-1"		Need at least this otherwise thoings wont work and loose lots of time troubleshooting
+#  --enable-autoscaling					Scaling - lets dot it!
+gcloud beta container --project "${PROJECT_ID}" clusters create "standard-cluster-1" \
 	--zone "europe-west2-a" --no-enable-basic-auth --cluster-version "1.13.6-gke.13" \
 	--machine-type "n1-standard-1" --image-type "COS" \
-	--disk-type "pd-standard" --disk-size "30" \
+	--disk-type "pd-standard" --disk-size "20" \
 	--metadata disable-legacy-endpoints=true --scopes "https://www.googleapis.com/auth/cloud-platform" \
-	--num-nodes "3" \
+	--num-nodes "2" \
 	--enable-stackdriver-kubernetes \
 	--enable-ip-alias \
 	--network "projects/${PROJECT_ID}/global/networks/default" \
@@ -52,7 +55,8 @@ gcloud beta container clusters create "standard-cluster-1" \
 	--enable-autoscaling --min-nodes "1" --max-nodes "5" \
 	--addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard \
 	--enable-autoupgrade \
-	--enable-autorepair
+	--enable-autorepair \
+	--preemptible
 
 
 # Can then get credentials with :
