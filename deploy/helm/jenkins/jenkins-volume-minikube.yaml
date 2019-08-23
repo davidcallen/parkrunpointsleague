@@ -6,14 +6,11 @@ metadata:
     app: prpl-jenkins
     type: local
 spec:
-  storageClassName: manual
   accessModes:
     - ReadWriteOnce
   capacity:
     storage: 3Gi
   persistentVolumeReclaimPolicy: Recycle
-  hostPath:
-    path: /data/jenkins-master/
 
 ---
 
@@ -24,7 +21,6 @@ metadata:
   labels:
     app: prpl-jenkins
 spec:
-  storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:

@@ -73,7 +73,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 #	trap "[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output" EXIT
 
 	echo '----------------------------------- Build libtidy --------------------------------------------'
-	docker run -i --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
+	docker run -i --volume=$PWD/build-output:/prpl --volume=/prpl-srcs ${PRPL_DOCKER_REGISTRY}prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& git clone https://github.com/htacg/tidy-html5 \
 		&& cd tidy-html5 \
 		&& cd build/cmake \
@@ -86,7 +86,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 	ls -la $PWD/build-output
 
 	echo '----------------------------------- Build gumbo --------------------------------------------'
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
+	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs ${PRPL_DOCKER_REGISTRY}prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& git clone https://github.com/google/gumbo-parser \
 		&& cd gumbo-parser \
 		&& ./autogen.sh \
@@ -100,7 +100,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 	ls -la $PWD/build-output
 
 	echo '----------------------------------- Build poco --------------------------------------------'
-	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
+	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs ${PRPL_DOCKER_REGISTRY}prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
 		&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
 		&& cd poco \

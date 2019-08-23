@@ -116,7 +116,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 
 	echo -e '\n----------------------------------- Get lib dependancy binaries --------------------------------------\n'
 	# Extract the libs from prpl-base image for use in this image build
-	DOCKER_BASE_LIBS_ID=`docker create prpl-base:${ARG_USE_PRPL_BASE_IMAGE_TAG}`
+	DOCKER_BASE_LIBS_ID=`docker create ${PRPL_DOCKER_REGISTRY}prpl-base:${ARG_USE_PRPL_BASE_IMAGE_TAG}`
 	docker cp ${DOCKER_BASE_LIBS_ID}:/prpl-libs/include ${START_PATH}/build-output
 	docker cp ${DOCKER_BASE_LIBS_ID}:/prpl-libs/lib ${START_PATH}/build-output
 	docker rm ${DOCKER_BASE_LIBS_ID}
@@ -131,14 +131,14 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 		cd ..
 		ls -al ${START_PATH}/build-output
 
-		docker run --volume=${START_PATH}/build-output:/prpl prpl-builder:latest \
+		docker run --volume=${START_PATH}/build-output:/prpl ${PRPL_DOCKER_REGISTRY}prpl-builder:latest \
 			/bin/sh -c "cd /prpl \
 			&& cd /prpl/src \
 			&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib:/prpl/lib \
 			&& ./build.sh -clean -cpu ${ARG_MAKE_JOBS} && rm -rf /prpl/src/exe/prpld/CMakeFiles && rm -f /prpl/sql/db-backups/* \
 			&& chmod -R 777 /prpl"
 	else
-		docker run --volume=${START_PATH}/build-output:/prpl prpl-builder:latest \
+		docker run --volume=${START_PATH}/build-output:/prpl ${PRPL_DOCKER_REGISTRY}prpl-builder:latest \
 			/bin/sh -c "mkdir /prpl-libs && mv /prpl/* /prpl-libs/ && cd / \
 			&& git clone https://github.com/davidcallen/parkrunpointsleague.git prpl \
 			&& mv /prpl-libs/* /prpl \
