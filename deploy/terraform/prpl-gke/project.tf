@@ -6,6 +6,10 @@ variable "region" {
   type = "string"
   default = "europe-west2" 
 }
+variable "zone" {
+  type = "string"
+  default = "europe-west2-a" 
+}
 variable "environment" {
   type = "string"
   description = "Environment description : e.g. dev, test, staging, production"
