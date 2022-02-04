@@ -1,0 +1,122 @@
+pipeline {
+  agent { label 'aws-prpl-builder' }
+  options {
+    // ansiColor('xterm')
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    disableResume()
+    skipStagesAfterUnstable()
+    timeout(time: 1, unit: 'HOURS')
+    // This is required if you want to clean before build
+    skipDefaultCheckout(true)
+  }
+  environment {
+    LD_LIBRARY_PATH="${WORKSPACE}/install/lib:/lib64:/lib:/usr/lib64/:/usr/lib:/usr/local/lib64:/usr/local/lib"
+  }
+  parameters {
+    string(name: 'Release_Version', defaultValue: '1.0.0', description: 'The release version e.g. 1.0.0')
+  }
+  stages {
+    stage('prepare') {
+      steps {
+        echo('----------------------------------------------------   prepare   ----------------------------------------------------')
+        cleanWs(deleteDirs: true, notFailBuild: true)
+        sh script: """
+          [ ! -d install ] && mkdir install
+          env | sort
+         """
+      }
+    } // end stage
+    stage('tidy-html') {
+      steps {
+        echo('----------------------------------------------------   tidy-html   ----------------------------------------------------')
+        checkout([$class: 'GitSCM', branches: [[name: 'refs/tags/5.8.0']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'lib-tidy-html']], userRemoteConfigs: [[url: 'https://github.com/htacg/tidy-html5.git']]])
+        sh script: """
+          cd lib-tidy-html/build/cmake
+          cmake --version
+          cmake ../.. -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/install -DCMAKE_BUILD_TYPE=Release
+          make -j \$(cat /proc/cpuinfo | grep processor | wc -l)
+          make install
+        """
+      }
+    } // end stage
+    stage('gumbo') {
+      steps {
+        echo('----------------------------------------------------   gumbo   ----------------------------------------------------')
+        checkout([$class: 'GitSCM', branches: [[name: 'refs/tags/v0.10.1']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'lib-gumbo']], userRemoteConfigs: [[url: 'https://github.com/google/gumbo-parser.git']]])
+        sh script: """
+          cd lib-gumbo
+          ./autogen.sh
+          cmake --version
+          ./configure --prefix=${WORKSPACE}/install
+          make -j \$(cat /proc/cpuinfo | grep processor | wc -l)
+          make install
+        """
+      }
+    } // end stage
+    stage('poco') {
+      steps {
+        echo('----------------------------------------------------   poco   ----------------------------------------------------')
+        checkout([$class: 'GitSCM', branches: [[name: 'refs/tags/poco-1.7.8-release']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'lib-poco']], userRemoteConfigs: [[url: 'https://github.com/pocoproject/poco.git']]])
+        sh script: """
+          cd lib-poco
+          ./configure --prefix=${WORKSPACE}/install --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests
+          mkdir cmake_build && cd cmake_build
+          cmake --version
+          cmake .. -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/install -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_PDF=OFF -DENABLE_TESTS=OFF -DENABLE_MONGODB=OFF -DENABLE_ZIP=OFF
+          make -j \$(cat /proc/cpuinfo | grep processor | wc -l) VERBOSE=1
+          make install
+        """
+      }
+    } // end stage
+    stage('packaging') {
+      steps {
+        echo('----------------------------------------------------   packaging   ----------------------------------------------------')
+        tar(file: "prpl-libs-${params.Release_Version}.tar.gz", dir: 'install/', archive: true, compress: true)
+      }
+    } // end stage
+    stage('publishing') {
+      steps {
+        echo('----------------------------------------------------   publishing   ----------------------------------------------------')
+//         nexusArtifactUploader(
+//             nexusVersion: 'nexus3',
+//             protocol: 'http',
+//             nexusUrl: '10.6.1.179:8081',
+//             groupId: 'org.parkrunpointsleague',
+//             version: "${params.Release_Version}",
+//             repository: 'private-release',
+//             credentialsId: 'prpl-core-nexus-jenkins-user',
+//             artifacts: [
+//                 [artifactId: 'prpl-libs',
+//                  classifier: '',
+//                  file: "prpl-libs-${params.Release_Version}.tar.gz",
+//                  type: 'tar.gz']
+//             ]
+//          )
+        nexusPublisher(
+          nexusInstanceId: 'nexus-3',
+          nexusRepositoryId: 'private-release',
+          packages: [
+            [$class: 'MavenPackage',
+              mavenAssetList: [[
+                classifier: '',
+                extension: 'tar.gz',
+                filePath: "prpl-libs-${params.Release_Version}.tar.gz"
+              ]],
+              mavenCoordinate: [
+                artifactId: 'prpl-libs',
+                groupId: 'org.parkrunpointsleague',
+                packaging: 'tar.gz',
+                version: "${params.Release_Version}"
+              ]
+            ]
+          ]
+        ) // end : nexusPublisher()
+      } // end step
+    } // end stage
+  }	// end stages
+  post {
+    failure {
+      error('Stopping due to error.')
+    }
+  }
+} // end pipeline

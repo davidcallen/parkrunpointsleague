@@ -1,0 +1,100 @@
+pipeline {
+  agent { label 'aws-prpl-builder' }
+  options {
+    // ansiColor('xterm')
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    disableResume()
+    skipStagesAfterUnstable()
+    timeout(time: 1, unit: 'HOURS')
+    // This is required if you want to clean before build
+    skipDefaultCheckout(true)
+  }
+  environment {
+    LD_LIBRARY_PATH="${WORKSPACE}/prpl/libs/lib:${WORKSPACE}/install/lib:/lib64:/lib:/usr/lib64/:/usr/lib:/usr/local/lib64:/usr/local/lib"
+  }
+  parameters {
+    string(name: 'Libs_Release_Version', defaultValue: '1.0.0', description: 'The release version for prpl-libs e.g. 1.0.0')
+    string(name: 'Release_Version', defaultValue: '1.0.0', description: 'The release version for prpl e.g. 1.0.0')
+  }
+  stages {
+    stage('prepare') {
+      steps {
+        echo('----------------------------------------------------   prepare   ----------------------------------------------------')
+        cleanWs(deleteDirs: true, notFailBuild: true)
+        sh script: """
+          [ ! -d install ] && mkdir install
+          env | sort
+         """
+      }
+    } // end stage
+    stage('prpl-libs') {
+      steps {
+        echo('----------------------------------------------------   get prpl-libs   ----------------------------------------------------')
+        withCredentials([usernameColonPassword(credentialsId: 'prpl-core-nexus-jenkins-user', variable: 'NEXUS_CREDENTIALS')]) {
+            sh script: """
+              curl --silent --fail -u ${NEXUS_CREDENTIALS} -o prpl-libs-${params.Libs_Release_Version}.tar.gz \
+                "${NEXUS_HTTP_PROTOCOL}://${NEXUS_HOST}:${NEXUS_HTTP_PORT}/repository/private-release/org/parkrunpointsleague/prpl-libs/${params.Libs_Release_Version}/prpl-libs-${params.Libs_Release_Version}.tar.gz"
+            """
+        }
+//        sh script: """
+//          mvn org.apache.maven.plugins:maven-dependency-plugin::get -Dartifact=org.parkrunpointsleague:prpl-libs:${params.Libs_Release_Version}:tar.gz -DrepoUrl=${NEXUS_HTTP_PROTOCOL}://${NEXUS_HOST}:${NEXUS_HTTP_PORT}/repository/private-release/
+//        """
+      }
+    } // end stage
+    stage('prpl') {
+      steps {
+        echo('----------------------------------------------------   prpl   ----------------------------------------------------')
+        checkout([$class: 'GitSCM', branches: [[name: 'refs/heads/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'prpl']], userRemoteConfigs: [[url: 'https://github.com/davidcallen/parkrunpointsleague.git']]])
+        sh script: """
+          # Extract prpl-libs tar into prpl/libs
+          cd ${WORKSPACE}/prpl && mkdir libs && cd libs
+          tar -xzf ${WORKSPACE}/prpl-libs-${params.Libs_Release_Version}.tar.gz
+          #
+          cd ${WORKSPACE}/prpl/src
+          cmake --version
+          ./build.sh -clean -cpu \$(cat /proc/cpuinfo | grep processor | wc -l)
+        """
+      }
+    } // end stage
+    stage('packaging') {
+      steps {
+        echo('----------------------------------------------------   packaging   ----------------------------------------------------')
+        sh script: """
+          # Copy binaries and headers from prpl and prpl-libs into install, ready for packaging
+          cp -r prpl/bin/* install/
+          cp -r prpl/libs/lib/* install/
+        """
+        tar(file: "prpl-${params.Release_Version}.tar.gz", dir: 'install/', archive: true, compress: true)
+      }
+    } // end stage
+    stage('publishing') {
+      steps {
+        echo('----------------------------------------------------   publishing   ----------------------------------------------------')
+        nexusPublisher(
+          nexusInstanceId: 'nexus-3',
+          nexusRepositoryId: 'private-release',
+          packages: [
+            [$class: 'MavenPackage',
+              mavenAssetList: [[
+                classifier: '',
+                extension: 'tar.gz',
+                filePath: "prpl-${params.Release_Version}.tar.gz"
+              ]],
+              mavenCoordinate: [
+                artifactId: 'prpl',
+                groupId: 'org.parkrunpointsleague',
+                packaging: 'tar.gz',
+                version: "${params.Release_Version}"
+              ]
+            ]
+          ]
+        ) // end : nexusPublisher()
+      }
+    } // end stage
+  }	// end stages
+  post {
+    failure {
+      error('Stopping due to error.')
+    }
+  }
+} // end pipeline
