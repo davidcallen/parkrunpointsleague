@@ -82,6 +82,7 @@ if(WIN32)
 endif(WIN32)
 
 LINK_DIRECTORIES(
+    ${CMAKE_BINARY_DIR}/../libs/lib
     ${CMAKE_BINARY_DIR}/../lib
     ${CMAKE_BINARY_DIR}
     ${PROJECT_BINARY_DIR}
@@ -89,7 +90,6 @@ LINK_DIRECTORIES(
 
 include_directories("/usr/include")
 include_directories("/usr/local/include")
-include_directories(${CMAKE_BINARY_DIR}/../include)
 
 set (EXTRA_LIBS
     PocoNet

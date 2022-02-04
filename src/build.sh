@@ -196,7 +196,7 @@ echo TEE=${TEE}
 if [ -z ${LD_LIBRARY_PATH:-} ] ; then
 	LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib
 fi
-export LD_LIBRARY_PATH=.:${ROOT_PATH}/bin:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=.:${ROOT_PATH}/bin:${ROOT_PATH}/libs/lib:${LD_LIBRARY_PATH}
 echo LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
 export LD_LIBRARY_PATH_64=${LD_LIBRARY_PATH}
 echo LD_LIBRARY_PATH_64=${LD_LIBRARY_PATH_64}
