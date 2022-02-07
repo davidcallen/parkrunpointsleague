@@ -1,0 +1,231 @@
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - basicSSHUserPrivateKey:
+          description: "PRPL Core Centos user ssh key"
+          id: "jenkins-prpl-core-centos-ssh-key"
+          privateKeySource:
+            directEntry:
+              privateKey: "$${decodeBase64:${centos_ssh_private_key_base64}}"
+          scope: SYSTEM
+          username: "centos"
+      - basicSSHUserPrivateKey:
+          description: "SSH Key for Jenkins worker on Agent Node"
+          id: "jenkins-prpl-core-jenkins-worker"
+          privateKeySource:
+            directEntry:
+              privateKey: "$${decodeBase64:${jenkins_worker_ssh_private_key_base64}}"
+          scope: SYSTEM
+          username: "jenkins"
+      - usernamePassword:
+          description: "Jenkins user on Nexus for store and retrieve artifacts"
+          id: "prpl-core-nexus-jenkins-user"
+          password: "<<JENKINS_NEXUS_USER_PASSWORD>>"
+          scope: GLOBAL
+          username: "jenkins"
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  clouds:
+  - amazonEC2:
+      cloudName: "aws-prpl-core"
+      instanceCapStr: "10"
+      noDelayProvisioning: true
+      region: "eu-west-1"
+      sshKeysCredentialsId: "jenkins-prpl-core-centos-ssh-key"
+      templates:
+      - amiFilters:
+        - name: "name"
+          values: "prpl-centos-7-jenkins-worker-prpl-builder-*"
+        amiOwners: "228947135432"
+        amiType:
+          unixData:
+            sshPort: "22"
+        associatePublicIp: false
+        connectBySSHProcess: true
+        connectionStrategy: PRIVATE_IP
+        deleteRootOnTermination: true
+        description: "prpl-centos-7-jenkins-worker-prpl-builder"
+        ebsEncryptRootVolume: DEFAULT
+        ebsOptimized: false
+        hostKeyVerificationStrategy: 'OFF'
+        idleTerminationMinutes: "5"
+        instanceCapStr: "3"
+        labelString: "aws-prpl-builder"
+        launchTimeoutStr: "300"
+        maxTotalUses: -1
+        metadataEndpointEnabled: true
+        metadataHopsLimit: 1
+        metadataTokensRequired: false
+        minimumNumberOfInstances: 0
+        minimumNumberOfSpareInstances: 0
+        mode: NORMAL
+        monitoring: false
+        nodeProperties:
+        - envVars:
+            env:
+            - key: "JAVA_HOME"
+              value: "/usr/lib/jvm/jre"
+        numExecutors: 2
+        remoteAdmin: "jenkins"
+        remoteFS: "/home/jenkins"
+        securityGroups: "prpl-core-jenkins-worker"
+        stopOnTerminate: true
+        subnetId: "${subnet_ids}"
+        t2Unlimited: false
+        tags:
+        - name: "Name"
+          value: "prpl-core-jenkins-worker-prpl-builder"
+        tenancy: Default
+        type: T3aMicro
+        useEphemeralDevices: false
+        userData: |
+          #cloud-config
+          runcmd:
+            - mkdir /home/jenkins/.ssh
+            - chmod 700 /home/jenkins/.ssh
+            - echo '${centos_ssh_public_key_base64} prpl-core-ssh-key' >> /home/jenkins/.ssh/authorized_keys
+            - echo '${jenkins_worker_ssh_public_key_base64} prpl-core-ssh-key-jenkins-worker' >> /home/jenkins/.ssh/authorized_keys
+            - chmod 600 /home/jenkins/.ssh/authorized_keys
+            - chown -R jenkins:jenkins /home/jenkins/.ssh
+      useInstanceProfileForCredentials: true
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: false
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: "NEXUS_HOST"
+        value: "${nexus_host}"
+      - key: "NEXUS_HTTP_PROTOCOL"
+        value: "${nexus_http_protocol}"
+      - key: "NEXUS_HTTP_PORT"
+        value: "${nexus_http_port}"
+  labelAtoms:
+  - name: "aws-prpl-builder"
+  - name: "built-in"
+  - name: "controller"
+  labelString: "controller"
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  numExecutors: 0
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: false
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+      - id: "admin"
+        name: "admin"
+        properties:
+        - "apiToken"
+        # - "myView"
+        - "timezone"
+  slaveAgentPort: 0
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+globalCredentialsConfiguration:
+  configuration:
+    providerFilter: "none"
+    typeFilter: "none"
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  sSHD:
+    port: -1
+unclassified:
+  buildDiscarders:
+    configuredBuildDiscarders:
+      - "jobBuildDiscarder"
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  globalNexusConfiguration:
+    instanceId: "c073e74353834af8a4aa17f926bd253d"
+    nxrmConfigs:
+    - nxrm3Configuration:
+        credentialsId: "prpl-core-nexus-jenkins-user"
+        displayName: "Nexus"
+        id: "nexus-3"
+        internalId: "67c45af0-419b-4bea-9a2c-340f5d358134"
+        serverUrl: "${nexus_http_protocol}://${nexus_host}:${nexus_http_port}"
+  location:
+    adminAddress: "address not configured yet <nobody@nowhere>"
+    url: "${jenkins_url}"
+  pollSCM:
+    pollingThreadCount: 10
+tool:
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"
+# ----------------------------------------------- jobs --------------------------------------------------------------
+# Uses the JCasC in combination with the JobDSL plugin.
+# See https://github.com/jenkinsci/job-dsl-plugin/wiki/JCasC
+jobs:
+  # Job will load Jenkinsfile from git repo.  (see https://jenkinsci.github.io/job-dsl-plugin/#path/pipelineJob-definition-cpsScm)
+  - script: >
+      pipelineJob('prpl-libs-build') {
+        description("Build PRPL third-party libraries")
+        parameters {
+          stringParam(name: 'Release_Version', defaultValue: '1.0.0', description: 'The release version e.g. 1.0.0')
+        }
+        definition {
+          cpsScm {
+            lightweight(true)
+            scm {
+              git {
+                remote {
+                  url('https://github.com/davidcallen/parkrunpointsleague.git')
+                }
+                branch('master')
+              }
+            }
+            scriptPath('deploy/jenkins/jobs/prpl-libs-build/Jenkinsfile')
+          }
+        }
+      }
+  # Job will load Jenkinsfile from git repo.  (see https://jenkinsci.github.io/job-dsl-plugin/#path/pipelineJob-definition-cpsScm)
+  - script: >
+      pipelineJob('prpl-build') {
+        description("Build PRPL application")
+        parameters {
+          stringParam(name: 'Libs_Release_Version', defaultValue: '1.0.0', description: 'The release version for prpl-libs e.g. 1.0.0')
+          stringParam(name: 'Release_Version', defaultValue: '1.0.0', description: 'The release version e.g. 1.0.0')
+        }
+        definition {
+          cpsScm {
+            lightweight(true)
+            scm {
+              git {
+                remote {
+                  url('https://github.com/davidcallen/parkrunpointsleague.git')
+                }
+                branch('master')
+              }
+            }
+            scriptPath('deploy/jenkins/jobs/prpl-build/Jenkinsfile')
+          }
+        }
+      }

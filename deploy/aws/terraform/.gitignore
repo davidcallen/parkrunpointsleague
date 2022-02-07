@@ -1,0 +1,14 @@
+#  Local .terraform directories
+**/.terraform/*
+
+# Terraform .tfstate files backup files
+**/*.tfstate.backup
+
+# Excluded items
+_archive/
+**/terraform.log
+**/*.tfplan
+
+*/secrets.yml
+
+TODO.md

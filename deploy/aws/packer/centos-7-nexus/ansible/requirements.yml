@@ -1,0 +1,20 @@
+
+- src: geerlingguy.java
+  version: 2.0.0
+
+- src: ansible-thoteam.nexus3-oss
+  version: v2.4.15
+
+# EPEL needed by role "christiangda.awscli"
+#  from Ansible Galaxy https://galaxy.ansible.com/geerlingguy/repo-epel
+- src: geerlingguy.repo-epel
+  version: 3.1.0
+
+# awscli : installation of aws command line tool
+#  Forked from Ansible Galaxy :
+#     https://galaxy.ansible.com/christiangda/awscli
+#     https://github.com/christiangda/ansible-role-awscli
+# Forked to fix issue : https://github.com/christiangda/ansible-role-awscli/issues/6
+- src: git@github.com:davidcallen/ansible-role-awscli.git
+  scm: git
+  version: master      # 1.0.2a

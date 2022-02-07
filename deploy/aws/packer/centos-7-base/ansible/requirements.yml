@@ -1,0 +1,17 @@
+
+# amazon_cloudwatch_agent : installation and configuration of agent
+#  Forked from Ansible Galaxy https://galaxy.ansible.com/christiangda/amazon_cloudwatch_agent
+#  Forked to fix virtualbox build and suppress startup in non-AWS environment.
+- src: git@github.com:davidcallen/ansible-role-amazon-cloudwatch-agent.git
+  scm: git
+
+# telegraf : Installs and configures telegraf agent
+# Forked from
+#   https://galaxy.ansible.com/rossmcdonald/telegraf
+#   https://github.com/rossmcdonald/telegraf
+# Forked to add ability to :
+#  1) Split telegraf.conf into individual conf files. This makes it easier to update/replace those files at initial-startup of the EC2 instance.
+#  2) Add var telegraf_enabled_service to allow for install but disabled service.
+- src: https://github.com/davidcallen/telegraf.git
+  scm: git
+  version: master

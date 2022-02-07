@@ -1,0 +1,211 @@
+# ParkRun Points League - GPLv3
+#
+- name: "apply common configuration to all nodes"
+  hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    prpl_yum_update_enabled: "{{ PRPL_YUM_UPDATE_ENABLED | default(true) }}"
+    install_diagnostic_tools: true
+    log_files_for_purging:
+      - { path: /var/log/messages, owner: root, mode: '0640' }
+      - { path: /var/log/secure, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init.log, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init-output.log, owner: root, mode: '0600' }
+
+  # -------------------------------------------   Pre Tasks   -------------------------------------------
+  pre_tasks:
+    - name: "Save IP address for possible ansible debugging"
+      copy:
+        content: "[all]\ncentos@{{ ansible_default_ipv4.address }}"
+        dest: ~/group_vars_static
+
+    - name: "Save IP address locally for ansible debugging"
+      fetch:
+        src: ~/group_vars_static
+        dest: ./group_vars/static
+        flat: yes
+
+    - name: "Create AMI identifier file"
+      file:
+        path: "/PRPL_PACKER_AMI_{{ AMI_NAME }}"
+        owner: root
+        group: root
+        mode: '0644'
+        state: touch
+      tags: stamp_ami
+
+  # -------------------------------------------   Roles   -------------------------------------------
+  roles:
+    # Forked from - role: christiangda.amazon_cloudwatch_agent
+    - role: ansible-role-amazon-cloudwatch-agent
+      vars:
+        cwa_agent_mode: "ec2"
+        cwa_conf_json_file_content: "{{ lookup('file', 'files/etc/amazon/amazon-cloudwatch-agent/amazon-cloudwatch-agent.json') | from_json }}"
+      tags: [cloudwatch]
+
+    - role: telegraf
+      vars:
+        # Prevent starting telegraf since config not complete until initial-startup
+        telegraf_start_service: no
+        telegraf_template_configuration: yes
+        telegraf_plugins:
+          - name: mem
+          - name: system
+          - name: cpu
+            options:
+              percpu: "true"
+              totalcpu: "true"
+              fielddrop:
+                - "time_*"
+          - name: disk
+            options:
+              ignore_fs: ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+          - name: diskio
+            options:
+              skip_serial_number: "true"
+          - name: net
+            options:
+              interfaces:
+                - "eth0"
+          - name: netstat
+          - name: processes
+          - name: syslog
+            options:
+              server: "tcp://:6514"
+          - name: procstat
+            id: procstat_telegraf
+            options:
+              exe: "telegraf"
+        # Dummy telegraf_influxdb settings - these will be set for-real at initial-startup via user-data
+        telegraf_influxdb_urls: ["https://localhost:8086"]
+        telegraf_influxdb_database: telegraf
+        telegraf_influxdb_retention_policy: autogen
+        telegraf_influxdb_username: telegraf
+        telegraf_influxdb_password: ""
+        telegraf_influxdb_insecure_skip_verify: "true"
+        telegraf_agent_interval: 10s
+        telegraf_round_interval: "false"
+        telegraf_metric_batch_size: "1000"
+        telegraf_metric_buffer_limit: "10000"
+        telegraf_collection_jitter: 2s
+        telegraf_flush_interval: 10s
+        telegraf_flush_jitter: 2s
+        telegraf_debug: "false"
+        telegraf_quiet: "true"
+        telegraf_tags:
+      tags: [telegraf]
+
+  # -------------------------------------------   Tasks   -------------------------------------------
+  tasks:
+    - name: "Disable Amazon cloudwatch agent service since its configuration is incomplete until initial-startup configures it properly."
+      systemd:
+        name: amazon-cloudwatch-agent
+        state: stopped
+        enabled: false
+      tags: cloudwatch
+
+    - name: "Add motd"
+      copy:
+        src: files/etc/motd
+        dest: /etc/motd
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: "Copy systemd script for cloud-init fix"
+      copy:
+        src: files/etc/systemd/system/cloud-init-log-permissions.service
+        dest: /etc/systemd/system/cloud-init-log-permissions.service
+        owner: root
+        group: root
+        mode: 'u=rw,g=r,o=r'
+      tags: cloud-init
+
+    - name: "Add service script for cloud-init fix"
+      systemd:
+        name: cloud-init-log-permissions.service
+        enabled: true
+        daemon_reload: true
+      tags: cloud-init
+
+    - name: "yum update the system (enabled={{ prpl_yum_update_enabled }})"
+      yum:
+        update_only: true
+        name: "*"
+        state: latest
+        update_cache: true
+      when: prpl_yum_update_enabled | bool
+
+    - name: "yum install overnight cron yum updater to keep system up-to-date"
+      yum:
+        name:
+          - yum-cron
+
+    - name: "Enable yum cron"
+      lineinfile:
+        path: /etc/yum/yum-cron.conf
+        # Change the line to enable updates
+        regexp: '^apply_updates = no$'
+        line: 'apply_updates = yes'
+        state: present
+      tags: [prepare]
+
+    - name: "yum install general tools"
+      yum:
+        name:
+          - emacs-nox
+          - unzip
+          - dos2unix
+          - python3
+
+    - name: "Add user skeleton files"
+      copy:
+        src: "{{ item }}"
+        dest: /etc/skel
+        owner: root
+        group: root
+        mode: '0644'
+      with_fileglob:
+        - files/etc/skel/*
+
+    - name: "Add user skeleton files : ssh directory"
+      file:
+        path: /etc/skel/.ssh
+        owner: root
+        group: root
+        mode: '0700'
+        state: directory
+
+    - name: "yum install diagnostic tools"
+      yum:
+        name:
+          - telnet
+          - wget
+          - dstat
+          - traceroute
+      when: install_diagnostic_tools
+
+    - name: "Copy initial-startup scripts"
+      copy:
+        src: "{{ item }}"
+        dest: "/usr/local/bin/"
+        owner: root
+        group: root
+        mode: 0750
+      with_fileglob:
+        - "files/usr/local/bin/prpl-initial-startup_*.sh"
+
+  # -------------------------------------------   Post Tasks   -------------------------------------------
+  post_tasks:
+    - name: "Check for log files to purge"
+      stat: path="{{ item.path }}"
+      with_items: "{{ log_files_for_purging }}"
+      register: log_files_for_purging_check
+      tags: [logs]
+
+    - name: "Ensure we have empty log files from when image was created"
+      shell: "truncate --size=0 {{ item.stat.path }}"
+      when: "{{ item.stat.exists | bool}} == true"
+      with_items: "{{ log_files_for_purging_check.results }}"
+      tags: [logs]

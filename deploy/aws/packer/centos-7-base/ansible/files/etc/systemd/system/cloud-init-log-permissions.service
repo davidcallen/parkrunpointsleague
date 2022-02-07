@@ -1,0 +1,20 @@
+# This service patches a cloud-init issue of :
+#  /var/log/cloud-init-output.log has read permission to everyone.
+#  This is dangerous since chance of a password or secret being output in this log file.
+#  See https://bugs.launchpad.net/cloud-init/+bug/1541196
+[Unit]
+Description=Correct cloud-init's logfile permissions
+
+# We want to start *AFTER* cloud-init has opened its log files:
+After=cloud-init.service
+
+# We want to restart any time cloud-init is restarted (requires RemainAfterExit below):
+PartOf=cloud-init.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/chmod u=rw,g=r,o= /var/log/cloud-init.log /var/log/cloud-init-output.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,221 @@
+# ParkRun Points League - GPLv3
+#
+- name: "apply common configuration to all nodes"
+  hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    install_diagnostic_tools: true
+    log_files_for_purging:
+      - { path: /var/log/messages, owner: root, mode: '0640' }
+      - { path: /var/log/secure, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init.log, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init-output.log, owner: root, mode: '0600' }
+      - { path: /var/log/jenkins/jenkins.log, owner: jenkins, group: jenkins, mode: '0640' }
+
+  # -------------------------------------------   Pre Tasks   -------------------------------------------
+  pre_tasks:
+    - name: "Save IP address for possible ansible debugging"
+      copy:
+        content: "[all]\ncentos@{{ ansible_default_ipv4.address }}"
+        dest: ~/group_vars_static
+
+    - name: "Save IP address locally for ansible debugging"
+      fetch:
+        src: ~/group_vars_static
+        dest: ./group_vars/static
+        flat: yes
+
+    - name: "Create AMI identifier file"
+      file:
+        path: "/PRPL_PACKER_AMI_{{ AMI_NAME }}"
+        owner: root
+        group: root
+        mode: '0644'
+        state: touch
+      tags: stamp_ami
+
+  # -------------------------------------------   Roles   -------------------------------------------
+  roles:
+    - role: geerlingguy.java
+      tags: [java]
+
+    # The role ansible-role-awscli requires EPEL
+    - role: geerlingguy.repo-epel
+      tags: [epel]
+
+    - role: geerlingguy.jenkins
+      vars:
+        jenkins_prefer_lts: true
+        jenkins_admin_password: "h12y834ejbadsouh901"     # TODO : move this into Secrets Manager and set in deploy-time user-data
+        jenkins_plugins:
+          # Config as Code plugins
+          - configuration-as-code
+          - job-dsl     # enables JCasC for jobs
+          # AWS plugins
+          - ec2
+          # Git plugins
+          - git-parameter
+          - git
+          - github
+          # Pipeline plugins
+          - workflow-job
+          - workflow-aggregator
+          - workflow-scm-step
+          - pipeline-github-lib
+          - pipeline-github
+          - pipeline-utility-steps      # For the zip() function in pipelines
+          # Nexus plugins
+          - nexus-artifact-uploader # gives us nexusArtifactUploader(0 function in pipeline
+          - nexus-jenkins-plugin
+          # Miscellaneous plugins
+          - ws-cleanup    # gives us cleanWS() function in pipelines
+          - rebuilder     # job rebuild button
+          - ansicolor     # For colored job output logs
+      tags: [jenkins]
+
+    # Use my fork of role "christiangda.awscli" with fix to pip issue
+    - role: ansible-role-awscli
+      vars:
+        pip_executable_override: pip3
+      tags: [awscli]
+
+# TODO : finish adding telegraf monitor of jenkins process
+  #    - role: telegraf
+  #      vars:
+  #        # Prevent starting telegraf since config not complete until initial-startup
+  #        telegraf_start_service: no
+  #        telegraf_template_configuration: yes
+  #        telegraf_plugins:
+  #          - name: mem
+  #          - name: system
+  #          - name: cpu
+  #            options:
+  #              percpu: "true"
+  #              totalcpu: "true"
+  #              fielddrop:
+  #                - "time_*"
+  #          - name: disk
+  #            options:
+  #              ignore_fs: ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+  #          - name: diskio
+  #            options:
+  #              skip_serial_number: "true"
+  #          - name: net
+  #            options:
+  #              interfaces:
+  #                - "eth0"
+  #          - name: netstat
+  #          - name: processes
+  #          - name: syslog
+  #            options:
+  #              server: "tcp://:6514"
+  #          - name: procstat
+  #            id: procstat_telegraf
+  #            options:
+  #              exe: "telegraf"
+  #          - name: tail
+  #            id: tail_jenkins
+  #            options:
+  #              name_override: "logs_jenkins"
+  #              files: ["/var/log/jenkins/jenkins.log"]
+  #              watch_method: "inotify"
+  #              from_beginning: "true"
+  #          - name: procstat
+  #            id: procstat_jenkins
+  #            options:
+  #              pattern: "java.*jenkins*.jar"
+  #              user: "jenkins"
+  #              pid_finder: "native"
+  #        # Dummy telegraf_influxdb settings - these will be set for-real at initial-startup via user-data
+  #        telegraf_influxdb_urls: ["https://localhost:8086"]
+  #        telegraf_influxdb_database: telegraf
+  #        telegraf_influxdb_retention_policy: autogen
+  #        telegraf_influxdb_username: telegraf
+  #        telegraf_influxdb_password: ""
+  #        telegraf_influxdb_insecure_skip_verify: "true"
+  #        telegraf_agent_interval: 10s
+  #        telegraf_round_interval: "false"
+  #        telegraf_metric_batch_size: "1000"
+  #        telegraf_metric_buffer_limit: "10000"
+  #        telegraf_collection_jitter: 2s
+  #        telegraf_flush_interval: 10s
+  #        telegraf_flush_jitter: 2s
+  #        telegraf_debug: "false"
+  #        telegraf_quiet: "true"
+  #        telegraf_tags:
+  #      tags: [telegraf]
+
+  # -------------------------------------------   Tasks   -------------------------------------------
+  tasks:
+    - name: "Install additional Amazon CloudWatch Agent config files"
+      copy:
+        src: "files/etc/amazon/amazon-cloudwatch-agent/amazon-cloudwatch-agent.d/{{ item }}"
+        dest: /etc/amazon/amazon-cloudwatch-agent/amazon-cloudwatch-agent.d/
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - amazon-cloudwatch-agent-jenkins-controller.json
+      tags: [amazon_cloudwatch_agent]
+
+    - name: "Copy initial-startup scripts"
+      copy:
+        src: "{{ item }}"
+        dest: "/usr/local/bin/"
+        owner: root
+        group: root
+        mode: 0750
+      with_fileglob:
+        - "files/usr/local/bin/prpl-initial-startup_*.sh"
+
+    - name: "Add script template for changing the admin password on 1st boot"
+      copy:
+        src: roles/geerlingguy.jenkins/templates/basic-security.groovy.j2
+        dest: "/var/lib/jenkins/basic-security.groovy.template"
+        owner: "jenkins"
+        group: "jenkins"
+        mode: 0770
+
+    # The jenkins role comes with an systemV init service script. Override this with an systemD one so that can add the
+    # "After=syslog.target network.target jenkins.mount" - the "jenkins.mount" will make it wait until our jenkins home dir has been mount before startup.
+    - name: "Create jenkins systemd service"
+      copy:
+        src: files/etc/systemd/system/jenkins.service
+        dest: /etc/systemd/system/jenkins.service
+        owner: root
+        group: root
+        mode: 'u=rw,g=,o='
+
+    - name: "Create jenkins systemd service start script"
+      copy:
+        src: files/var/lib/jenkins/jenkins-systemd-start.sh
+        dest: /var/lib/jenkins
+        owner: jenkins
+        group: jenkins
+        mode: 'u=rwx,g=rwx,o='
+
+    - name: "Add service script for Jenkins to systemd (disabled - will enable after EFS attachment)"
+      systemd:
+        name: jenkins
+        enabled: false
+        daemon_reload: true
+
+    - name: "Yum install general tools for Jenkins Controller"
+      yum:
+        name:
+          - git
+
+  # -------------------------------------------   Post Tasks   -------------------------------------------
+  post_tasks:
+    - name: "Check for log files to purge"
+      stat: path="{{ item.path }}"
+      with_items: "{{ log_files_for_purging }}"
+      register: log_files_for_purging_check
+      tags: [logs]
+
+    - name: "Ensure we have empty log files from when image was created"
+      shell: "truncate --size=0 {{ item.stat.path }}"
+      when: "{{ item.stat.exists | bool}} == true"
+      with_items: "{{ log_files_for_purging_check.results }}"
+      tags: [logs]

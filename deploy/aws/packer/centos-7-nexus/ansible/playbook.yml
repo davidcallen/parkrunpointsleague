@@ -1,0 +1,147 @@
+# ParkRun Points League - GPLv3
+#
+- name: "apply common configuration to all nodes"
+  hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    install_diagnostic_tools: true
+    log_files_for_purging:
+      - { path: /var/log/messages, owner: root, mode: '0640' }
+      - { path: /var/log/secure, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init.log, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init-output.log, owner: root, mode: '0600' }
+      - { path: /var/nexus/log/nexus.log, owner: nexus, group: nexus, mode: '0640' }
+
+  # -------------------------------------------   Pre Tasks   -------------------------------------------
+  pre_tasks:
+    - name: "Save IP address for possible ansible debugging"
+      copy:
+        content: "[all]\ncentos@{{ ansible_default_ipv4.address }}"
+        dest: ~/group_vars_static
+
+    - name: "Save IP address locally for ansible debugging"
+      fetch:
+        src: ~/group_vars_static
+        dest: ./group_vars/static
+        flat: yes
+
+    - name: "Create AMI identifier file"
+      file:
+        path: "/PRPL_PACKER_AMI_{{ AMI_NAME }}"
+        owner: root
+        group: root
+        mode: '0644'
+        state: touch
+      tags: stamp_ami
+
+  # -------------------------------------------   Roles   -------------------------------------------
+  roles:
+    - role: geerlingguy.java
+      tags: [java]
+
+    - role: ansible-thoteam.nexus3-oss
+      vars:
+        nexus_admin_password: 'nkl12390uckbj134gvg' # temporary password - will be changed on AMI deployment
+        nexus_privileges:
+          - name: all-repos-read  # used as key to update a privilege
+            description: 'Read & Browse access to all repos'
+            repository: '*'
+            actions:
+              - read
+              - browse
+          - name: all-repos-write  # used as key to update a privilege
+            description: 'Read, Browse and Write access to all repos'
+            repository: '*'
+            actions:
+              - read
+              - browse
+              - write
+        nexus_roles:
+          - id: developers  # can map to a LDAP group id, also used as a key to update a role
+            name: developers
+            description: All developers
+            privileges:
+              - nx-search-read
+              - all-repos-read
+            roles: []   # for permission to other roles
+          - id: jenkins  # can map to a LDAP group id, also used as a key to update a role
+            name: jenkins
+            description: All Jenkins CI
+            privileges:
+              - nx-search-read
+              - all-repos-write
+              - nx-repository-view-maven2-private-release-edit
+              - nx-repository-view-maven2-private-snapshots-edit
+              - nx-repository-view-maven2-private-snapshots-delete
+            roles: []   # for permission to other roles
+        nexus_local_users:
+          - username: jenkins
+            first_name: Jenkins
+            last_name: CI
+            email: devops@parkrunpointsleague.org
+            password: "k219nd%n]2nksu29i2lajv#"       # temporary password - will be changed on AMI deployment
+            roles:
+              - jenkins
+        nexus_repos_maven_hosted:
+          - name: private-release
+            version_policy: release
+            write_policy: allow_once  # one of "allow", "allow_once" or "deny"
+          - name: private-snapshots
+            version_policy: snapshot
+            layout_policy: permissive
+            write_policy: allow  # one of "allow", "allow_once" or "deny"
+      tags: [nexus]
+
+    # The role ansible-role-awscli requires EPEL
+    - role: geerlingguy.repo-epel
+      tags: [epel]
+
+    # Use my fork of role "christiangda.awscli" with fix to pip issue
+    - role: ansible-role-awscli
+      vars:
+        pip_executable_override: pip3
+      tags: [awscli]
+
+  # -------------------------------------------   Tasks   -------------------------------------------
+  tasks:
+    - name: "Install additional Amazon CloudWatch Agent config files"
+      copy:
+        src: "files/etc/amazon/amazon-cloudwatch-agent/amazon-cloudwatch-agent.d/{{ item }}"
+        dest: /etc/amazon/amazon-cloudwatch-agent/amazon-cloudwatch-agent.d/
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - amazon-cloudwatch-agent-nexus.json
+      tags: [amazon_cloudwatch_agent]
+
+    - name: "Copy initial-startup scripts"
+      copy:
+        src: "{{ item }}"
+        dest: "/usr/local/bin/"
+        owner: root
+        group: root
+        mode: 0750
+      with_fileglob:
+        - "files/usr/local/bin/prpl-initial-startup_*.sh"
+
+    - name: "Modify systemd service script for Nexus to disabled (will enable after EFS attachment)"
+      systemd:
+        name: nexus
+        enabled: false
+        daemon_reload: true
+
+  # -------------------------------------------   Post Tasks   -------------------------------------------
+  post_tasks:
+    - name: "Check for log files to purge"
+      stat: path="{{ item.path }}"
+      with_items: "{{ log_files_for_purging }}"
+      register: log_files_for_purging_check
+      tags: [logs]
+
+    - name: "Ensure we have empty log files from when image was created"
+      shell: "truncate --size=0 {{ item.stat.path }}"
+      when: "{{ item.stat.exists | bool}} == true"
+      with_items: "{{ log_files_for_purging_check.results }}"
+      tags: [logs]
