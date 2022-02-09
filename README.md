@@ -9,7 +9,7 @@ Data stored in MariaDB database.
 
 Pulls data from ParkRun website.
 
-This website is no longer hosted on www.parkrunpointsleage.org due to concerns over GDPR.
+This website is no longer hosted on www.parkrunpointsleage.org due to concerns over GDPR. Its primary purpose now is to act as a "showcase" and Lab environment for my DevOps and AWS practices.
  
 See ./doc/readme.txt for instructions on building from source code.
 

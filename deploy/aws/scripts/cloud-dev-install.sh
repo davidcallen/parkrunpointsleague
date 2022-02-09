@@ -225,6 +225,30 @@ if [ ${INSTALL_HELM} == true ] ; then
   rm -f ./get_helm.sh
 fi
 
+
+# ------------------------------------------  sops  -------------------------------------------------------
+# Mozilla sops for file decrypt+edit+encrypt
+SOPS_VERSION=3.7.1
+INSTALL_SOPS=false
+if [ ! -f ~/bin/sops ] ; then
+  INSTALL_SOPS=true
+  echo "Installing SOPS..."
+else
+  INSTALLED_SOPS_VERSION=$(~/bin/sops version | grep -o -E 'v[0-9]+\.[0-9]+\.[0-9]+')
+  if [ "${INSTALLED_SOPS_VERSION}" != "${SOPS_VERSION}" ] ; then
+    echo "Upgrading sops ${INSTALLED_SOPS_VERSION} -> ${SOPS_VERSION} ..."
+    INSTALL_SOPS=true
+  fi
+fi
+if [ ${INSTALL_SOPS} == true ] ; then
+  echo
+  curl  --silent --location -O https://github.com/mozilla/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux
+  chmod +x sops-v${SOPS_VERSION}.linux
+  mv sops-v${SOPS_VERSION}.linux ~/bin
+  ln -s ~/bin/sops-v${SOPS_VERSION}.linux ~/bin/sops
+fi
+
+
 # Cleanup
 [ -d ${TEMP_DIR} ] && rm -rf ${TEMP_DIR}
 cd ${START_PATH}

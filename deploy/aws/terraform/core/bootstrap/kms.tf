@@ -41,3 +41,6 @@ resource "aws_kms_alias" "secrets" {
   name          = "alias/${var.environment.resource_name_prefix}-kms-secrets"
   target_key_id = aws_kms_key.secrets.key_id
 }
+output "kms_secrets_arn" {
+  value = aws_kms_key.secrets.arn
+}

@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/null"
       version = "= 3.1.0"
     }
+    sops = {
+      source = "carlpett/sops"
+      version = "= 0.6.3"
+    }
   }
   required_version = "= 1.0.11"
 }
