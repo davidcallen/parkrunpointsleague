@@ -84,6 +84,14 @@ In directory ```core/bootstrap``` do 1st terraform run using aws-vault profile `
     aws-vault exec prpl-core -- ./terraform-apply.sh    
     ```
 
+
+- in ```core``` directory create the secrets file using SOPS as your personal IAM Admin user (e.g. david) by using aws-vault profile ```prpl-core```  
+
+    ```shell script
+    # Use the "kms_secrets_arn" output from above core/bootstrap apply for below SOPS_KMS_ARN env var. 
+    SOPS_KMS_ARN="arn:aws:kms:eu-west-1:123456789:key/xxxxxxxxx-yyyyy-zzzzzz-xxxxx-xxxxxxxx" aws-vault exec prpl-$(basename $(realpath .)) -- sops secrets.encrypted.json
+    ```
+  
 - and in ```core``` directory do terraform runs as your personal IAM Admin user (e.g. david) by using aws-vault profile ```prpl-core```  
 
     ```shell script

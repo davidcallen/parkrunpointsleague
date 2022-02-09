@@ -44,7 +44,8 @@ FILENAMES[0]=vpc.tf
 FILENAMES[1]=packer/security-groups.tf
 FILENAMES[2]=jenkins.tf
 FILENAMES[3]=nexus.tf
-FILENAMES[4]=bootstrap/kms.tf
+FILENAMES[4]=secrets.tf
+FILENAMES[5]=bootstrap/kms.tf
 
 # echo ${FILENAMES[@]}
 
