@@ -215,17 +215,17 @@ resource "aws_route53_resolver_rule_association" "on-premise" {
 }
 # Share above Route53 resolver rules into our other accounts
 module "route53-resolver-rule-inbound-sharing-cross-accounts" {
-  # source                  = "git@github.com:davidcallen/terraform-module-resolver-rules-sharing-cross-accounts.git?ref=1.0.0"
-  source                    = "../../../../../terraform-modules/terraform-module-resolver-rules-sharing-cross-accounts"
-  name                      = "${var.environment.resource_name_prefix}-resolver-rule-aws-cloud-share"
+  # source                  = "git@github.com:davidcallen/terraform-module-route53-resolver-rules-sharing-cross-accounts.git?ref=1.0.0"
+  source                    = "../../../../../terraform-modules/terraform-module-route53-resolver-rules-sharing-cross-accounts"
+  name                      = "${var.environment.resource_name_prefix}-route53-resolver-rule-aws-cloud-share"
   route53_resolver_rule_arn = aws_route53_resolver_rule.aws-cloud.arn
   share_with_account_ids    = var.cross_account_access.accounts[*].account_id
   default_tags              = merge(module.global_variables.default_tags, var.environment.default_tags)
 }
 module "route53-resolver-rule-outbound-sharing-cross-accounts" {
-  # source                  = "git@github.com:davidcallen/terraform-module-resolver-rules-sharing-cross-accounts.git?ref=1.0.0"
-  source                    = "../../../../../terraform-modules/terraform-module-resolver-rules-sharing-cross-accounts"
-  name                      = "${var.environment.resource_name_prefix}-resolver-rule-on-premise-share"
+  # source                  = "git@github.com:davidcallen/terraform-module-route53-resolver-rules-sharing-cross-accounts.git?ref=1.0.0"
+  source                    = "../../../../../terraform-modules/terraform-module-route53-resolver-rules-sharing-cross-accounts"
+  name                      = "${var.environment.resource_name_prefix}-route53-resolver-rule-on-premise-share"
   route53_resolver_rule_arn = aws_route53_resolver_rule.on-premise.arn
   share_with_account_ids    = var.cross_account_access.accounts[*].account_id
   default_tags              = merge(module.global_variables.default_tags, var.environment.default_tags)
