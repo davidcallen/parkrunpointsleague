@@ -7,12 +7,14 @@ environment = {
   resource_deletion_protection                 = false
   cloudwatch_alarms_sns_emails                 = ["david.c.allen1971@gmail.com"] # ["devops@parkrunpointsleague.org"]
   cloudwatch_log_groups_default_retention_days = 5
+  route53_enabled                              = true
+  route53_use_endpoints                        = true
   default_tags = {
     Environment = "core"
   }
 }
 
-# Temporary cost-savings by remove public subnets (not currently needed) and reduce AZs to 1
+# Temporary cost-savings by remove public subnets (not currently needed) and reduce AZs to 1        #COST-SAVING
 //vpc = {
 //  cidr_block                    = "10.6.0.0/16"
 //  private_subnets_cidr_blocks   = ["10.6.1.0/24", "10.6.2.0/24"]
@@ -25,12 +27,11 @@ environment = {
 //}
 vpc = {
   cidr_block                      = "10.6.0.0/16"
-  private_subnets_cidr_blocks     = ["10.6.1.0/24"]   # Temporary cost-savings by reduce AZs to 1
-  public_subnets_cidr_blocks      = ["10.6.101.0/24"] # Temporary cost-savings by reduce AZs to 1
+  private_subnets_cidr_blocks     = ["10.6.1.0/24"]   # Temporary cost-savings by reduce AZs to 1     #COST-SAVING
+  public_subnets_cidr_blocks      = ["10.6.101.0/24"] # Temporary cost-savings by reduce AZs to 1     #COST-SAVING
   flow_logs_to_s3_enabled         = false
   flow_logs_to_cloudwatch_enabled = false
 }
-
 
 cross_account_access = {
   accounts = [

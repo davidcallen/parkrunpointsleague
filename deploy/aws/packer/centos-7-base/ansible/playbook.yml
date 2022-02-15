@@ -184,6 +184,7 @@
           - wget
           - dstat
           - traceroute
+          - bind-utils   # For dig and nslookup
       when: install_diagnostic_tools
 
     - name: "Copy initial-startup scripts"

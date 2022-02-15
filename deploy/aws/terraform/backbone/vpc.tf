@@ -8,9 +8,10 @@ module "vpc" {
   azs                  = module.global_variables.aws_zones
   private_subnets      = var.vpc.private_subnets_cidr_blocks
   public_subnets       = var.vpc.public_subnets_cidr_blocks
-  enable_nat_gateway   = false # NAT not needed in backbone VPC cause only needed for attaching ClientVPN to TGW
+  enable_nat_gateway   = true # NAT not needed in backbone VPC cause vpc only needed for attaching ClientVPN to TGW  #COST-SAVING
   enable_vpn_gateway   = false # Using Transit Gateway instead
   enable_dns_hostnames = true
+  enable_dns_support   = true
 
   //  enable_public_s3_endpoint             = false
   //  enable_s3_endpoint                    = true

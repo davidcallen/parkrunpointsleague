@@ -54,7 +54,15 @@ output "allowed_org_public_network_cidrs" {
 # Allowed Organisation's Private (over VPN) network CIDRs.
 # This excludes any VPN virtual address space for connected clients - use "allowed_org_vpn_cidrs" for these.
 output "allowed_org_private_network_cidrs" {
-  value = []
+  value = [
+    "192.168.2.0/24" # our on-premise network
+  ]
+}
+output "on_premise_domain_name" {
+  value = "idlinux.net"
+}
+output "on_premise_dns_server_ip" {
+  value = "192.168.2.17"
 }
 # Allowed Organisation's VPN CIDRs
 output "allowed_org_vpn_cidrs" {
@@ -77,10 +85,10 @@ output "telegraf_influxdb_cidr" {
 output "telegraf_influxdb_url" {
   value = "https://10.6.2.10:8086"
 }
-# TODO : Move this password into ASM
-output "telegraf_influxdb_password" {
-  value = "halsdkln4e9h?24l£kjnasd90u134#"
-}
+//# TODO : Move this password into ASM
+//output "telegraf_influxdb_password" {
+//  value = "halsdkln4e9h?24l£kjnasd90u134#"
+//}
 output "telegraf_influxdb_retention_policy" {
   value = "autogen"
 }

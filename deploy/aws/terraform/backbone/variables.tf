@@ -1,18 +1,26 @@
 variable "environment" {
   description = "Environment details that are associated with the target AWS account"
   type = object({
-    name                         = string # Environment name (as used in account alias via switching roles) e.g. dev, demo, customerX-prod. Should be unique within our organistation
-    account_id                   = string # Environment account id
-    resource_name_prefix         = string # AWS Resource Name prefix
-    resource_deletion_protection = bool   # To protect against accidental deletion of resources
-    default_tags                 = map(string)
+    name                                         = string # Environment name (as used in account alias via switching roles) e.g. dev, demo, customerX-prod. Name should be unique within our organisation
+    account_id                                   = string # Environment account id
+    resource_name_prefix                         = string # AWS Resource Name prefix
+    resource_deletion_protection                 = bool   # To protect against accidental deletion of resources
+    cloudwatch_alarms_sns_emails                 = list(string)
+    cloudwatch_log_groups_default_retention_days = number
+    route53_enabled                              = bool
+    route53_use_endpoints                        = bool
+    default_tags                                 = map(string)
   })
   default = {
-    name                         = ""
-    account_id                   = ""
-    resource_name_prefix         = ""
-    resource_deletion_protection = true
-    default_tags                 = {}
+    name                                         = ""
+    account_id                                   = ""
+    resource_name_prefix                         = ""
+    resource_deletion_protection                 = true
+    cloudwatch_alarms_sns_emails                 = []
+    cloudwatch_log_groups_default_retention_days = 10
+    route53_enabled                              = false
+    route53_use_endpoints                        = false
+    default_tags                                 = {}
   }
 }
 variable "vpc" {

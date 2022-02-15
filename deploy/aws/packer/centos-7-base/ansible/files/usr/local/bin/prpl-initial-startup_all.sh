@@ -21,6 +21,9 @@ trap err ERR
 log "Starting"
 /usr/local/bin/prpl-initial-startup_motd.sh
 
+log "Register DNS with Route53"
+/usr/local/bin/prpl-initial-startup_route53-register-dns.sh
+
 log "Create the config for the Telegraf Agent (and then restart its service)..."
 /usr/local/bin/prpl-initial-startup_telegraf.sh
 

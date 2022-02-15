@@ -16,6 +16,10 @@ terraform {
       source = "carlpett/sops"
       version = "= 0.6.3"
     }
+    local = {
+      source = "hashicorp/local"
+      version = "= 2.1.0"
+    }
   }
   required_version = "= 1.0.11"
 }

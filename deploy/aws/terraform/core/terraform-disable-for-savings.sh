@@ -46,6 +46,7 @@ FILENAMES[2]=jenkins.tf
 FILENAMES[3]=nexus.tf
 FILENAMES[4]=secrets.tf
 FILENAMES[5]=bootstrap/kms.tf
+FILENAMES[6]=route53.tf
 
 # echo ${FILENAMES[@]}
 

@@ -37,6 +37,9 @@ fi
 FILENAMES[0]=tgw.tf
 FILENAMES[1]=vpc.tf
 FILENAMES[2]=client-vpn.tf
+FILENAMES[3]=route53.tf
+FILENAMES[4]=ec2-test.tf
+FILENAMES[5]=ec2-test-02.tf
 
 # echo ${FILENAMES[@]}
 

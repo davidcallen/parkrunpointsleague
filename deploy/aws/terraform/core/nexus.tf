@@ -77,13 +77,15 @@ module "nexus" {
     desired_capacity               = 1
     target_group_name_prefix       = "nexus" # Max 20 chars !! due to limitation on length of ASG TargetGroups which need to be unique
   }
-  name_suffix           = ""
-  hostname_fqdn         = "nexus.parkrunpointsleague.org"
-  server_listening_port = 8081         # This is the port that the EC2 will listen on, and that ALB will forward traffic to.
-  aws_instance_type     = "t3a.medium" # Nexus needs a minimum of 8GB
-  aws_ami_id            = data.aws_ami.centos-7-nexus[0].id
-  aws_ssh_key_name      = aws_key_pair.ssh.key_name
-  iam_instance_profile  = module.iam-nexus.nexus-profile.name
+  name_suffix                    = ""
+  hostname_fqdn                  = "${var.environment.resource_name_prefix}-nexus.${var.environment.name}.${module.global_variables.org_domain_name}"
+  route53_enabled                = var.environment.route53_enabled
+  route53_private_hosted_zone_id = aws_route53_zone.private.id
+  server_listening_port          = 8081         # This is the port that the EC2 will listen on, and that ALB will forward traffic to.
+  aws_instance_type              = "t3a.medium" # Nexus needs a minimum of 8GB
+  aws_ami_id                     = data.aws_ami.centos-7-nexus[0].id
+  aws_ssh_key_name               = aws_key_pair.ssh.key_name
+  iam_instance_profile           = module.iam-nexus.nexus-profile.name
   disk_root = {
     encrypted = true
   }
@@ -139,6 +141,9 @@ module "nexus" {
 //# ---------------------------------------------------------------------------------------------------------------------
 //# Create ssh_key_pair and upload ssh public key from file to there
 //#   Requires an ssh key to already exist that was created like "ssh-keygen -f ~/.ssh/prpl-aws/prpl-foobar-ssh-key -t rsa -b 2048 -m pem"
+//# Would like to use ECDSA or ED25519, but restricted because :
+//#  1) data.tls_public_key only supports RSA and ECDSA
+//#  2) EC2 aws_key_pair only supports RSA and ED25519
 //# ---------------------------------------------------------------------------------------------------------------------
 //data "tls_public_key" "ssh-key-nexus-admin-user" {
 //  private_key_pem = file("~/.ssh/prpl-aws/${var.environment.resource_name_prefix}-ssh-key-nexus-admin")
@@ -164,8 +169,9 @@ resource "aws_cloudwatch_log_group" "nexus" {
 # ---------------------------------------------------------------------------------------------------------------------
 module "iam-nexus" {
   # source           = "git@github.com:davidcallen/terraform-module-iam-nexus.git?ref=1.0.0"
-  source               = "../../../../../terraform-modules/terraform-module-iam-nexus"
-  resource_name_prefix = var.environment.resource_name_prefix
+  source                  = "../../../../../terraform-modules/terraform-module-iam-nexus"
+  resource_name_prefix    = var.environment.resource_name_prefix
+  route53_private_zone_id = aws_route53_zone.private.id
   secrets_arns = [
     module.nexus-admin-password-secret.secret_arn,
     module.nexus-jenkins-password-secret.secret_arn
@@ -187,7 +193,7 @@ module "nexus-admin-password-secret" {
   recovery_window_in_days = 0 # Force secret deletion to action immediately
   account_id              = var.environment.account_id
   # TODO : at some point ASM may support the generation of a random password which would be preferable for keeping password out of TF State and git
-  password = local.secrets_primary.nexus-admin.password
+  password = local.secrets_primary.data["nexus-admin.password"]
   allowed_iam_user_ids = [
     var.environment.account_id,
     "${data.aws_iam_role.admin.unique_id}:*",
@@ -204,7 +210,7 @@ module "nexus-jenkins-password-secret" {
   recovery_window_in_days = 0 # Force secret deletion to action immediately
   account_id              = var.environment.account_id
   # TODO : at some point ASM may support the generation of a random password which would be preferable for keeping password out of TF State and git
-  password = local.secrets_primary.nexus-jenkins.password
+  password = local.secrets_primary.data["nexus-jenkins.password"]
   allowed_iam_user_ids = [
     var.environment.account_id,
     "${data.aws_iam_role.admin.unique_id}:*",

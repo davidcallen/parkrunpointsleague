@@ -4,9 +4,8 @@
 # ---------------------------------------------------------------------------------------------------------------------
 provider "sops" {}
 data "sops_file" "primary" {
-  source_file = "${path.module}/secrets.encrypted.json"
-  input_type = "raw"
+  source_file = "${path.module}/secrets.encrypted.yml"
 }
 locals {
-  secrets_primary = yamldecode(data.sops_file.primary.raw)    # file data contents are in yaml format so use "raw" access
+  secrets_primary = data.sops_file.primary
 }

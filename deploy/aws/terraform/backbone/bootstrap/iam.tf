@@ -45,8 +45,12 @@ resource "aws_iam_group_membership" "admin" {
   group   = aws_iam_group.admin.name
   users = [
     data.aws_iam_user.david.user_name
+    # data.aws_iam_user.iam-test.user_name
   ]
 }
 data "aws_iam_user" "david" {
   user_name = "david"
 }
+//data "aws_iam_user" "iam-test" {
+//  user_name = "iam-test"
+//}

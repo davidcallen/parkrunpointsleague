@@ -88,7 +88,6 @@ resource "aws_iam_group_membership" "admin-read-only" {
   name    = aws_iam_group.admin-read-only.name
   group   = aws_iam_group.admin-read-only.name
   users = [
-    data.aws_iam_user.iam-test.user_name
   ]
 }
 

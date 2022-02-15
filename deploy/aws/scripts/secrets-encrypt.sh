@@ -72,8 +72,8 @@ if [ "${ARG_USE_SOPS}" == "TRUE" ] ; then
     echo "ERROR : ensure you have environment variable 'SOPS_KMS_ARN' set."
     err
   fi
-  sops secrets.yml.encrypted
-  echo "Finished editing and encrypting of 'secrets.yml.encrypted'."
+  sops secrets.encrypted.yml
+  echo "Finished editing and encrypting of 'secrets.encrypted.yml'."
 else
   if [ "${ARG_DECRYPT}" == "TRUE" ] ; then
     if [ ! -f secrets.yml.encrypted ] ; then

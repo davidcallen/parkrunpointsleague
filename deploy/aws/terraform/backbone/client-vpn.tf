@@ -42,12 +42,15 @@
 //}
 
 resource "aws_acm_certificate" "client-vpn-server-cert" {
-  count             = (var.client_vpn.enabled) ? 1 : 0
+  count = (var.client_vpn.enabled) ? 1 : 0
   # private_key      = tls_private_key.client-vpn-key[0].private_key_pem
-  private_key       = file("~/.cert/nm-openvpn/prpl-client-vpn-server.key")
+  private_key = file("~/.cert/nm-openvpn/prpl-client-vpn-server.key")
   # certificate_body = tls_self_signed_cert.client-vpn-cert[0].cert_pem
   certificate_body  = file("~/.cert/nm-openvpn/prpl-client-vpn-server.crt")
   certificate_chain = file("~/.cert/nm-openvpn/prpl-client-vpn-ca.crt")
+  tags = merge(module.global_variables.default_tags, var.environment.default_tags, {
+    Name = "${var.environment.resource_name_prefix}-client-vpn-server-cert"
+  })
 }
 // For use with Mutual Authentication
 //resource "aws_acm_certificate" "client-vpn-client-cert" {
@@ -62,8 +65,9 @@ resource "aws_ec2_client_vpn_endpoint" "client-vpn" {
   description            = "${var.environment.resource_name_prefix}-client-vpn"
   server_certificate_arn = aws_acm_certificate.client-vpn-server-cert[0].arn
   client_cidr_block      = var.client_vpn.client_cidr_block
-  dns_servers            = ["8.8.8.8", "8.8.4.4"]
-  split_tunnel           = true
+  # dns_servers            = ["8.8.8.8", "8.8.4.4"]   # #COST-SAVING
+  dns_servers  = aws_route53_resolver_endpoint.dns-endpoint-inbound.ip_address[*].ip #COST-SAVING
+  split_tunnel = true
   authentication_options {
     type                       = "certificate-authentication"
     root_certificate_chain_arn = aws_acm_certificate.client-vpn-server-cert[0].arn

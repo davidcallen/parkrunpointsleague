@@ -41,15 +41,15 @@ data "aws_iam_group" "admin-group" {
 }
 # Allow prpl-admin group users and Root user from root "backbone" account id
 module "iam-s3-bucket-policy" {
-  source = "git@github.com:davidcallen/terraform-module-iam-s3-bucket-policy-for-users.git?ref=1.0.0"
-  # source = "../../../../terraform-modules/terraform-module-iam-s3-bucket-policy-for-users"
+  # source = "git@github.com:davidcallen/terraform-module-iam-s3-bucket-policy-for-users.git?ref=1.0.0"
+  source      = "../../../../../terraform-modules/terraform-module-iam-s3-bucket-policy-for-users"
   bucket_name = data.aws_s3_bucket.terraform-state-environment.bucket
   sub_policies = [
     {
       description      = "Restrict access to our terraform-state bucket to Admins"
       actions          = ["s3:*"]
       bucket_paths     = ["", "/*"]
-      allowed_user_ids = data.aws_iam_group.admin-group.users[*].user_id
+      allowed_user_ids = concat(data.aws_iam_group.admin-group.users[*].user_id)
     }
   ]
   root_account_id     = module.global_variables.backbone_account_id
@@ -59,6 +59,9 @@ module "iam-s3-bucket-policy" {
 # ---------------------------------------------------------------------------------------------------------------------
 # Create ssh_key_pair and upload ssh public key from file to there
 #   Requires an ssh key to already exist that was created like "ssh-keygen -f ~/.ssh/prpl-aws/prpl-foobar-ssh-key -t rsa -b 2048 -m pem"
+# Would like to use ECDSA or ED25519, but restricted because :
+#  1) data.tls_public_key only supports RSA and ECDSA
+#  2) EC2 aws_key_pair only supports RSA and ED25519
 # ---------------------------------------------------------------------------------------------------------------------
 data "tls_public_key" "ssh-key" {
   private_key_pem = file("~/.ssh/prpl-aws/${var.environment.resource_name_prefix}-ssh-key")

@@ -89,6 +89,16 @@ variable "allowed_org_private_network_cidrs" {
   default     = []
   type        = list(string)
 }
+variable "on_premise_domain_name" {
+  description = "Our on-premise domain name"
+  type        = string
+  default     = ""
+}
+variable "on_premise_dns_server_ip" {
+  description = "Our on-premise DNS server IP address"
+  type        = string
+  default     = ""
+}
 variable "allowed_org_vpn_cidrs" {
   description = "List of the allowed PRPL VPN CIDRs to access the AWS resources."
   default     = []

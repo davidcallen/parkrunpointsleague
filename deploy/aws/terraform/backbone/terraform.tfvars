@@ -1,10 +1,14 @@
 # Variable values (overrides defaults defined in variables.tf)
 #
 environment = {
-  name                         = "backbone"
-  account_id                   = "597767386394"
-  resource_name_prefix         = "prpl-backbone"
-  resource_deletion_protection = false
+  name                                         = "backbone"
+  account_id                                   = "597767386394"
+  resource_name_prefix                         = "prpl-backbone"
+  resource_deletion_protection                 = false
+  cloudwatch_alarms_sns_emails                 = ["david.c.allen1971@gmail.com"] # ["devops@parkrunpointsleague.org"]
+  cloudwatch_log_groups_default_retention_days = 5
+  route53_enabled                              = true
+  route53_use_endpoints                        = true
   default_tags = {
     Environment = "backbone"
   }
@@ -12,9 +16,12 @@ environment = {
 
 # Need a VPC in Backbone only for because Client VPN requires association to a VPN (cannot attach directly to a TGW - unlike Site-to-Site VPNs).
 vpc = {
-  cidr_block                      = "10.5.0.0/16"
-  private_subnets_cidr_blocks     = ["10.5.0.0/16"]
-  public_subnets_cidr_blocks      = [] # Dont need public subnets in backbone
+  cidr_block = "10.5.0.0/16"
+  # For cost-savings we are using a single subnet and no public subnets
+  # IMPORTANT : If changing this then search terraform for "#COST-SAVINGS" for additional impact
+  private_subnets_cidr_blocks = ["10.5.1.0/24", "10.5.2.0/24"] # Need 2 subnets because Route53 Endpoints require it
+  # public_subnets_cidr_blocks      = [] # Dont need public subnets in backbone       #COST-SAVING
+  public_subnets_cidr_blocks      = ["10.5.101.0/24", "10.5.102.0/24"]
   flow_logs_to_s3_enabled         = false
   flow_logs_to_cloudwatch_enabled = false
 }
