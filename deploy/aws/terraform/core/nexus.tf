@@ -79,8 +79,8 @@ module "nexus" {
   }
   name_suffix                    = ""
   hostname_fqdn                  = "${var.environment.resource_name_prefix}-nexus.${var.environment.name}.${module.global_variables.org_domain_name}"
-  route53_enabled                = var.environment.route53_enabled
-  route53_private_hosted_zone_id = aws_route53_zone.private.id
+  route53_enabled                = module.global_variables.route53_enabled
+  route53_private_hosted_zone_id = (module.global_variables.route53_enabled) ? aws_route53_zone.private[0].id : ""
   server_listening_port          = 8081         # This is the port that the EC2 will listen on, and that ALB will forward traffic to.
   aws_instance_type              = "t3a.medium" # Nexus needs a minimum of 8GB
   aws_ami_id                     = data.aws_ami.centos-7-nexus[0].id
@@ -171,7 +171,7 @@ module "iam-nexus" {
   # source           = "git@github.com:davidcallen/terraform-module-iam-nexus.git?ref=1.0.0"
   source                  = "../../../../../terraform-modules/terraform-module-iam-nexus"
   resource_name_prefix    = var.environment.resource_name_prefix
-  route53_private_zone_id = aws_route53_zone.private.id
+  route53_private_zone_id = aws_route53_zone.private[0].id
   secrets_arns = [
     module.nexus-admin-password-secret.secret_arn,
     module.nexus-jenkins-password-secret.secret_arn

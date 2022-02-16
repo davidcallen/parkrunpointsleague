@@ -76,6 +76,12 @@ output "active_directory_ips" {
 output "active_directory_cidrs" {
   value = []
 }
+output "route53_enabled" {
+  value = true
+}
+output "route53_use_endpoints" {
+  value = false
+}
 output "telegraf_enabled" {
   value = false
 }
@@ -99,7 +105,7 @@ output "cloudwatch_log_groups_default_retention_days" {
   value = 30
 }
 # CAUTION !!!!
-#   ONLY CHANGE THIS TO FALSE WHEN NUKING AN ENVIRONMENT (i.e. before doing a "total-global-thermonuclear-warfare" terraform destoy)
+#   ONLY CHANGE THIS TO FALSE WHEN NUKING AN ENVIRONMENT (i.e. before doing a "total-global-thermonuclear-warfare" terraform destroy)
 output "debug_prevent_destroy_terraform_state_buckets" {
   value = var.debug_prevent_destroy_terraform_state_buckets
 }

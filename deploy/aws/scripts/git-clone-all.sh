@@ -57,6 +57,7 @@ terraform_modules_git_clone terraform-module-iam-jenkins
 terraform_modules_git_clone terraform-module-iam-nexus
 terraform_modules_git_clone terraform-module-iam-packer-build
 terraform_modules_git_clone terraform-module-iam-s3-bucket-policy-for-users
+terraform_modules_git_clone terraform-module-route53-resolver-rules-sharing-cross-accounts
 terraform_modules_git_clone terraform-module-sns-topic-subs
 terraform_modules_git_clone terraform-module-tgw-sharing-cross-accounts
 

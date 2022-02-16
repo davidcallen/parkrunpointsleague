@@ -114,6 +114,16 @@ variable "active_directory_mk_cidrs" {
   description = "List of CIDRs of MK Active Directory Servers"
   default     = []
 }
+variable "route53_enabled" {
+  description = "Use Route53 for DNS"
+  type        = bool
+  default     = false
+}
+variable "route53_use_endpoints" {
+  description = "Use Route53 Endpoints for DNS"
+  type        = bool
+  default     = false
+}
 variable "telegraf_influxdb_cidr" {
   description = "The monitoring InfluxDB CIDR for output from Telegraf Agent"
   default     = ""

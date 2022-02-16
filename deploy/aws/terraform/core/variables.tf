@@ -8,8 +8,6 @@ variable "environment" {
     resource_deletion_protection                 = bool   # To protect against accidental deletion of resources
     cloudwatch_alarms_sns_emails                 = list(string)
     cloudwatch_log_groups_default_retention_days = number
-    route53_enabled                              = bool
-    route53_use_endpoints                        = bool
     default_tags                                 = map(string)
   })
   default = {

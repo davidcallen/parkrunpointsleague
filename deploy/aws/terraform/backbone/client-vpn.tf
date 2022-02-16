@@ -65,9 +65,8 @@ resource "aws_ec2_client_vpn_endpoint" "client-vpn" {
   description            = "${var.environment.resource_name_prefix}-client-vpn"
   server_certificate_arn = aws_acm_certificate.client-vpn-server-cert[0].arn
   client_cidr_block      = var.client_vpn.client_cidr_block
-  # dns_servers            = ["8.8.8.8", "8.8.4.4"]   # #COST-SAVING
-  dns_servers  = aws_route53_resolver_endpoint.dns-endpoint-inbound.ip_address[*].ip #COST-SAVING
-  split_tunnel = true
+  dns_servers            = (module.global_variables.route53_enabled && module.global_variables.route53_use_endpoints) ? aws_route53_resolver_endpoint.dns-endpoint-inbound[0].ip_address[*].ip : (module.global_variables.route53_enabled) ? [cidrhost(module.vpc.vpc_cidr_block, 2)] : ["8.8.8.8", "8.8.4.4"] #COST-SAVING
+  split_tunnel           = true
   authentication_options {
     type                       = "certificate-authentication"
     root_certificate_chain_arn = aws_acm_certificate.client-vpn-server-cert[0].arn

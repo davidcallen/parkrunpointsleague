@@ -7,8 +7,6 @@ environment = {
   resource_deletion_protection                 = false
   cloudwatch_alarms_sns_emails                 = ["david.c.allen1971@gmail.com"] # ["devops@parkrunpointsleague.org"]
   cloudwatch_log_groups_default_retention_days = 5
-  route53_enabled                              = true
-  route53_use_endpoints                        = true
   default_tags = {
     Environment = "core"
   }
