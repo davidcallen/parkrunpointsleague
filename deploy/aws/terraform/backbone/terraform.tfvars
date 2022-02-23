@@ -17,9 +17,14 @@ vpc = {
   cidr_block = "10.5.0.0/16"
   # For cost-savings we are using a single subnet and no public subnets
   # IMPORTANT : If changing this then search terraform for "#COST-SAVINGS" for additional impact
+
+  # private_subnets_cidr_blocks = ["10.5.1.0/24"] # , "10.5.2.0/24"]
+  # public_subnets_cidr_blocks  = []              # Dont need public subnets in backbone       #COST-SAVING
+
+  # For Route53 with EndPoints need 2 subnets. Same for AD.
   private_subnets_cidr_blocks = ["10.5.1.0/24", "10.5.2.0/24"] # Need 2 subnets because Route53 Endpoints require it
-  # public_subnets_cidr_blocks      = [] # Dont need public subnets in backbone       #COST-SAVING
-  public_subnets_cidr_blocks      = ["10.5.101.0/24", "10.5.102.0/24"]
+  public_subnets_cidr_blocks  = ["10.5.101.0/24", "10.5.102.0/24"]
+
   flow_logs_to_s3_enabled         = false
   flow_logs_to_cloudwatch_enabled = false
 }
@@ -62,3 +67,4 @@ client_vpn = {
     "10.7.0.0/16"  # dev
   ]
 }
+route53_testing_mode_enabled = true

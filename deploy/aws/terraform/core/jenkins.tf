@@ -70,22 +70,23 @@ module "jenkins_controller" {
     health_check_grace_period      = 60  # Time (in seconds) after instance comes into service before checking health
     default_cooldown               = 120 # Start the failover instance quickly
     suspended_processes            = []  # ["Launch", "Terminate", "ReplaceUnhealthy", "HealthCheck"]
-    cloudwatch_alarm_sns_topic_arn = module.iam-jenkins.jenkins-controller-profile.name
+    cloudwatch_alarm_sns_topic_arn = ""
     check_efs_asg_max_attempts     = 60
     max_size                       = 1
     min_size                       = 1
     desired_capacity               = 1
     target_group_name_prefix       = "jenkins-controller" # Max 20 chars !! due to limitation on length of ASG TargetGroups which need to be unique
   }
-  name_suffix                    = ""
-  hostname_fqdn                  = "${var.environment.resource_name_prefix}-jenkins.${var.environment.name}.${module.global_variables.org_domain_name}"
-  route53_enabled                = module.global_variables.route53_enabled
-  route53_private_hosted_zone_id = (module.global_variables.route53_enabled) ? aws_route53_zone.private[0].id : ""
-  server_listening_port          = 8080 # This is the port that the EC2 will listen on, and that ALB will forward traffic to.
-  aws_instance_type              = "t3a.small"
-  aws_ami_id                     = data.aws_ami.centos-7-jenkins-controller[0].id
-  aws_ssh_key_name               = aws_key_pair.ssh.key_name
-  iam_instance_profile           = module.iam-jenkins.jenkins-controller-profile.name
+  name_suffix                       = ""
+  hostname_fqdn                     = "${var.environment.resource_name_prefix}-jenkins.${var.environment.name}.${module.global_variables.org_domain_name}"
+  route53_enabled                   = module.global_variables.route53_enabled
+  route53_direct_dns_update_enabled = module.global_variables.route53_direct_dns_update_enabled
+  route53_private_hosted_zone_id    = module.dns[0].route53_private_hosted_zone_id
+  server_listening_port             = 8080 # This is the port that the EC2 will listen on, and that ALB will forward traffic to.
+  aws_instance_type                 = "t3a.small"
+  aws_ami_id                        = data.aws_ami.centos-7-jenkins-controller[0].id
+  aws_ssh_key_name                  = aws_key_pair.ssh.key_name
+  iam_instance_profile              = module.iam-jenkins.jenkins-controller-profile.name
   disk_root = {
     encrypted = true
   }
@@ -188,8 +189,9 @@ resource "aws_cloudwatch_log_group" "jenkins-controller" {
 # ---------------------------------------------------------------------------------------------------------------------
 module "iam-jenkins" {
   # source           = "git@github.com:davidcallen/terraform-module-iam-jenkins.git?ref=1.0.0"
-  source               = "../../../../../terraform-modules/terraform-module-iam-jenkins"
-  resource_name_prefix = var.environment.resource_name_prefix
+  source                  = "../../../../../terraform-modules/terraform-module-iam-jenkins"
+  resource_name_prefix    = var.environment.resource_name_prefix
+  route53_private_zone_id = module.dns[0].route53_private_hosted_zone_id
   secrets_arns = [
     module.jenkins-controller-admin-password-secret.secret_arn,
     module.jenkins-controller-nexus-password-secret.secret_arn
@@ -251,7 +253,7 @@ locals {
     subnet_ids                            = join(",", module.vpc.private_subnets)
     jenkins_url                           = "http://prpl-core-jenkins:8080"
     jenkins_listening_port                = 8080
-    nexus_host                            = "${var.environment.resource_name_prefix}-nexus.${var.environment}.${module.global_variables.org_domain_name}" # module.nexus.aws_instance_private_ip
+    nexus_host                            = "${var.environment.resource_name_prefix}-nexus.${var.environment.name}.${module.global_variables.org_domain_name}" # module.nexus.aws_instance_private_ip
     nexus_http_port                       = 8081
     nexus_http_protocol                   = "http"
   })

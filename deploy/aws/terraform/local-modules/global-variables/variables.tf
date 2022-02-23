@@ -28,7 +28,7 @@ variable "org_name" {
   type        = string
 }
 variable "org_short_name" {
-  description = "Short name for organisation e.g. ta"
+  description = "Short name for organisation e.g. prpl"
   default     = ""
   type        = string
 }
@@ -81,28 +81,28 @@ variable "resource_deletion_protection" {
 }
 variable "allowed_org_public_network_cidrs" {
   description = "List of the allowed PRPL Public IP addresses to access the AWS resources over the internet."
-  default     = []
   type        = list(string)
+  default     = []
 }
 variable "allowed_org_private_network_cidrs" {
   description = "List of the allowed PRPL Private IP addresses to access the AWS resources over the VPN."
-  default     = []
   type        = list(string)
+  default     = []
 }
 variable "on_premise_domain_name" {
   description = "Our on-premise domain name"
   type        = string
   default     = ""
 }
-variable "on_premise_dns_server_ip" {
-  description = "Our on-premise DNS server IP address"
-  type        = string
-  default     = ""
+variable "on_premise_dns_server_ips" {
+  description = "Our on-premise DNS server IP addresses"
+  type        = list(string)
+  default     = []
 }
 variable "allowed_org_vpn_cidrs" {
   description = "List of the allowed PRPL VPN CIDRs to access the AWS resources."
-  default     = []
   type        = list(string)
+  default     = []
 }
 variable "active_directory_mk_ips" {
   type        = list(string)
@@ -124,6 +124,16 @@ variable "route53_use_endpoints" {
   type        = bool
   default     = false
 }
+variable "central_directory_enabled" {
+  description = "True if using a centralised directory like SimpleAD or Full MS Active Directory"
+  type        = bool
+  default     = true
+}
+variable "telegraf_enabled" {
+  description = "True if monitoring with InfluxDB from Telegraf Agent"
+  type        = bool
+  default     = true
+}
 variable "telegraf_influxdb_cidr" {
   description = "The monitoring InfluxDB CIDR for output from Telegraf Agent"
   default     = ""
@@ -136,18 +146,23 @@ variable "telegraf_influxdb_url" {
 }
 variable "telegraf_influxdb_retention_policy" {
   description = "The metric retention policy for outputing to InfluxDB from Telegraf Agent"
-  default     = "autogen"
   type        = string
+  default     = "autogen"
+}
+variable "telegraf_influxdb_https_insecure_skip_verify" {
+  description = "True if skip SSL/TLS certificate verification on InfluxDB HTTPS endpoint"
+  type        = bool
+  default     = false
 }
 # CAUTION !!!!
 #   ONLY CHANGE THIS TO FALSE WHEN NUKING AN ENVIRONMENT (i.e. before doing a "total-global-thermonuclear-warfare" terraform destroy)
 variable "debug_prevent_destroy_terraform_state_buckets" {
   description = "ONLY CHANGE THIS TO FALSE WHEN NUKING AN ENVIRONMENT (i.e. before doing a 'total-global-thermonuclear-warfare' terraform destroy)"
-  default     = true
   type        = bool
+  default     = true
 }
 variable "default_tags" {
   description = "Default tags"
-  default     = {}
   type        = map(string)
+  default     = {}
 }

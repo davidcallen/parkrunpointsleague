@@ -52,9 +52,11 @@ function terraform_modules_git_clone() {
 terraform_modules_git_clone terraform-module-aws-asm-secret
 terraform_modules_git_clone terraform-module-aws-jenkins-controller
 terraform_modules_git_clone terraform-module-aws-nexus
+terraform_modules_git_clone terraform-module-aws-simple-ad-admin-linux
 terraform_modules_git_clone terraform-module-aws-vpc-flow-logs-s3
 terraform_modules_git_clone terraform-module-iam-jenkins
 terraform_modules_git_clone terraform-module-iam-nexus
+terraform_modules_git_clone terraform-module-iam-simple-ad-admin
 terraform_modules_git_clone terraform-module-iam-packer-build
 terraform_modules_git_clone terraform-module-iam-s3-bucket-policy-for-users
 terraform_modules_git_clone terraform-module-route53-resolver-rules-sharing-cross-accounts

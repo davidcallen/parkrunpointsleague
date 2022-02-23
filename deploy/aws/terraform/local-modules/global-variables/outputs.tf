@@ -61,8 +61,8 @@ output "allowed_org_private_network_cidrs" {
 output "on_premise_domain_name" {
   value = "idlinux.net"
 }
-output "on_premise_dns_server_ip" {
-  value = "192.168.2.17"
+output "on_premise_dns_server_ips" {
+  value = ["192.168.2.17"]
 }
 # Allowed Organisation's VPN CIDRs
 output "allowed_org_vpn_cidrs" {
@@ -76,24 +76,45 @@ output "active_directory_ips" {
 output "active_directory_cidrs" {
   value = []
 }
+# DNS Scenario 1 : Route53 only with No Central Directory and Using R53 Endpoints (module=core/dns-route53-only)
+//output "route53_enabled" {
+//  value = true
+//}
+//output "route53_direct_dns_update_enabled" {
+//  value = true
+//}
+//output "route53_use_endpoints" {
+//  value = true
+//}
+//output "central_directory_enabled" {
+//  value = false
+//}
+# DNS Scenario : Central Directory (SimpleAD) with Route53 and No R53 Endpoints (module=core/dns-route53-simple-ad-no-endpoints)
 output "route53_enabled" {
   value = true
+}
+output "route53_direct_dns_update_enabled" {
+  value = false
 }
 output "route53_use_endpoints" {
   value = false
 }
+output "central_directory_enabled" {
+  value = true
+}
+
 output "telegraf_enabled" {
   value = false
 }
 output "telegraf_influxdb_cidr" {
-  value = "10.6.2.247/32"
+  value = "10.6.1.10/32"
 }
 output "telegraf_influxdb_url" {
-  value = "https://10.6.2.10:8086"
+  value = "https://10.6.1.10:8086"
 }
 //# TODO : Move this password into ASM
 //output "telegraf_influxdb_password" {
-//  value = "halsdkln4e9h?24l£kjnasd90u134#"
+//  value = "3w45sfgd?ad1341dad23#"
 //}
 output "telegraf_influxdb_retention_policy" {
   value = "autogen"

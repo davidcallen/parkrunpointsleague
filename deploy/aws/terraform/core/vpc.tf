@@ -47,12 +47,12 @@ module "vpc" {
   tags = merge(module.global_variables.default_tags, var.environment.default_tags, {})
   public_subnet_tags = {
     Visibility                                           = "public"
-    "kubernetes.io/cluster/ta-core-kube-jenkins-cluster" = "shared"
+    "kubernetes.io/cluster/${var.environment.resource_name_prefix}-kube-jenkins-cluster" = "shared"
     "kubernetes.io/role/elb"                             = "1"
   }
   private_subnet_tags = {
     Visibility                                           = "private"
-    "kubernetes.io/cluster/ta-core-kube-jenkins-cluster" = "shared"
+    "kubernetes.io/cluster/${var.environment.resource_name_prefix}-kube-jenkins-cluster" = "shared"
     "kubernetes.io/role/internal-elb"                    = "1"
   }
 }

@@ -1,0 +1,9 @@
+ansible_user: 'Administrator'
+ansible_password: 'Mypass123!'
+ansible_winrm_transport: kerberos
+
+ansible_port: '5985'
+ansible_connection: 'winrm'
+
+ansible_winrm_server_cert_validation: ignore
+validate_certs: false

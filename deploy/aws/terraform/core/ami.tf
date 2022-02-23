@@ -74,7 +74,7 @@ data "aws_ami" "centos-6-base" {
   }
   filter {
     name   = "name"
-    values = ["${var.amis.name_prefix}prpl-centos-6-base-*"]
+    values = ["${var.amis.name_prefix}${module.global_variables.org_short_name}-centos-6-base-*"]
   }
   filter {
     name   = "virtualization-type"
@@ -100,7 +100,7 @@ data "aws_ami" "centos-7-base" {
   }
   filter {
     name   = "name"
-    values = ["${var.amis.name_prefix}prpl-centos-7-base-*"]
+    values = ["${var.amis.name_prefix}${module.global_variables.org_short_name}-centos-7-base-*"]
   }
   filter {
     name   = "virtualization-type"
@@ -128,7 +128,7 @@ data "aws_ami" "centos-7-jenkins-controller" {
   }
   filter {
     name   = "name"
-    values = ["${var.amis.name_prefix}prpl-centos-7-jenkins-controller-*"]
+    values = ["${var.amis.name_prefix}${module.global_variables.org_short_name}-centos-7-jenkins-controller-*"]
   }
   filter {
     name   = "virtualization-type"
@@ -156,7 +156,7 @@ data "aws_ami" "centos-7-nexus" {
   }
   filter {
     name   = "name"
-    values = ["${var.amis.name_prefix}prpl-centos-7-nexus-*"]
+    values = ["${var.amis.name_prefix}${module.global_variables.org_short_name}-centos-7-nexus-*"]
   }
   filter {
     name   = "virtualization-type"
@@ -168,3 +168,4 @@ data "aws_ami" "centos-7-nexus" {
   }
   owners = ["self"]
 }
+

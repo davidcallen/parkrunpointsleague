@@ -1,0 +1,1 @@
+Follows article : https://aws.amazon.com/blogs/security/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/

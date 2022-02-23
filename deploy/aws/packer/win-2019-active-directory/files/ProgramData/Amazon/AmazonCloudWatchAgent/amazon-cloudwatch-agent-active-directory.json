@@ -1,0 +1,36 @@
+{
+  "logs": {
+    "logs_collected": {
+      "windows_events": {
+        "collect_list": [
+          {
+            "event_format": "text",
+            "event_levels": [
+              "VERBOSE",
+              "INFORMATION",
+              "WARNING",
+              "ERROR",
+              "CRITICAL"
+            ],
+            "event_name": "Directory Service",
+            "log_group_name": "active-directory-domain-services",
+            "log_stream_name": "{local_hostname}"
+          },
+          {
+            "event_format": "text",
+            "event_levels": [
+              "VERBOSE",
+              "INFORMATION",
+              "WARNING",
+              "ERROR",
+              "CRITICAL"
+            ],
+            "event_name": "DNS Server",
+            "log_group_name": "active-directory-dns",
+            "log_stream_name": "{local_hostname}"
+          }
+        ]
+      }
+    }
+  }
+}

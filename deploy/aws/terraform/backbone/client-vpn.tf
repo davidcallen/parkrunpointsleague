@@ -60,13 +60,34 @@ resource "aws_acm_certificate" "client-vpn-server-cert" {
 //  certificate_chain = file("~/.cert/nm-openvpn/prpl-client-vpn-ca.crt")
 //}
 
+# ---------------------------------------------------------------------------------------------------------------------
+# SECOND STAGE : This needs to be run after a creation/change of the Central Directory (AD) in Core
+# This Stage will attempt to associate the ClientVPN with DNS IPs for that Central Directory
+# ---------------------------------------------------------------------------------------------------------------------
+locals {
+  central_directory_dns_ips_filenames = fileset("${path.module}/..", "*/outputs/terraform-output-central-directory-dns-ips")
+}
+data "local_file" "central_directory_dns_ips" {
+  for_each = local.central_directory_dns_ips_filenames
+  filename = "${path.module}/../${each.value}"
+}
+locals {
+  central_directory_dns_ips_str = (module.global_variables.central_directory_enabled && length(data.local_file.central_directory_dns_ips) > 0) ? data.local_file.central_directory_dns_ips["core/outputs/terraform-output-central-directory-dns-ips"].content : ""
+  central_directory_dns_ips     = (length(local.central_directory_dns_ips_str) > 0) ? split(",", local.central_directory_dns_ips_str) : []
+}
+output "central_directory_dns_ips" {
+  value = data.local_file.central_directory_dns_ips
+}
 resource "aws_ec2_client_vpn_endpoint" "client-vpn" {
   count                  = (var.client_vpn.enabled) ? 1 : 0
   description            = "${var.environment.resource_name_prefix}-client-vpn"
   server_certificate_arn = aws_acm_certificate.client-vpn-server-cert[0].arn
   client_cidr_block      = var.client_vpn.client_cidr_block
-  dns_servers            = (module.global_variables.route53_enabled && module.global_variables.route53_use_endpoints) ? aws_route53_resolver_endpoint.dns-endpoint-inbound[0].ip_address[*].ip : (module.global_variables.route53_enabled) ? [cidrhost(module.vpc.vpc_cidr_block, 2)] : ["8.8.8.8", "8.8.4.4"] #COST-SAVING
-  split_tunnel           = true
+
+  dns_servers            = (module.global_variables.route53_enabled && module.global_variables.route53_use_endpoints) ? module.dns[0].client_vpn_dns_server_ips : (length(local.central_directory_dns_ips) > 0) ? local.central_directory_dns_ips : (module.global_variables.route53_enabled) ? [cidrhost(module.vpc.vpc_cidr_block, 2)] : ["8.8.8.8", "8.8.4.4"] #COST-SAVING
+  # dns_servers            = local.central_directory_dns_ips  # TEMP HACK
+
+  split_tunnel = true
   authentication_options {
     type                       = "certificate-authentication"
     root_certificate_chain_arn = aws_acm_certificate.client-vpn-server-cert[0].arn
@@ -79,6 +100,9 @@ resource "aws_ec2_client_vpn_endpoint" "client-vpn" {
   tags = merge(module.global_variables.default_tags, {
     Name = "${var.environment.resource_name_prefix}-client-vpn"
   })
+}
+output "client_vpn_dns_server_ips" {
+  value = (var.client_vpn.enabled) ? aws_ec2_client_vpn_endpoint.client-vpn[0].dns_servers : []
 }
 
 # Note this VPN -> VPC association can take up to 12 mins to completion

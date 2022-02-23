@@ -75,3 +75,8 @@ variable "client_vpn" {
     routing_to_account_cidrs             = []
   }
 }
+variable "route53_testing_mode_enabled" {
+  description = "True if want to test Route53"
+  type        = bool
+  default     = false
+}

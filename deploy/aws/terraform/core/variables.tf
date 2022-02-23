@@ -120,6 +120,22 @@ variable "amis" {
       enabled       = bool
       use_encrypted = bool
     })
+    win-base = object({
+      enabled       = bool
+      use_encrypted = bool
+    })
+    win-core-base = object({
+      enabled       = bool
+      use_encrypted = bool
+    })
+    win-desktop = object({
+      enabled       = bool
+      use_encrypted = bool
+    })
+    win-active-directory = object({
+      enabled       = bool
+      use_encrypted = bool
+    })
   })
   default = {
     ami_name_suffix_encrypted = "-enc"
@@ -148,6 +164,22 @@ variable "amis" {
       enabled       = true
       use_encrypted = true
     }
+    win-base = {
+      enabled       = true
+      use_encrypted = true
+    }
+    win-core-base = {
+      enabled       = false
+      use_encrypted = true
+    }
+    win-desktop = {
+      enabled       = false
+      use_encrypted = true
+    }
+    win-active-directory = {
+      enabled       = true
+      use_encrypted = true
+    }
   }
 }
 
@@ -171,4 +203,9 @@ variable "share_amis_with_asgs_in_accounts" {
     account_id = string
   }))
   default = []
+}
+variable "route53_testing_mode_enabled" {
+  description = "True if want to test Route53"
+  type        = bool
+  default     = false
 }

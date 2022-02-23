@@ -34,12 +34,14 @@ if [ "${PRPL_ROUTE53_PRIVATE_HOSTED_ZONE_ID}" == "" ] ; then
   err
 fi
 
-PRIVATE_IP_ADDRESS=$(ip route get 1 | awk '{print $NF;exit}')
-HOSTNAME=$(hostname)
-TTL="600"
+if [ "${PRPL_ROUTE53_DIRECT_DNS_UPDATE_ENABLED}" == "TRUE" ] ; then
+  PRIVATE_IP_ADDRESS=$(ip route get 1 | awk '{print $NF;exit}')
+  HOSTNAME=$(hostname)
+  TTL="600"
 
-aws route53 change-resource-record-sets \
-  --hosted-zone-id ${PRPL_ROUTE53_PRIVATE_HOSTED_ZONE_ID} \
-  --change-batch "{ \"Changes\": [ { \"Action\": \"UPSERT\", \"ResourceRecordSet\": { \"Name\": \"${HOSTNAME}\", \"Type\": \"A\", \"TTL\": ${TTL}, \"ResourceRecords\": [ { \"Value\": \"${PRIVATE_IP_ADDRESS}\" } ] } } ] }"
+  aws route53 change-resource-record-sets \
+    --hosted-zone-id ${PRPL_ROUTE53_PRIVATE_HOSTED_ZONE_ID} \
+    --change-batch "{ \"Changes\": [ { \"Action\": \"UPSERT\", \"ResourceRecordSet\": { \"Name\": \"${HOSTNAME}\", \"Type\": \"A\", \"TTL\": ${TTL}, \"ResourceRecords\": [ { \"Value\": \"${PRIVATE_IP_ADDRESS}\" } ] } } ] }"
 
-log "Registered ec2 instance DNS record on Route53 Private Zone with hostname '${HOSTNAME}' and ip '${PRIVATE_IP_ADDRESS}'."
+  log "Registered ec2 instance DNS record on Route53 Private Zone with hostname '${HOSTNAME}' and ip '${PRIVATE_IP_ADDRESS}'."
+fi

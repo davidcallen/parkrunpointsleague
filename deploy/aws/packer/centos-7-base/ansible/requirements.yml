@@ -15,3 +15,17 @@
 - src: https://github.com/davidcallen/telegraf.git
   scm: git
   version: master
+
+# epel_repo : contains 'daemonize' package which is required by jenkins rpm
+#  from Ansible Galaxy https://galaxy.ansible.com/geerlingguy/repo-epel
+- src: geerlingguy.repo-epel
+  version: 3.1.0
+
+# awscli : installation of aws command line tool
+#  Forked from Ansible Galaxy :
+#     https://galaxy.ansible.com/christiangda/awscli
+#     https://github.com/christiangda/ansible-role-awscli
+# Forked to fix issue : https://github.com/christiangda/ansible-role-awscli/issues/6
+- src: git@github.com:davidcallen/ansible-role-awscli.git
+  scm: git
+  version: master      # 1.0.2a

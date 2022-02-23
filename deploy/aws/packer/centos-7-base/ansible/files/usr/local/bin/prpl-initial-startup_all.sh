@@ -21,14 +21,17 @@ trap err ERR
 log "Starting"
 /usr/local/bin/prpl-initial-startup_motd.sh
 
-log "Register DNS with Route53"
-/usr/local/bin/prpl-initial-startup_route53-register-dns.sh
-
 log "Create the config for the Telegraf Agent (and then restart its service)..."
 /usr/local/bin/prpl-initial-startup_telegraf.sh
 
 log "Create the config for the Amazon Cloudwatch Agent (and then restart its service)..."
 /usr/local/bin/prpl-initial-startup_cloudwatch.sh
+
+log "Register DNS with Route53"
+/usr/local/bin/prpl-initial-startup_route53-register-dns.sh
+
+log "Join our Domain"
+/usr/local/bin/prpl-initial-startup_domain-join.sh
 
 log "Mount persistent filesystem (EBS/EFS)..."
 /usr/local/bin/prpl-initial-startup_mount-file-system.sh

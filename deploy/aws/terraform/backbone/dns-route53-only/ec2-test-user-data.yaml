@@ -1,0 +1,35 @@
+#cloud-config
+preserve_hostname: false  # Feels wrong setting this to false, but otherwise will preserve the aws internal hostname "ip-99-99-99-99"
+hostname: ${aws_ec2_instance_name}
+fqdn: ${aws_ec2_instance_fqdn}
+manage_etc_hosts: true
+
+#write_files:
+#  - path: /etc/cloud/cloud.cfg.d/99_hostname.cfg
+#    permissions: '0644'
+#    content: |
+#      preserve_hostname: true
+
+write_files:
+  - path: /usr/local/bin/cloud-init-runcmd.sh
+    permissions: '0700'
+    content: |
+      sudo yum -y install bind-utils unzip    # Install bind-utils for dig and nslookup
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      unzip awscliv2.zip
+      ./aws/install
+      if [ "$${PRPL_ROUTE53_ENABLED}" == "" -o "$${PRPL_ROUTE53_ENABLED}" == "FALSE" ] ; then
+      if [ "$${PRPL_ROUTE53_DIRECT_DNS_UPDATE_ENABLED}" == "TRUE" ] ; then
+      PRPL_ROUTE53_PRIVATE_HOSTED_ZONE_ID=${aws_route53_private_hosted_zone_id}
+      PRIVATE_IP_ADDRESS=$(ip route get 1 | awk '{print $NF;exit}')
+      HOSTNAME=$(hostname)
+      TTL="600"
+      # Now register our hostname with Route53 DNS server ...
+      aws route53 change-resource-record-sets --hosted-zone-id $${PRPL_ROUTE53_PRIVATE_HOSTED_ZONE_ID} --change-batch "{ \"Changes\": [ { \"Action\": \"UPSERT\", \"ResourceRecordSet\": { \"Name\": \"$${HOSTNAME}\", \"Type\": \"A\", \"TTL\": $${TTL}, \"ResourceRecords\": [ { \"Value\": \"$${PRIVATE_IP_ADDRESS}\" } ] } } ] }"
+      fi
+      fi
+
+runcmd:
+  - /usr/local/bin/cloud-init-runcmd.sh
+
+output: {all: '| tee -a /var/log/cloud-init-output.log'}

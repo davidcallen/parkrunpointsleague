@@ -1,0 +1,9 @@
+- hosts: all
+  remote_user: Administrator
+  gather_facts: true
+
+  tasks:
+    - name: Display all variables/facts known for a host
+      debug:
+        var: hostvars[inventory_hostname]
+        verbosity: 4

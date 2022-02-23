@@ -8,7 +8,7 @@ module "vpc" {
   azs                  = module.global_variables.aws_zones
   private_subnets      = var.vpc.private_subnets_cidr_blocks
   public_subnets       = var.vpc.public_subnets_cidr_blocks
-  enable_nat_gateway   = true # NAT not needed in backbone VPC cause vpc only needed for attaching ClientVPN to TGW  #COST-SAVING
+  enable_nat_gateway   = (module.global_variables.route53_enabled && var.route53_testing_mode_enabled) # NAT not needed in backbone VPC cause vpc only needed for attaching ClientVPN to TGW  #COST-SAVING
   enable_vpn_gateway   = false # Using Transit Gateway instead
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -158,4 +158,17 @@ module "vpc-flow-logs-s3" {
   aws_region     = module.global_variables.aws_region
   account_id     = var.environment.account_id
   tags           = merge(module.global_variables.default_tags, var.environment.default_tags)
+}
+
+# Output the Backbone VPC ID to an output file.
+# Note: this is a simpler form of data sharing to other accounts than the terraform state file
+# Also avoiding the sharing of state files decreases potential security blast-radius if a cross-account is compromised.
+resource "local_file" "backbone_vpc_id" {
+  content              = module.vpc.vpc_id
+  directory_permission = "660"
+  file_permission      = "660"
+  filename             = "${path.module}/outputs/terraform-output-vpc-id"
+}
+output "backbone_vpc_id" {
+  value = module.vpc.vpc_id
 }

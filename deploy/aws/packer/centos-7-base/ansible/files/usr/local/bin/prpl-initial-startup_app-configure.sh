@@ -23,11 +23,12 @@ source /usr/local/etc/prpl-initial-startup_app.config
 
 [ ! -z ${PRPL_INIT_DEBUG_ENABLED:-} ] && set -x
 
-# Validate our env vars
 if [ "${APP_LINUX_USER_NAME}" == "" ] ; then
-  logError "ERROR : missing value for variable 'APP_LINUX_USER_NAME'"
-  err
+  log "'APP_LINUX_USER_NAME' not set - skipping App configure"
+  exit 0
 fi
+
+# Validate our env vars
 if [ "${APP_LINUX_USER_GROUP}" == "" ] ; then
   logError "ERROR : missing value for variable 'APP_LINUX_USER_GROUP'"
   err

@@ -35,6 +35,55 @@
         state: touch
       tags: stamp_ami
 
+    - name: "yum install general tools"
+      yum:
+        name:
+          - emacs-nox
+          - unzip
+          - dos2unix
+          - python3       # we want python3 installed before installation of awscli
+
+    - name: "Install SSSD for Active Directory Integration"
+      yum:
+        name:
+          - sssd
+          - realmd
+          - oddjob
+          - oddjob-mkhomedir
+          - adcli
+          - samba-common
+          - samba-client
+          - samba-common-tools
+          - cifs-utils
+          - krb5-workstation
+          - openldap-clients
+          - policycoreutils-python
+        state: present
+      tags: active_directory
+
+    - name: "Ensure kerberos config has reverse dns (rdns) disabled to allow use to auth to our AD DC"
+      ini_file:
+        path: /etc/krb5.conf
+        section: libdefaults
+        option: ignore_acceptor_hostname
+        value: "true"
+      tags: active_directory
+
+    - name: "Configure SSH service to accept password authentication"
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: 'PasswordAuthentication no', line: 'PasswordAuthentication yes' }
+        - { regexp: '.*GSSAPIAuthentication .*', line: 'GSSAPIAuthentication yes' }
+        - { regexp: '.*GSSAPICleanupCredentials.*', line: 'GSSAPICleanupCredentials yes' }
+        - { regexp: '.*GSSAPIStrictAcceptorCheck.*', line: 'GSSAPIStrictAcceptorCheck no' }
+        - { regexp: '.*GSSAPIKeyExchange.*', line: 'GSSAPIKeyExchange yes' }
+        - { regexp: '.*GSSAPIEnablek5users.*', line: 'GSSAPIEnablek5users yes' }
+        - { regexp: '.*GSSAPIStoreCredentialsOnRekey.*', line: 'GSSAPIStoreCredentialsOnRekey yes' }
+      tags: active_directory
+
   # -------------------------------------------   Roles   -------------------------------------------
   roles:
     # Forked from - role: christiangda.amazon_cloudwatch_agent
@@ -96,6 +145,17 @@
         telegraf_tags:
       tags: [telegraf]
 
+    # The role ansible-role-awscli requires EPEL
+    - role: geerlingguy.repo-epel
+      tags: [epel]
+
+    # aws cli needed by route53 registering DNS
+    # Use my fork of role "christiangda.awscli" with fix to pip issue
+    - role: ansible-role-awscli
+      vars:
+        pip_executable_override: pip3
+      tags: [awscli]
+
   # -------------------------------------------   Tasks   -------------------------------------------
   tasks:
     - name: "Disable Amazon cloudwatch agent service since its configuration is incomplete until initial-startup configures it properly."
@@ -150,14 +210,6 @@
         line: 'apply_updates = yes'
         state: present
       tags: [prepare]
-
-    - name: "yum install general tools"
-      yum:
-        name:
-          - emacs-nox
-          - unzip
-          - dos2unix
-          - python3
 
     - name: "Add user skeleton files"
       copy:
