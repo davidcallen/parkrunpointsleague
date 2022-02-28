@@ -1,0 +1,97 @@
+# ParkRun Points League - GPLv3
+#
+- name: "apply common configuration to all nodes"
+  hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    install_diagnostic_tools: true
+    prpl_user_group: prpl
+    prpl_user_name: prpl
+    log_files_for_purging:
+      - { path: /var/log/messages, owner: root, mode: '0640' }
+      - { path: /var/log/secure, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init.log, owner: root, mode: '0600' }
+      - { path: /var/log/cloud-init-output.log, owner: root, mode: '0600' }
+      - { path: /mnt/prpl/log/prpl.log, owner: prpl, group: prplr, mode: '0640' }
+
+  # -------------------------------------------   Pre Tasks   -------------------------------------------
+  pre_tasks:
+    - name: "Save IP address for possible ansible debugging"
+      copy:
+        content: "[all]\ncentos@{{ ansible_default_ipv4.address }}"
+        dest: ~/group_vars_static
+
+    - name: "Save IP address locally for ansible debugging"
+      fetch:
+        src: ~/group_vars_static
+        dest: ./group_vars/static
+        flat: yes
+
+    - name: "Create AMI identifier file"
+      file:
+        path: "/PRPL_PACKER_AMI_{{ AMI_NAME }}"
+        owner: root
+        group: root
+        mode: '0644'
+        state: touch
+      tags: stamp_ami
+
+  # -------------------------------------------   Roles   -------------------------------------------
+
+
+  # -------------------------------------------   Tasks   -------------------------------------------
+  tasks:
+    - name: "Yum install the tools for running the prpl application"
+      yum:
+        name:
+          - mariadb
+          - mariadb-devel
+
+    - name: "Add the PRPL User Group"
+      group:
+        name: "{{ prpl_user_group }}"
+        state: present
+        # system: true
+
+    - name: "Add the PRPL user account"
+      user:
+        name: "{{ prpl_user_name }}"
+        comment: PRPL User
+        group: "{{ prpl_user_group }}"
+
+    - name: "Create prpl systemd service"
+      copy:
+        src: files/etc/systemd/system/prpld.service
+        dest: /etc/systemd/system/prpld.service
+        owner: root
+        group: root
+        mode: 'u=rw,g=,o='
+
+#    - name: "Create prpld systemd service start script"
+#      copy:
+#        src: files/var/lib/prpl/prpld-systemd-start.sh
+#        dest: /var/lib/prpl
+#        owner: prpl
+#        group: prpl
+#        mode: 'u=rwx,g=rwx,o='
+
+    - name: "Add service script for prpl to systemd (disabled - will enable after EFS attachment)"
+      systemd:
+        name: prpld
+        enabled: false
+        daemon_reload: true
+
+  # -------------------------------------------   Post Tasks   -------------------------------------------
+  post_tasks:
+    - name: "Check for log files to purge"
+      stat: path="{{ item.path }}"
+      with_items: "{{ log_files_for_purging }}"
+      register: log_files_for_purging_check
+      tags: logs
+
+    - name: "Ensure we have empty log files from when image was created"
+      shell: "truncate --size=0 {{ item.stat.path }}"
+      when: "{{ item.stat.exists | bool}} == true"
+      with_items: "{{ log_files_for_purging_check.results }}"
+      tags: logs

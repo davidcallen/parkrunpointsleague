@@ -1,0 +1,16 @@
+# SystemD service for PRPL application
+[Unit]
+Description=ParkRun Points League Service
+After=syslog.target network.target prpl.mount
+
+[Service]
+Type=simple
+ExecStart=/opt/prpl/bin/prpld
+WorkingDirectory=/opt/prpl/bin
+EnvironmentFile=/etc/sysconfig/prpld
+Restart=always
+User=prpl
+Group=prpl
+
+[Install]
+WantedBy=multi-user.target
