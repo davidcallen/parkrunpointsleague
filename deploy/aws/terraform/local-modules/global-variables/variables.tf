@@ -124,6 +124,11 @@ variable "route53_use_endpoints" {
   type        = bool
   default     = false
 }
+variable "org_using_subdomains" {
+  description = "True if using sub-domains for our DNS naming scheme"
+  type        = bool
+  default     = true
+}
 variable "central_directory_enabled" {
   description = "True if using a centralised directory like SimpleAD or Full MS Active Directory"
   type        = bool

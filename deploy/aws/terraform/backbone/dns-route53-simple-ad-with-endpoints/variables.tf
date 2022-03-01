@@ -189,8 +189,8 @@ variable "route53_use_endpoints" {
   type        = bool
   default     = false
   validation {
-    condition = (var.route53_use_endpoints == false)
-    error_message = "Use Route53 Endpoints for DNS 'var.route53_use_endpoints' should be set to false."
+    condition = (var.route53_use_endpoints == true)
+    error_message = "Use Route53 Endpoints for DNS 'var.route53_use_endpoints' should be set to true."
   }
 }
 variable "route53_testing_mode_enabled" {
@@ -224,6 +224,11 @@ variable "route53_endpoint_outbound_allow_egress_cidrs" {
   description = ""
   type        = list(string)
 }
+variable "central_directory_enabled" {
+  description = "True if using a centralised directory like SimpleAD or Full MS Active Directory"
+  type        = bool
+  default     = true
+}
 variable "central_directory_admin_password" {
   description = "The Central Directory Administrator user password"
   type        = string
@@ -235,20 +240,15 @@ variable "central_directory_admin_password_secret_allowed_iam_user_ids" {
   type        = list(string)
   default     = []
 }
-variable "central_directory_admin_ami_id_linux" {
-  description = "The AMI ID for the Admin EC2 instance for administering Central Directory"
-  type        = string
-  default     = ""
-}
-variable "central_directory_admin_ami_id_win" {
-  description = "The AMI ID for the Admin EC2 instance for administering Central Directory"
-  type        = string
-  default     = ""
-}
-//variable "central_directory_enabled" {
-//  description = "True if using a centralised directory like SimpleAD or Full MS Active Directory"
-//  type        = bool
-//  default     = true
+//variable "central_directory_admin_ami_id_linux" {
+//  description = "The AMI ID for the Admin EC2 instance for administering Central Directory"
+//  type        = string
+//  default     = ""
+//}
+//variable "central_directory_admin_ami_id_win" {
+//  description = "The AMI ID for the Admin EC2 instance for administering Central Directory"
+//  type        = string
+//  default     = ""
 //}
 variable "telegraf_enabled" {
   description = "True if monitoring with InfluxDB from Telegraf Agent"

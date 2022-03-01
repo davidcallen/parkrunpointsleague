@@ -1,6 +1,14 @@
 # This file is maintained automatically by "terraform init".
 # Manual edits may be lost in future updates.
 
+provider "registry.terraform.io/carlpett/sops" {
+  version     = "0.6.3"
+  constraints = "0.6.3"
+  hashes = [
+    "h1:1Dx43rBcTvC7sKDvAsLwM038mph2BBLs9VcF4UAGs7A=",
+  ]
+}
+
 provider "registry.terraform.io/hashicorp/aws" {
   version     = "3.69.0"
   constraints = "3.69.0"

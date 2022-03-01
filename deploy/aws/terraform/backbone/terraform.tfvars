@@ -44,6 +44,13 @@ cross_account_access = {
       cidr_block                  = "10.7.0.0/16"
       private_subnets_cidr_blocks = ["10.7.1.0/24", "10.7.2.0/24"]
       public_subnets_cidr_blocks  = ["10.7.101.0/24", "10.7.102.0/24"]
+    },
+    {
+      name                        = "prod"          # Environment Account IDs are used for giving permissions to those Accounts for resources such as AMIs
+      account_id                  = "472687107726" # These cidrs are needed to setup SecurityGroup rules, and routes for cross-account access.
+      cidr_block                  = "10.9.0.0/16"
+      private_subnets_cidr_blocks = ["10.9.1.0/24", "10.9.2.0/24"]
+      public_subnets_cidr_blocks  = ["10.9.101.0/24", "10.9.102.0/24"]
     }
   ]
 }
@@ -59,12 +66,14 @@ client_vpn = {
   authorize_account_cidrs = [
     "10.5.0.0/16", # backbone
     "10.6.0.0/16", # core
-    "10.7.0.0/16"  # dev
+    "10.7.0.0/16", # dev
+    "10.9.0.0/16"  # prod
   ]
   routing_to_account_cidrs = [
     # "10.5.0.0/16", # backbone not needed since this VPC already associated to Client VPN
     "10.6.0.0/16", # core
-    "10.7.0.0/16"  # dev
+    "10.7.0.0/16",  # dev
+    "10.9.0.0/16"  # prod
   ]
 }
 route53_testing_mode_enabled = true

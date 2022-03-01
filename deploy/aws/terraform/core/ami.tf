@@ -141,7 +141,6 @@ data "aws_ami" "centos-7-jenkins-controller" {
   owners = ["self"]
 }
 
-
 # ---------------------------------------------------------------------------------------------------------------------
 # AMI for our CentOS 7 Nexus (inherit from our base CentOS 7 with installs (nexus)
 # ---------------------------------------------------------------------------------------------------------------------
@@ -165,6 +164,33 @@ data "aws_ami" "centos-7-nexus" {
   filter {
     name   = "block-device-mapping.encrypted"
     values = [var.amis.centos7_nexus.use_encrypted]
+  }
+  owners = ["self"]
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# AMI for our CentOS 7 PRPL application host
+# ---------------------------------------------------------------------------------------------------------------------
+# aws --region eu-west-1 ec2 describe-images --owners self --filters Name=product-code,Values=aw0evgkw8e5c1q413zgy5pjce --filters Name=name,Values=prpl-centos-7-prpl-*
+data "aws_ami" "centos-7-prpl" {
+  count       = var.amis.centos7_prpl.enabled ? 1 : 0
+  most_recent = true
+  # centos7 based
+  filter {
+    name   = "product-code"
+    values = ["aw0evgkw8e5c1q413zgy5pjce"]
+  }
+  filter {
+    name   = "name"
+    values = ["${var.amis.name_prefix}${module.global_variables.org_short_name}-centos-7-prpl-*"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name   = "block-device-mapping.encrypted"
+    values = [var.amis.centos7_prpl.use_encrypted]
   }
   owners = ["self"]
 }

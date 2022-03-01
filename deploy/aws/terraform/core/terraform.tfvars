@@ -99,19 +99,19 @@ amis = {
     enabled       = false
     use_encrypted = true
   }
-  win-base = {
+  win_base = {
     enabled       = true
     use_encrypted = true
   }
-  win-core-base = {
+  win_core_base = {
     enabled       = false
     use_encrypted = true
   }
-  win-desktop = {
+  win_desktop = {
     enabled       = false
     use_encrypted = true
   }
-  win-active-directory = {
+  win_active_directory = {
     enabled       = false
     use_encrypted = true
   }
@@ -157,4 +157,4 @@ share_amis_with_asgs_in_accounts = [
 //    account_id = "472687107726"
 //  }
 ]
-route53_testing_mode_enabled = false
+route53_testing_mode_enabled = true

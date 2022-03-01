@@ -1,6 +1,10 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # An EC2 instance for testing route53
 # ---------------------------------------------------------------------------------------------------------------------
+locals {
+  name                               = "${var.environment.resource_name_prefix}-test"
+  domain_host_name_short_ad_friendly = substr(join("", ["aws", md5(local.name)]), 0, 15)
+}
 resource "aws_instance" "test" {
   count                = (var.route53_testing_mode_enabled) ? 1 : 0
   ami                  = var.route53_testing_mode_ami_id
@@ -15,17 +19,19 @@ resource "aws_instance" "test" {
   }
   disable_api_termination = var.environment.resource_deletion_protection
   user_data = templatefile("${path.module}/ec2-test-user-data.yaml", {
-    aws_ec2_instance_name                 = "${var.environment.resource_name_prefix}-test"
-    aws_ec2_instance_fqdn                 = (var.org_using_subdomains) ? "${var.environment.resource_name_prefix}-test.${var.environment.name}.${var.org_domain_name}" : "${var.environment.resource_name_prefix}-test.${var.org_domain_name}"
+    aws_ec2_instance_name                 = local.name
+    aws_ec2_instance_fqdn                 = (var.org_using_subdomains) ? "${local.name}.${var.environment.name}.${var.org_domain_name}" : "${local.name}.${var.org_domain_name}"
+    domain_host_name_short_ad_friendly    = substr(join("", ["aws", md5(local.name)]), 0, 15)
     aws_route53_enabled                   = "TRUE"
     aws_route53_direct_dns_update_enabled = var.route53_direct_dns_update_enabled ? "TRUE" : "FALSE"
     aws_route53_private_hosted_zone_id    = aws_route53_zone.private.id
   })
   tags = merge(var.default_tags, var.environment.default_tags, {
-    Name        = "${var.environment.resource_name_prefix}-test"
-    Zone        = var.aws_zones[0]
-    Visibility  = "private"
-    Application = "test"
+    Name                    = local.name
+    HostNameShortADFriendly = local.domain_host_name_short_ad_friendly
+    Zone                    = var.aws_zones[0]
+    Visibility              = "private"
+    Application             = "test"
   })
 }
 output "ec2_test_ip_address" {
@@ -59,7 +65,7 @@ EOF
   })
 }
 
-# 2) Nexus get config files from S3
+# 2) Route53 can register DNS
 resource "aws_iam_policy" "route53" {
   count       = (var.route53_testing_mode_enabled) ? 1 : 0
   name        = "${var.environment.resource_name_prefix}-test-route53"

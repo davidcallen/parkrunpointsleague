@@ -45,7 +45,7 @@ FILENAMES[1]=packer/security-groups.tf
 FILENAMES[2]=jenkins.tf
 FILENAMES[3]=nexus.tf
 FILENAMES[4]=secrets.tf
-FILENAMES[5]=bootstrap/kms.tf
+FILENAMES[5]=bootstrap/secrets.tf
 FILENAMES[6]=dns.tf
 
 # echo ${FILENAMES[@]}

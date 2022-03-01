@@ -76,32 +76,62 @@ output "active_directory_ips" {
 output "active_directory_cidrs" {
   value = []
 }
+# ----------------------------------------------------------------------------------------------------------------------
 # DNS Scenario 1 : Route53 only with No Central Directory and Using R53 Endpoints (module=core/dns-route53-only)
-//output "route53_enabled" {
-//  value = true
-//}
-//output "route53_direct_dns_update_enabled" {
-//  value = true
-//}
-//output "route53_use_endpoints" {
-//  value = true
-//}
-//output "central_directory_enabled" {
-//  value = false
-//}
-# DNS Scenario : Central Directory (SimpleAD) with Route53 and No R53 Endpoints (module=core/dns-route53-simple-ad-no-endpoints)
+# ----------------------------------------------------------------------------------------------------------------------
 output "route53_enabled" {
   value = true
 }
 output "route53_direct_dns_update_enabled" {
-  value = false
-}
-output "route53_use_endpoints" {
-  value = false
-}
-output "central_directory_enabled" {
   value = true
 }
+output "route53_use_endpoints" {
+  value = true
+}
+output "org_using_subdomains" {
+  value = true
+}
+output "central_directory_enabled" {
+  value = false
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# DNS Scenario : Central Directory (SimpleAD) with Route53 and No R53 Endpoints (module=core/dns-route53-simple-ad-no-endpoints)
+# ----------------------------------------------------------------------------------------------------------------------
+//output "route53_enabled" {
+//  value = true
+//}
+//output "route53_direct_dns_update_enabled" {
+//  value = false
+//}
+//output "route53_use_endpoints" {
+//  value = false
+//}
+//output "org_using_subdomains" {
+//  value = true
+//}
+//output "central_directory_enabled" {
+//  value = true
+//}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# DNS Scenario : Central Directory (SimpleAD) with Route53 AND R53 Endpoints (module=core/dns-route53-simple-ad-with-endpoints)
+# ----------------------------------------------------------------------------------------------------------------------
+//output "route53_enabled" {
+//  value = true
+//}
+//output "route53_direct_dns_update_enabled" {
+//  value = false
+//}
+//output "route53_use_endpoints" {
+//  value = true
+//}
+//output "org_using_subdomains" {
+//  value = true
+//}
+//output "central_directory_enabled" {
+//  value = true
+//}
 
 output "telegraf_enabled" {
   value = false

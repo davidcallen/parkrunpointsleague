@@ -167,7 +167,7 @@ resource "local_file" "backbone_vpc_id" {
   content              = module.vpc.vpc_id
   directory_permission = "660"
   file_permission      = "660"
-  filename             = "${path.module}/outputs/terraform-output-vpc-id"
+  filename             = "${path.module}/outputs/terraform-output-backbone-vpc-id"
 }
 output "backbone_vpc_id" {
   value = module.vpc.vpc_id

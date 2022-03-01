@@ -19,7 +19,7 @@ resource "aws_instance" "test" {
     aws_ec2_instance_fqdn                 = (var.org_using_subdomains) ? "${var.environment.resource_name_prefix}-test.${var.environment.name}.${var.org_domain_name}" : "${var.environment.resource_name_prefix}-test.${var.org_domain_name}"
     aws_route53_enabled                   = "TRUE"
     aws_route53_direct_dns_update_enabled = var.route53_direct_dns_update_enabled ? "TRUE" : "FALSE"
-    aws_route53_private_hosted_zone_id    = aws_route53_zone.private.id
+    aws_route53_private_hosted_zone_id    = data.local_file.backbone_phz_id_file.content # aws_route53_zone.private.id
   })
   tags = merge(var.default_tags, var.environment.default_tags, {
     Name        = "${var.environment.resource_name_prefix}-test"
@@ -77,7 +77,7 @@ resource "aws_iam_policy" "route53" {
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:aws:route53:::hostedzone/${aws_route53_zone.private.id}"
+        "arn:aws:route53:::hostedzone/${data.local_file.backbone_phz_id_file.content}"
       ]
     }
   ]

@@ -120,19 +120,19 @@ variable "amis" {
       enabled       = bool
       use_encrypted = bool
     })
-    win-base = object({
+    win_base = object({
       enabled       = bool
       use_encrypted = bool
     })
-    win-core-base = object({
+    win_core_base = object({
       enabled       = bool
       use_encrypted = bool
     })
-    win-desktop = object({
+    win_desktop = object({
       enabled       = bool
       use_encrypted = bool
     })
-    win-active-directory = object({
+    win_active_directory = object({
       enabled       = bool
       use_encrypted = bool
     })
@@ -164,19 +164,19 @@ variable "amis" {
       enabled       = true
       use_encrypted = true
     }
-    win-base = {
+    win_base = {
       enabled       = true
       use_encrypted = true
     }
-    win-core-base = {
+    win_core_base = {
       enabled       = false
       use_encrypted = true
     }
-    win-desktop = {
+    win_desktop = {
       enabled       = false
       use_encrypted = true
     }
-    win-active-directory = {
+    win_active_directory = {
       enabled       = true
       use_encrypted = true
     }

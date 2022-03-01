@@ -52,7 +52,7 @@ resource "local_file" "route53_private_hosted_zone_id" {
 # Note: could get this from backbone's terraform state file, but would require change to how all this terraform invoked (via aws-vault).
 # Also allowing the sharing of state files increases potential security blast-radius if a cross-account is compromised.
 data "local_file" "backbone_vpc_id_file" {
-  filename = "${path.module}/../../backbone/outputs/terraform-output-vpc-id"
+  filename = "${path.module}/../../backbone/outputs/terraform-output-backbone-vpc-id"
 }
 
 # Because the private hosted zone and DNS-VPC are in different accounts, we need to associate the private hosted zone with the backbone "DNS-VPC".
@@ -63,26 +63,6 @@ resource "aws_route53_vpc_association_authorization" "example" {
   zone_id = aws_route53_zone.private.id
 }
 
-data "aws_route53_resolver_rule" "aws-cloud" {
-  count = (var.route53_use_endpoints) ? 1 : 0
-  name  = "aws-cloud"
-}
-resource "aws_route53_resolver_rule_association" "aws-cloud" {
-  count            = (var.route53_use_endpoints) ? 1 : 0
-  name             = "${var.org_short_name}-route53-dns-endpoint-inbound"
-  resolver_rule_id = data.aws_route53_resolver_rule.aws-cloud[0].id
-  vpc_id           = var.vpc.vpc_id
-}
-data "aws_route53_resolver_rule" "on-premise" {
-  count = (var.route53_use_endpoints) ? 1 : 0
-  name  = "on-premise"
-}
-resource "aws_route53_resolver_rule_association" "on-premise" {
-  count            = (var.route53_use_endpoints) ? 1 : 0
-  name             = "${var.org_short_name}-route53-dns-endpoint-outbound"
-  resolver_rule_id = data.aws_route53_resolver_rule.on-premise[0].id
-  vpc_id           = var.vpc.vpc_id
-}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Outputs for debugging etc...

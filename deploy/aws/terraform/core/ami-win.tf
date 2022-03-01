@@ -34,7 +34,7 @@ data "aws_ami" "windows-server-core-2019" {
 # ---------------------------------------------------------------------------------------------------------------------
 # aws --region eu-west-1 ec2 describe-images --owners self --filters Name=name,Values=prpl-win-2019-base-*
 data "aws_ami" "win-2019-base" {
-  count       = var.amis.win-base.enabled ? 1 : 0
+  count       = var.amis.win_base.enabled ? 1 : 0
   most_recent = true
   filter {
     name   = "name"
@@ -46,7 +46,7 @@ data "aws_ami" "win-2019-base" {
   }
   filter {
     name   = "block-device-mapping.encrypted"
-    values = [var.amis.win-base.use_encrypted]
+    values = [var.amis.win_base.use_encrypted]
   }
   owners = ["self"]
 }
@@ -56,7 +56,7 @@ data "aws_ami" "win-2019-base" {
 # ---------------------------------------------------------------------------------------------------------------------
 # aws --region eu-west-1 ec2 describe-images --owners self --filters Name=name,Values=prpl-win-2019-core-base-*
 data "aws_ami" "win-2019-core-base" {
-  count       = var.amis.win-core-base.enabled ? 1 : 0
+  count       = var.amis.win_core_base.enabled ? 1 : 0
   most_recent = true
   filter {
     name   = "name"
@@ -68,7 +68,7 @@ data "aws_ami" "win-2019-core-base" {
   }
   filter {
     name   = "block-device-mapping.encrypted"
-    values = [var.amis.win-core-base.use_encrypted]
+    values = [var.amis.win_core_base.use_encrypted]
   }
   owners = ["self"]
 }
@@ -78,7 +78,7 @@ data "aws_ami" "win-2019-core-base" {
 # ---------------------------------------------------------------------------------------------------------------------
 # aws --region eu-west-1 ec2 describe-images --owners self --filters Name=name,Values=prpl-win-2019-active-directory-*
 data "aws_ami" "win-2019-active-directory" {
-  count       = var.amis.win-active-directory.enabled ? 1 : 0
+  count       = var.amis.win_active_directory.enabled ? 1 : 0
   most_recent = true
   filter {
     name   = "name"
@@ -90,7 +90,7 @@ data "aws_ami" "win-2019-active-directory" {
   }
   filter {
     name   = "block-device-mapping.encrypted"
-    values = [var.amis.win-active-directory.use_encrypted]
+    values = [var.amis.win_active_directory.use_encrypted]
   }
   owners = ["self"]
 }
@@ -100,7 +100,7 @@ data "aws_ami" "win-2019-active-directory" {
 # ---------------------------------------------------------------------------------------------------------------------
 # aws --region eu-west-1 ec2 describe-images --owners self --filters Name=name,Values=prpl-win-2019-core-active-directory-*
 data "aws_ami" "win-2019-core-active-directory" {
-  count       = (var.amis.win-core-base.enabled && var.amis.win-active-directory.enabled) ? 1 : 0
+  count       = (var.amis.win_core_base.enabled && var.amis.win_active_directory.enabled) ? 1 : 0
   most_recent = true
   filter {
     name   = "name"
@@ -112,7 +112,7 @@ data "aws_ami" "win-2019-core-active-directory" {
   }
   filter {
     name   = "block-device-mapping.encrypted"
-    values = [var.amis.win-active-directory.use_encrypted]
+    values = [var.amis.win_active_directory.use_encrypted]
   }
   owners = ["self"]
 }
@@ -122,7 +122,7 @@ data "aws_ami" "win-2019-core-active-directory" {
 # ---------------------------------------------------------------------------------------------------------------------
 # aws --region eu-west-1 ec2 describe-images --owners self --filters Name=name,Values=prpl-win-2019-dev-desktop-*
 data "aws_ami" "win-2019-desktop-base" {
-  count       = var.amis.win-desktop.enabled ? 1 : 0
+  count       = var.amis.win_desktop.enabled ? 1 : 0
   most_recent = true
   filter {
     name   = "name"
@@ -134,7 +134,7 @@ data "aws_ami" "win-2019-desktop-base" {
   }
   filter {
     name   = "block-device-mapping.encrypted"
-    values = [var.amis.win-desktop.use_encrypted]
+    values = [var.amis.win_desktop.use_encrypted]
   }
   owners = ["self"]
 }
@@ -143,7 +143,7 @@ data "aws_ami" "win-2019-desktop-base" {
 # AMI for our Windows 2019 Desktop - Dev
 # ---------------------------------------------------------------------------------------------------------------------
 data "aws_ami" "win-2019-desktop-dev" {
-  count       = var.amis.win-desktop.enabled ? 1 : 0
+  count       = var.amis.win_desktop.enabled ? 1 : 0
   most_recent = true
   filter {
     name   = "name"
@@ -155,7 +155,7 @@ data "aws_ami" "win-2019-desktop-dev" {
   }
   filter {
     name   = "block-device-mapping.encrypted"
-    values = [var.amis.win-desktop.use_encrypted]
+    values = [var.amis.win_desktop.use_encrypted]
   }
   owners = ["self"]
 }

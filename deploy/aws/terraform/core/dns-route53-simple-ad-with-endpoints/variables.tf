@@ -58,10 +58,6 @@ variable "vpc" {
     public_subnets_ids          = []
   }
 }
-//# Variable Definitions and defaults.
-//#
-//# Only define what is needed in this module
-//#
 variable "aws_region" {
   description = "AWS region to apply terraform to."
   default     = ""
@@ -164,33 +160,13 @@ variable "on_premise_dns_server_ips" {
   type        = list(string)
   default     = []
 }
-//variable "allowed_org_vpn_cidrs" {
-//  description = "List of the allowed PRPL VPN CIDRs to access the AWS resources."
-//  default     = []
-//  type        = list(string)
-//}
-//variable "active_directory_mk_ips" {
-//  type        = list(string)
-//  description = "List of IP Addresses of MK Active Directory Servers"
-//  default     = []
-//}
-//variable "active_directory_mk_cidrs" {
-//  type        = list(string)
-//  description = "List of CIDRs of MK Active Directory Servers"
-//  default     = []
-//}
-//variable "route53_enabled" {
-//  description = "Use Route53 for DNS"
-//  type        = bool
-//  default     = false
-//}
 variable "route53_use_endpoints" {
   description = "Use Route53 Endpoints for DNS"
   type        = bool
   default     = false
   validation {
-    condition = (var.route53_use_endpoints == false)
-    error_message = "Use Route53 Endpoints for DNS 'var.route53_use_endpoints' should be set to false."
+    condition = (var.route53_use_endpoints == true)
+    error_message = "Use Route53 Endpoints for DNS 'var.route53_use_endpoints' should be set to true."
   }
 }
 variable "route53_testing_mode_enabled" {
@@ -224,6 +200,11 @@ variable "route53_endpoint_outbound_allow_egress_cidrs" {
   description = ""
   type        = list(string)
 }
+variable "central_directory_enabled" {
+  description = "True if using a centralised directory like SimpleAD or Full MS Active Directory"
+  type        = bool
+  default     = true
+}
 variable "central_directory_admin_password" {
   description = "The Central Directory Administrator user password"
   type        = string
@@ -245,11 +226,6 @@ variable "central_directory_admin_ami_id_win" {
   type        = string
   default     = ""
 }
-//variable "central_directory_enabled" {
-//  description = "True if using a centralised directory like SimpleAD or Full MS Active Directory"
-//  type        = bool
-//  default     = true
-//}
 variable "telegraf_enabled" {
   description = "True if monitoring with InfluxDB from Telegraf Agent"
   type        = bool

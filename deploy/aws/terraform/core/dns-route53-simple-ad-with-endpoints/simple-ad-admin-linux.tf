@@ -24,14 +24,15 @@ module "simple-ad-admin-linux" {
     public_subnets_ids          = var.vpc.public_subnets_ids
   }
   name_suffix                       = ""
-  hostname_fqdn                     = "${var.environment.resource_name_prefix}-simple-ad-admin-linux.${var.environment.name}.${var.org_domain_name}"
+  # hostname_fqdn                     = "${var.environment.resource_name_prefix}-simple-ad-admin-linux.${var.environment.name}.${var.org_domain_name}"
+  hostname_fqdn                     = (var.org_using_subdomains) ? "${var.environment.resource_name_prefix}-simple-ad-admin-linux.${var.environment.name}.${var.org_domain_name}" : "${var.environment.resource_name_prefix}-simple-ad-admin-linux.${var.org_domain_name}"
   route53_enabled                   = true
   route53_direct_dns_update_enabled = false
-  route53_private_hosted_zone_id    = aws_route53_zone.private.id
+  route53_private_hosted_zone_id    = data.local_file.backbone_phz_id_file.content # aws_route53_zone.private.id
 
   # domain_name                 = "${var.environment.name}.${var.org_domain_name}"
   domain_name                 = var.org_domain_name
-  domain_netbios_name         = aws_directory_service_directory.simple-directory.short_name # upper(var.org_short_name)
+  domain_netbios_name         = upper(var.org_short_name)
   domain_join_user_name       = "Administrator"                                             # var.active_directory_domain_join_user_name
   domain_join_user_password   = var.central_directory_admin_password                        # var.active_directory_domain_join_user_password    # TODO : move to Vault
   domain_login_allowed_users  = []                                                          # ["david"]
@@ -67,7 +68,7 @@ module "simple-ad-admin-linux" {
   //      contents_md5_hash = md5(local.nexus_config_file_contents)
   //    }
   //  ]
-  simple_ad_admin_user_password_secret_id      = module.simple-ad-admin-password-secret.secret_id
+#  simple_ad_admin_user_password_secret_id      = module.simple-ad-admin-password-secret.secret_id
   cloudwatch_enabled                           = true
   cloudwatch_refresh_interval_secs             = 60
   telegraf_enabled                             = var.telegraf_enabled
@@ -97,7 +98,7 @@ module "iam-simple-ad-admin" {
   # source           = "git@github.com:davidcallen/terraform-module-iam-simple-ad-admin.git?ref=1.0.0"
   source                  = "../../../../../../terraform-modules/terraform-module-iam-simple-ad-admin"
   resource_name_prefix    = var.environment.resource_name_prefix
-  route53_private_zone_id = aws_route53_zone.private.id
+  route53_private_zone_id = data.local_file.backbone_phz_id_file.content #  aws_route53_zone.private.id
   secrets_arns = [
     module.simple-ad-admin-password-secret.secret_arn,
   ]
