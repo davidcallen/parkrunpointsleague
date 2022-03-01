@@ -82,6 +82,11 @@ variable "org_domain_name" {
   default     = ""
   type        = string
 }
+variable "org_using_subdomains" {
+  description = "True if using sub-domains for our DNS naming scheme"
+  type        = bool
+  default     = true
+}
 //variable "org_name" {
 //  description = "Name for organisation e.g. parkrunpointsleague"
 //  default     = ""

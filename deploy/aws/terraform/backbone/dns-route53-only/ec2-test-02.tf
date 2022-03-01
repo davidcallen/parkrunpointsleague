@@ -7,7 +7,7 @@ resource "aws_instance" "test-02" {
   instance_type        = "t3a.nano"
   iam_instance_profile = aws_iam_instance_profile.test[0].name
   subnet_id            = var.vpc.private_subnets_ids[0]
-  # vpc_security_group_ids = local.vpc_security_group_ids
+  vpc_security_group_ids = [aws_security_group.test.id]
   key_name = var.ec2_ssh_key_pair_name
   root_block_device {
     delete_on_termination = true
@@ -16,7 +16,7 @@ resource "aws_instance" "test-02" {
   disable_api_termination = var.environment.resource_deletion_protection
   user_data = templatefile("${path.module}/ec2-test-user-data.yaml", {
     aws_ec2_instance_name                 = "${var.environment.resource_name_prefix}-test-02"
-    aws_ec2_instance_fqdn                 = "${var.environment.resource_name_prefix}-test-02.${var.environment.name}.${var.org_domain_name}"
+    aws_ec2_instance_fqdn                 = (var.org_using_subdomains) ? "${var.environment.resource_name_prefix}-test-02.${var.environment.name}.${var.org_domain_name}" : "${var.environment.resource_name_prefix}-test-02.${var.org_domain_name}"
     aws_route53_enabled                   = "TRUE"
     aws_route53_direct_dns_update_enabled = var.route53_direct_dns_update_enabled ? "TRUE" : "FALSE"
     aws_route53_private_hosted_zone_id    = aws_route53_zone.private.id

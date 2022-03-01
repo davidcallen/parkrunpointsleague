@@ -14,12 +14,13 @@ write_files:
   - path: /usr/local/bin/cloud-init-runcmd.sh
     permissions: '0700'
     content: |
+      set -x
       sudo yum -y install bind-utils unzip    # Install bind-utils for dig and nslookup
       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
       unzip awscliv2.zip
       ./aws/install
-      if [ "$${PRPL_ROUTE53_ENABLED}" == "" -o "$${PRPL_ROUTE53_ENABLED}" == "FALSE" ] ; then
-      if [ "$${PRPL_ROUTE53_DIRECT_DNS_UPDATE_ENABLED}" == "TRUE" ] ; then
+      if [ "${aws_route53_enabled}" == "TRUE" ] ; then
+      if [ "${aws_route53_direct_dns_update_enabled}" == "TRUE" ] ; then
       PRPL_ROUTE53_PRIVATE_HOSTED_ZONE_ID=${aws_route53_private_hosted_zone_id}
       PRIVATE_IP_ADDRESS=$(ip route get 1 | awk '{print $NF;exit}')
       HOSTNAME=$(hostname)

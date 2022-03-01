@@ -62,25 +62,30 @@ variable "vpc" {
 //#
 //# Only define what is needed in this module
 //#
-//variable "aws_region" {
-//  description = "AWS region to apply terraform to."
-//  default     = ""
-//  type        = string
-//}
+variable "aws_region" {
+  description = "AWS region to apply terraform to."
+  default     = ""
+  type        = string
+}
 variable "aws_zones" {
   description = "AWS zones to apply terraform to. The first zone in the list will be the default for single AZ requirements."
   default     = []
   type        = list(string)
 }
-//variable "aws_zone_preferred_placement_index" {
-//  description = "The index of the preferred AZ. If this AZ goes offline then change this index to the healthy AZ and terraform apply top move."
-//  default     = 0
-//  type        = number
-//}
+variable "aws_zone_preferred_placement_index" {
+  description = "The index of the preferred AZ. If this AZ goes offline then change this index to the healthy AZ and terraform apply top move."
+  default     = 0
+  type        = number
+}
 variable "org_domain_name" {
   description = "Domain name for organisation e.g. parkrunpointsleague.org"
   default     = ""
   type        = string
+}
+variable "org_using_subdomains" {
+  description = "True if using sub-domains for our DNS naming scheme"
+  type        = bool
+  default     = true
 }
 //variable "org_name" {
 //  description = "Name for organisation e.g. parkrunpointsleague"
@@ -230,6 +235,11 @@ variable "route53_testing_mode_enabled" {
   description = "True if want to test Route53"
   type        = bool
   default     = false
+}
+variable "route53_testing_mode_ami_id" {
+  description = "The AMI ID to be used on testing instances"
+  type        = string
+  default     = ""
 }
 variable "route53_direct_dns_update_enabled" {
   description = "If using direct add/update of hostname DNS record to Route53"
