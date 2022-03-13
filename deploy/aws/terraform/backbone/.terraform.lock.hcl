@@ -10,10 +10,10 @@ provider "registry.terraform.io/carlpett/sops" {
 }
 
 provider "registry.terraform.io/hashicorp/aws" {
-  version     = "3.69.0"
-  constraints = "3.69.0"
+  version     = "4.4.0"
+  constraints = ">= 3.28.0, >= 3.63.0, 4.4.0"
   hashes = [
-    "h1:1ud3VckbhSQ250tv58JCM9i1HKP05eijG4PEnU5PH7s=",
+    "h1:xUXge6/Bn/CzSjZpmQIr7/FwANKj+3cIEnxYlgS1xFo=",
   ]
 }
 
