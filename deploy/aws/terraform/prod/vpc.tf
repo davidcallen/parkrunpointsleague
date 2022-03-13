@@ -197,7 +197,7 @@ resource "aws_route" "route-vpn-shared-tgw" {
 # S3 storage for VPC Flow Logs (long-term storage)
 # ---------------------------------------------------------------------------------------------------------------------
 module "vpc-flow-logs-s3" {
-  # source     = "git@github.com:davidcallen/terraform-module-aws-vpc-flow-logs-s3.git?ref=1.0.0"
+  # source     = "git@github.com:davidcallen/terraform-module-aws-vpc-flow-logs-s3.git?ref=v1.0.0"
   source         = "../../../../../terraform-modules/terraform-module-aws-vpc-flow-logs-s3"
   count          = var.vpc.flow_logs_to_s3_enabled ? 1 : 0
   s3_bucket_name = "${module.global_variables.org_domain_name}-${var.environment.resource_name_prefix}-vpc-flow-logs"
