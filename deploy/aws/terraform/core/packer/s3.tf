@@ -11,26 +11,38 @@ locals {
 }
 resource "aws_s3_bucket" "packer-files" {
   bucket        = "${var.org_domain_name}-${var.environment.resource_name_prefix}-packer-files"
-  acl           = "private"
   force_destroy = true
-  versioning {
-    enabled = false
+  lifecycle {
+    prevent_destroy = false # cant use variable here for resource_deletion_protection :(
   }
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm     = "AES256"
-      }
+  tags = merge(var.global_default_tags, var.environment.default_tags, {
+    Name = "${var.org_domain_name}-${var.environment.resource_name_prefix}-packer-files"
+  })
+}
+resource "aws_s3_bucket_versioning" "vpc-flow-logs" {
+  bucket = aws_s3_bucket.packer-files.id
+  versioning_configuration {
+    status = "Suspended"
+  }
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "vpc-flow-logs" {
+  bucket = aws_s3_bucket.packer-files.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
+}
+resource "aws_s3_bucket_policy" "vpc-flow-logs" {
+  bucket = aws_s3_bucket.packer-files.bucket
   policy = jsonencode({
     "Version" = "2012-10-17"
     "Statement" = [
       {
-        Sid         = "Deny ALL access to all except Admins and packer-files Roles",
-        Effect      = "Deny"
+        Sid       = "Deny ALL access to all except Admins and packer-files Roles",
+        Effect    = "Deny"
         Principal = "*"
-        Action      = [
+        Action = [
           "s3:List*",
           "s3:GetObject*"
         ]
@@ -42,7 +54,8 @@ resource "aws_s3_bucket" "packer-files" {
           StringNotLike = {
             "aws:userId" = [
               "${data.aws_iam_role.admin-role.unique_id}:*",
-              "${aws_iam_role.packer-files-s3-read.unique_id}:*",    # assumed role id is "UNIQUE-ROLE-ID:ROLE-SESSION-NAME"
+              "${aws_iam_role.packer-files-s3-read.unique_id}:*",
+              # assumed role id is "UNIQUE-ROLE-ID:ROLE-SESSION-NAME"
               "${data.aws_iam_role.OrganizationAccountAccessRole.unique_id}:*",
               var.backbone_account_id
             ]
@@ -50,12 +63,6 @@ resource "aws_s3_bucket" "packer-files" {
         }
       }
     ]
-  })
-  lifecycle {
-    prevent_destroy = false          # cant use variable here for resource_deletion_protection :(
-  }
-  tags = merge(var.global_default_tags, var.environment.default_tags, {
-    Name            = "${var.org_domain_name}-${var.environment.resource_name_prefix}-packer-files"
   })
 }
 data "aws_iam_role" "admin-role" {
@@ -70,8 +77,8 @@ data "aws_iam_role" "OrganizationAccountAccessRole" {
 resource "aws_s3_bucket_object" "packer-files-upload" {
   for_each = fileset("${path.module}/../../../../files-for-uploading/${var.org_short_name}/${var.environment.name}/packer-files/", "**")
 
-  bucket  = aws_s3_bucket.packer-files.id
-  key     = each.value
-  source  = "${path.module}/../../../../files-for-uploading/${var.org_short_name}/${var.environment.name}/packer-files/${each.value}"
-  etag    = filemd5("${path.module}/../../../../files-for-uploading/${var.org_short_name}/${var.environment.name}/packer-files/${each.value}")
+  bucket = aws_s3_bucket.packer-files.id
+  key    = each.value
+  source = "${path.module}/../../../../files-for-uploading/${var.org_short_name}/${var.environment.name}/packer-files/${each.value}"
+  etag   = filemd5("${path.module}/../../../../files-for-uploading/${var.org_short_name}/${var.environment.name}/packer-files/${each.value}")
 }

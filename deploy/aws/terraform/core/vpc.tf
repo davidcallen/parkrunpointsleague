@@ -46,14 +46,14 @@ module "vpc" {
 
   tags = merge(module.global_variables.default_tags, var.environment.default_tags, {})
   public_subnet_tags = {
-    Visibility                                           = "public"
+    Visibility                                                                           = "public"
     "kubernetes.io/cluster/${var.environment.resource_name_prefix}-kube-jenkins-cluster" = "shared"
-    "kubernetes.io/role/elb"                             = "1"
+    "kubernetes.io/role/elb"                                                             = "1"
   }
   private_subnet_tags = {
-    Visibility                                           = "private"
+    Visibility                                                                           = "private"
     "kubernetes.io/cluster/${var.environment.resource_name_prefix}-kube-jenkins-cluster" = "shared"
-    "kubernetes.io/role/internal-elb"                    = "1"
+    "kubernetes.io/role/internal-elb"                                                    = "1"
   }
 }
 
@@ -197,7 +197,7 @@ resource "aws_route" "route-vpn-shared-tgw" {
 # S3 storage for VPC Flow Logs (long-term storage)
 # ---------------------------------------------------------------------------------------------------------------------
 module "vpc-flow-logs-s3" {
-  # source     = "git@github.com:davidcallen/terraform-module-aws-vpc-flow-logs-s3.git?ref=1.0.0"
+  # source = "git@github.com:davidcallen/terraform-module-aws-vpc-flow-logs-s3.git?ref=v1.0.0"
   source         = "../../../../../terraform-modules/terraform-module-aws-vpc-flow-logs-s3"
   count          = var.vpc.flow_logs_to_s3_enabled ? 1 : 0
   s3_bucket_name = "${module.global_variables.org_domain_name}-${var.environment.resource_name_prefix}-vpc-flow-logs"

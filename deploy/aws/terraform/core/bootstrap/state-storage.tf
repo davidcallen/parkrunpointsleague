@@ -1,18 +1,7 @@
-resource "aws_s3_bucket" "terraform-state-core" {
+resource "aws_s3_bucket" "terraform-state" {
   # The bucket name needs to be *globally* unique over the WHOLE of AWS, hence using org_domain_name-environment_name which should be unique for us
   bucket        = "${module.global_variables.org_domain_name}-${var.environment.resource_name_prefix}-terraform-state"
-  acl           = "private"
   force_destroy = true
-  versioning {
-    enabled = true
-  }
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
   lifecycle {
     prevent_destroy = true # cant use variable here for resource_deletion_protection :(
   }
@@ -21,6 +10,21 @@ resource "aws_s3_bucket" "terraform-state-core" {
     Account = data.aws_caller_identity.current.account_id
   })
 }
+resource "aws_s3_bucket_versioning" "terraform-state" {
+  bucket = aws_s3_bucket.terraform-state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform-state" {
+  bucket = aws_s3_bucket.terraform-state.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # Set Access Policy on our remote state bucket to Admins Only
 #  (cause it could contain passwords or other sensitive info)
@@ -31,7 +35,7 @@ data "aws_iam_role" "OrganizationAccountAccessRole" {
 module "iam-s3-bucket-policy" {
   # source = "git@github.com:davidcallen/terraform-module-iam-s3-bucket-policy-for-users.git?ref=1.0.0"
   source      = "../../../../../../terraform-modules/terraform-module-iam-s3-bucket-policy-for-users"
-  bucket_name = aws_s3_bucket.terraform-state-core.bucket
+  bucket_name = aws_s3_bucket.terraform-state.bucket
   sub_policies = [
     {
       description  = "Restrict access to our terraform-state bucket to Admins"

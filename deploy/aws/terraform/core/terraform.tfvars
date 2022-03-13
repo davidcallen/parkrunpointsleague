@@ -92,7 +92,7 @@ amis = {
     use_encrypted = true
   }
   centos7_prpl = {
-    enabled       = false
+    enabled       = true
     use_encrypted = true
   }
   centos7_prpl_builder = {
