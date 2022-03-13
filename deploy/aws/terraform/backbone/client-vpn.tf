@@ -76,17 +76,16 @@ resource "aws_acm_certificate" "client-vpn-server-cert" {
 //  central_directory_dns_ips     = (length(local.central_directory_dns_ips_str) > 0) ? split(",", local.central_directory_dns_ips_str) : []
 //}
 locals {
-  central_directory_dns_ips     = (module.global_variables.route53_enabled && module.global_variables.central_directory_enabled) ? module.dns[0].central_directory_dns_server_ips : []
+  central_directory_dns_ips = (module.global_variables.route53_enabled && module.global_variables.central_directory_enabled) ? module.dns[0].central_directory_dns_server_ips : []
+  client_vpn_dns_servers    = (module.global_variables.route53_enabled && module.global_variables.route53_use_endpoints) ? module.dns[0].route53_endpoint_inbound_ips : (length(local.central_directory_dns_ips) > 0) ? local.central_directory_dns_ips : [cidrhost(module.vpc.vpc_cidr_block, 2)]
 }
 resource "aws_ec2_client_vpn_endpoint" "client-vpn" {
   count                  = (var.client_vpn.enabled) ? 1 : 0
   description            = "${var.environment.resource_name_prefix}-client-vpn"
   server_certificate_arn = aws_acm_certificate.client-vpn-server-cert[0].arn
   client_cidr_block      = var.client_vpn.client_cidr_block
-
-  dns_servers            = (module.global_variables.route53_enabled && module.global_variables.route53_use_endpoints) ? module.dns[0].route53_endpoint_inbound_ips : (length(local.central_directory_dns_ips) > 0) ? local.central_directory_dns_ips : [cidrhost(module.vpc.vpc_cidr_block, 2)]  # : ["8.8.8.8", "8.8.4.4"] #COST-SAVING
-
-  split_tunnel = true
+  dns_servers            = local.client_vpn_dns_servers
+  split_tunnel           = true
   authentication_options {
     type                       = "certificate-authentication"
     root_certificate_chain_arn = aws_acm_certificate.client-vpn-server-cert[0].arn

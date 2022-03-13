@@ -28,9 +28,6 @@ resource "aws_instance" "test" {
     Application = "test"
   })
 }
-output "ec2_test_ip_address" {
-  value = (var.route53_testing_mode_enabled) ? aws_instance.test[0].private_ip : ""
-}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # IAM Role for use by an EC2 instance
@@ -121,6 +118,24 @@ resource "aws_security_group_rule" "test-allow-egress-ssh-to-workers" {
   description       = "ssh"
   from_port         = 22
   to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.test.id
+}
+resource "aws_security_group_rule" "test-allow-egress-http-to-workers" {
+  type              = "egress"
+  description       = "http"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.test.id
+}
+resource "aws_security_group_rule" "test-allow-egress-https-to-workers" {
+  type              = "egress"
+  description       = "https"
+  from_port         = 443
+  to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.test.id

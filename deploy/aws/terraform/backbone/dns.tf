@@ -42,7 +42,8 @@ module "dns" {
   )
   route53_endpoint_outbound_allow_ingress_cidrs = concat(
     [var.vpc.cidr_block],
-    var.cross_account_access.accounts[*].cidr_block
+    var.cross_account_access.accounts[*].cidr_block,
+    module.global_variables.allowed_org_vpn_cidrs
   )
   route53_endpoint_outbound_allow_egress_cidrs = concat(
     [var.vpc.cidr_block],

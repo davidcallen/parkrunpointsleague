@@ -1,6 +1,21 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # Route53 : Hosted Zones for our sub-domain "core.parkrunpointsleague.org"
 # ---------------------------------------------------------------------------------------------------------------------
+resource "aws_route53_zone" "public" {
+  name          = "${var.environment.name}.${var.org_domain_name}"
+  comment       = "Public HostedZone for ${var.environment.name}.${var.org_domain_name}"
+  force_destroy = false
+}
+# Output our above Public Hosted Zone ID so this can be read by the terraform in other accounts
+# so the TLD PublicHZ can delegate to this subdomain PublicHZ by adding an NS (dns) record pointing to our NS server IPs.
+# Note: this could also be achieved by reading terraform state files but then get caught in a catch-22 circular-dependancy hell.
+resource "local_file" "route53_public_hosted_zone_name_servers" {
+  content              = join(",", aws_route53_zone.public.name_servers)
+  directory_permission = "660"
+  file_permission      = "660"
+  filename             = "${path.module}/../outputs/terraform-output-route53-public-hosted-zone-name-servers"
+}
+
 resource "aws_route53_zone" "private" {
   name          = "${var.environment.name}.${var.org_domain_name}"
   comment       = "Private zone for our VPC"
@@ -42,9 +57,3 @@ resource "aws_route53_vpc_association_authorization" "example" {
   zone_id = aws_route53_zone.private.id
 }
 
-# ---------------------------------------------------------------------------------------------------------------------
-# Outputs for debugging etc...
-# ---------------------------------------------------------------------------------------------------------------------
-output "route53_private_hosted_zone_id" {
-  value = aws_route53_zone.private.id
-}
