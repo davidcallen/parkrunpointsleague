@@ -23,12 +23,36 @@ module "jenkins_controller" {
     public_subnets_cidr_blocks  = var.vpc.private_subnets_cidr_blocks
     public_subnets_ids          = module.vpc.public_subnets
   }
-  ha_high_availability_enabled = false
+  ha_high_availability_enabled = true
+  ha_public_load_balancer = {
+    enabled       = true
+    arn           = module.lb-public.load-balancer.arn
+    arn_suffix    = module.lb-public.load-balancer.arn_suffix
+    port          = 443
+    hostname_fqdn = "jenkins.${var.environment.name}.${module.global_variables.org_domain_name}"
+    ssl_cert = {
+      use_amazon_provider = true # Has the overhead of needing external DNS verification to activate it
+      use_self_signed     = false
+    }
+    alb_listener_arn      = aws_lb_listener.alb-public-https.arn
+    alb_listener_priority = 101
+    security_group_id     = module.lb-public.security_group_id
+    allowed_ingress_cidrs = {
+      https = concat(
+        module.global_variables.allowed_org_private_network_cidrs,
+        [var.vpc.cidr_block], # Note we allow complete vpc.cidr_block since we have a public load balancer
+      )
+    }
+    # Dont want customers reaching internal healthcheck page
+    disallow_ingress_internal_health_check_from_cidrs = []
+    # HACK local.jenkins_controller_testing_allowed_public_network_cidrs
+  }
   ha_private_load_balancer = {
-    enabled    = false # no major need for private ALB
-    arn        = ""
-    arn_suffix = ""
-    port       = 443
+    enabled       = false # no major need for private ALB
+    arn           = ""
+    arn_suffix    = ""
+    hostname_fqdn = "jenkins.${var.environment.name}.${module.global_variables.org_domain_name}"
+    port          = 443
     ssl_cert = {
       use_amazon_provider = true # Has the overhead of needing external DNS verification to activate it
       use_self_signed     = false
@@ -43,33 +67,11 @@ module "jenkins_controller" {
     disallow_ingress_internal_health_check_from_cidrs = []
     # HACK local.jenkins_controller_testing_allowed_public_network_cidrs
   }
-  ha_public_load_balancer = {
-    enabled    = true
-    arn        = "" # module.lb-public.load-balancer.arn
-    arn_suffix = "" # module.lb-public.load-balancer.arn_suffix
-    port       = 443
-    ssl_cert = {
-      use_amazon_provider = true # Has the overhead of needing external DNS verification to activate it
-      use_self_signed     = false
-    }
-    alb_listener_arn      = "" # aws_lb_listener.alb-public-https.arn
-    alb_listener_priority = 101
-    security_group_id     = "" # module.lb-public.security_group_id
-    allowed_ingress_cidrs = {
-      https = concat(
-        module.global_variables.allowed_org_private_network_cidrs,
-        [var.vpc.cidr_block], # Note we allow complete vpc.cidr_block since we have a public load balancer
-      )
-    }
-    # Dont want customers reaching internal healthcheck page
-    disallow_ingress_internal_health_check_from_cidrs = []
-    # HACK local.jenkins_controller_testing_allowed_public_network_cidrs
-  }
   ha_auto_scaling_group = {
     aws_ami_id                     = data.aws_ami.centos-7-jenkins-controller[0].id
     health_check_grace_period      = 60  # Time (in seconds) after instance comes into service before checking health
     default_cooldown               = 120 # Start the failover instance quickly
-    suspended_processes            = []  # ["Launch", "Terminate", "ReplaceUnhealthy", "HealthCheck"]
+    suspended_processes            = [] # ["Launch", "Terminate", "ReplaceUnhealthy", "HealthCheck"]
     cloudwatch_alarm_sns_topic_arn = ""
     check_efs_asg_max_attempts     = 60
     max_size                       = 1
@@ -81,7 +83,8 @@ module "jenkins_controller" {
   hostname_fqdn                     = "${var.environment.resource_name_prefix}-jenkins.${var.environment.name}.${module.global_variables.org_domain_name}"
   route53_enabled                   = module.global_variables.route53_enabled
   route53_direct_dns_update_enabled = module.global_variables.route53_direct_dns_update_enabled
-  route53_private_hosted_zone_id    = module.dns[0].route53_private_hosted_zone_id
+  route53_private_hosted_zone_id    = (module.global_variables.route53_enabled) ? module.dns[0].route53_private_hosted_zone_id : ""
+  route53_public_hosted_zone_id     = (module.global_variables.route53_enabled) ? module.dns[0].route53_public_subdomain_hosted_zone_id : ""
   server_listening_port             = 8080 # This is the port that the EC2 will listen on, and that ALB will forward traffic to.
   aws_instance_type                 = "t3a.small"
   aws_ami_id                        = data.aws_ami.centos-7-jenkins-controller[0].id
@@ -134,6 +137,7 @@ module "jenkins_controller" {
   jenkins_nexus_user_password_secret_id        = module.jenkins-controller-nexus-password-secret.secret_id
   cloudwatch_enabled                           = true
   cloudwatch_refresh_interval_secs             = 60
+  cloudwatch_alarm_default_sns_topic_arn       = module.cloudwatch_alarms_sns_topic.sns_topic.arn
   telegraf_enabled                             = module.global_variables.telegraf_enabled
   telegraf_influxdb_url                        = module.global_variables.telegraf_influxdb_url
   telegraf_influxdb_password_secret_id         = "" # module.tick-telegraf-password-secret.secret_id

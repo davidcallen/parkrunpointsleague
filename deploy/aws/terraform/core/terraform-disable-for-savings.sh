@@ -47,6 +47,10 @@ FILENAMES[3]=nexus.tf
 FILENAMES[4]=secrets.tf
 FILENAMES[5]=bootstrap/secrets.tf
 FILENAMES[6]=dns.tf
+# Temp testing of prpl app in Core for ease/cheaper
+FILENAMES[7]=application-load-balancer-public.tf
+FILENAMES[8]=prpl.tf
+# END : Temp testing of prpl app in Core for ease/cheaper
 
 # echo ${FILENAMES[@]}
 

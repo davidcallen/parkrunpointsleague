@@ -33,6 +33,13 @@ _image_using_accounts = [
 		'customer_name': 'prpl',
 		'assume_role_name': 'prpl-core-admin',
 		'regions': ["eu-west-1", 'us-east-1']
+	},
+	{
+		'account_id': '472687107726',
+		'account_name': 'prod',
+		'customer_name': 'prpl',
+		'assume_role_name': 'prpl-prod-admin',
+		'regions': ["eu-west-1", 'us-east-1']
 	}
 	# {
 	# 	'account_id': '760245709408',

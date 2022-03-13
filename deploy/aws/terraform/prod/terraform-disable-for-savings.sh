@@ -38,6 +38,9 @@ FILENAMES[0]=vpc.tf
 FILENAMES[1]=secrets.tf
 FILENAMES[2]=bootstrap/secrets.tf
 FILENAMES[3]=dns.tf
+FILENAMES[4]=application-load-balancer-public.tf
+FILENAMES[5]=prpl.tf
+FILENAMES[6]=cloudwatch-alarms.tf
 
 for FILENAME in "${FILENAMES[@]}" ; do
   mv ${FILENAME}${OLD_FILE_SUFFIX} ${FILENAME}${NEW_FILE_SUFFIX}

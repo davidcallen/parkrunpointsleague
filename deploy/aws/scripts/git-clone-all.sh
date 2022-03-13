@@ -49,8 +49,10 @@ function terraform_modules_git_clone() {
   [ ! -d ${ARG_REPO_NAME} ] && git clone git@github.com:davidcallen/${ARG_REPO_NAME}.git
   return 0
 }
+terraform_modules_git_clone terraform-module-aws-active-directory-security-group-for-linux
 terraform_modules_git_clone terraform-module-aws-asm-secret
 terraform_modules_git_clone terraform-module-aws-jenkins-controller
+terraform_modules_git_clone terraform-module-aws-load-balancer-application
 terraform_modules_git_clone terraform-module-aws-nexus
 terraform_modules_git_clone terraform-module-aws-simple-ad-admin-linux
 terraform_modules_git_clone terraform-module-aws-vpc-flow-logs-s3

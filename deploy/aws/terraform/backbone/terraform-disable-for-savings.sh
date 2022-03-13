@@ -38,6 +38,9 @@ FILENAMES[0]=tgw.tf
 FILENAMES[1]=vpc.tf
 FILENAMES[2]=client-vpn.tf
 FILENAMES[3]=dns.tf
+# Temp testing of ALB and Route53 DNS validated ACM certs
+# FILENAMES[4]=application-load-balancer-public.tf
+# END : Temp testing ALB
 
 # echo ${FILENAMES[@]}
 
