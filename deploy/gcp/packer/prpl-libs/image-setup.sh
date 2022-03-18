@@ -20,7 +20,7 @@ sudo mkdir -p /tmp/prpl-srcs/
 echo "------------------------------- tidy-html ------------------------------------------------------"
 sudo -S sh -c "export LD_LIBRARY_PATH=.:/opt/prpl/src/../bin:/lib64:/lib:/usr/lib64/:/usr/lib:/usr/local/lib64:/usr/local/lib \
  && cd /tmp/prpl-srcs \
- && git clone https://github.com/htacg/tidy-html5 \
+ && git clone -b 5.8.0 https://github.com/htacg/tidy-html5 \
  && cd tidy-html5 \
  && cd build/cmake \
  && cmake ../.. -DCMAKE_INSTALL_PREFIX=/opt/prpl -DCMAKE_BUILD_TYPE=Release \
@@ -29,7 +29,7 @@ sudo -S sh -c "export LD_LIBRARY_PATH=.:/opt/prpl/src/../bin:/lib64:/lib:/usr/li
 echo "------------------------------- gumbo ------------------------------------------------------"
 sudo -S sh -c "export LD_LIBRARY_PATH=.:/opt/prpl/src/../bin:/lib64:/lib:/usr/lib64/:/usr/lib:/usr/local/lib64:/usr/local/lib \
  && cd /tmp/prpl-srcs \
- && git clone https://github.com/google/gumbo-parser \
+ && git clone -b v0.10.1 https://github.com/google/gumbo-parser \
  && cd gumbo-parser \
  && ./autogen.sh \
  && ./configure --prefix=/opt/prpl \
@@ -40,7 +40,7 @@ sudo -S sh -c "export LD_LIBRARY_PATH=.:/opt/prpl/src/../bin:/lib64:/lib:/usr/li
 echo "------------------------------- poco ------------------------------------------------------"
 sudo -S sh -c "export LD_LIBRARY_PATH=.:/opt/prpl/src/../bin:/lib64:/lib:/usr/lib64/:/usr/lib:/usr/local/lib64:/usr/local/lib \
  && cd /tmp/prpl-srcs \
- && git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
+ && git clone -b poco-1.7.8-release https://github.com/pocoproject/poco.git \
  && cd poco \
  && ./configure --prefix=/opt/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
  && mkdir cmake_build \
