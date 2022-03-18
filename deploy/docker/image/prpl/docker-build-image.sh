@@ -66,6 +66,8 @@ done
 START_DATE=`date`
 START_PATH=${PWD}
 
+[[ ! -v ${PRPL_DOCKER_REGISTRY} ]] && echo "ERROR : docker build environment not set. Ensure you have done 'source docker-config.sh'" && exit 1
+
 # Common settings for build and publish docker images
 PRPL_DOCKER_IMAGE_NAME=prpl
 export PRPL_DOCKER_BUILD_DATE=`date`
@@ -97,11 +99,13 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 			--exclude='.git' \
 			--exclude='CMakeFiles' \
 			--exclude='../../../../../prpl/src/exe/prpld/CMakeFiles' \
+			--exclude='deploy' \
 			--exclude='build-output' \
 			-cf ${PRPL_TEMP_DIR}/prpl.srcs.tar.gz ../../../../../prpl 
 		cp -r ${PRPL_TEMP_DIR}/prpl.srcs.tar.gz .
+
 		trap "[ -d ${PRPL_TEMP_DIR} ] && rm -rf ${PRPL_TEMP_DIR}" EXIT
-	fi
+  fi
 
 	#echo -e "\n----------------------------------- Stop container -------------------------------------------\n"
 	#docker stop ${PRPL_DOCKER_IMAGE_NAME} || true
@@ -109,7 +113,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 	#docker ps
 
 	[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output
-	mkdir ${START_PATH}/build-output
+	mkdir -p ${START_PATH}/build-output/libs
 	cd ${START_PATH}/build-output
 
 	trap "[ -d ${START_PATH}/build-output ] && rm -rf ${START_PATH}/build-output" EXIT
@@ -117,8 +121,8 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 	echo -e '\n----------------------------------- Get lib dependancy binaries --------------------------------------\n'
 	# Extract the libs from prpl-base image for use in this image build
 	DOCKER_BASE_LIBS_ID=`docker create ${PRPL_DOCKER_REGISTRY}prpl-base:${ARG_USE_PRPL_BASE_IMAGE_TAG}`
-	docker cp ${DOCKER_BASE_LIBS_ID}:/prpl-libs/include ${START_PATH}/build-output
-	docker cp ${DOCKER_BASE_LIBS_ID}:/prpl-libs/lib ${START_PATH}/build-output
+	docker cp -a ${DOCKER_BASE_LIBS_ID}:/prpl-libs/include ${START_PATH}/build-output/libs
+	docker cp -a ${DOCKER_BASE_LIBS_ID}:/prpl-libs/lib ${START_PATH}/build-output
 	docker rm ${DOCKER_BASE_LIBS_ID}
 
 	echo -e '\n----------------------------------- Build binaries--------------------------------------------\n'
@@ -148,6 +152,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 			&& chmod -R 777 /prpl"
 	fi
 fi
+
 cd ${START_PATH}
 
 echo -e "\n----------------------------------- Build image  ---------------------------------------------\n"

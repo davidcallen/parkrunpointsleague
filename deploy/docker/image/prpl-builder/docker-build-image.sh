@@ -37,7 +37,7 @@ done
 
 START_DATE=`date`
 
-[ -z ${PRPL_DOCKER_REGISTRY:-} ] && echo "ERROR : docker build environment not set. Ensure you have done 'source docker-config.sh'" && exit 1
+[[ ! -v ${PRPL_DOCKER_REGISTRY} ]] && echo "ERROR : docker build environment not set. Ensure you have done 'source docker-config.sh'" && exit 1
 
 
 # Common settings for build and publish docker images

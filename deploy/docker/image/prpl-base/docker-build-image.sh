@@ -74,7 +74,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 
 	echo '----------------------------------- Build libtidy --------------------------------------------'
 	docker run -i --volume=$PWD/build-output:/prpl --volume=/prpl-srcs ${PRPL_DOCKER_REGISTRY}prpl-builder:latest /bin/sh -c 'mkdir -p /prpl-srcs/ && cd /prpl-srcs \
-		&& git clone https://github.com/htacg/tidy-html5 \
+		&& git clone -b 5.8.0 https://github.com/htacg/tidy-html5 \
 		&& cd tidy-html5 \
 		&& cd build/cmake \
 		&& cmake ../.. -DCMAKE_INSTALL_PREFIX=/prpl -DCMAKE_BUILD_TYPE=Release \
@@ -87,7 +87,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 
 	echo '----------------------------------- Build gumbo --------------------------------------------'
 	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs ${PRPL_DOCKER_REGISTRY}prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
-		&& git clone https://github.com/google/gumbo-parser \
+		&& git clone -b v0.10.1 https://github.com/google/gumbo-parser \
 		&& cd gumbo-parser \
 		&& ./autogen.sh \
 		&& ./configure --prefix=/prpl \
@@ -102,7 +102,7 @@ if [ "${ARG_IMAGE_BUILD_ONLY}" == "FALSE" ] ; then
 	echo '----------------------------------- Build poco --------------------------------------------'
 	docker run --rm --volume=$PWD/build-output:/prpl --volume=/prpl-srcs ${PRPL_DOCKER_REGISTRY}prpl-builder:latest /bin/sh -c "mkdir -p /prpl-srcs/ && cd /prpl-srcs \
 		&& export LD_LIBRARY_PATH=/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib \
-		&& git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git \
+		&& git clone -b poco-1.7.8-release https://github.com/pocoproject/poco.git \
 		&& cd poco \
 		&& ./configure --prefix=/prpl --everything --omit=Data/ODBC,Data/SQLite,PDF,MongoDB,ApacheConnector,CppParser,PageCompiler,ProGen,SevenZip --no-samples --no-tests \
 		&& mkdir cmake_build && cd cmake_build \
