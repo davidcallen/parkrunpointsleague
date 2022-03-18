@@ -104,7 +104,8 @@ def get_images(account):
 			block_device_mappings = describe_image.get('BlockDeviceMappings')
 			if block_device_mappings is not None:
 				for block_device_mapping in block_device_mappings:
-					snapshot_ids.append(block_device_mapping['Ebs']['SnapshotId'])
+					if 'Ebs' in block_device_mapping:
+						snapshot_ids.append(block_device_mapping['Ebs']['SnapshotId'])
 			image = {'image_id': describe_image['ImageId'], 'image_name': describe_image['Name'],
 					 'account_id': account['account_id'], 'account_name': account['account_name'],
 					 'region_name': region, 'snapshot_ids': snapshot_ids, 'image_tags': describe_image['Tags'],
