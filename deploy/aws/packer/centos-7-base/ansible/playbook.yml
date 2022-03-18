@@ -229,6 +229,11 @@
         mode: '0700'
         state: directory
 
+    - name: "yum install general tools from EPEL repo"
+      yum:
+        name:
+          - jq
+
     - name: "yum install diagnostic tools"
       yum:
         name:

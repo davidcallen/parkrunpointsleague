@@ -47,6 +47,7 @@
     - role: geerlingguy.jenkins
       vars:
         jenkins_prefer_lts: true
+        jenkins_version: 2.333
         jenkins_admin_password: "h12y834ejbadsouh901"     # TODO : move this into Secrets Manager and set in deploy-time user-data
         jenkins_plugins:
           # Config as Code plugins
@@ -179,21 +180,13 @@
 
     # The jenkins role comes with an systemV init service script. Override this with an systemD one so that can add the
     # "After=syslog.target network.target jenkins.mount" - the "jenkins.mount" will make it wait until our jenkins home dir has been mount before startup.
-    - name: "Create jenkins systemd service"
+    - name: "Create jenkins systemd service overides file"
       copy:
-        src: files/etc/systemd/system/jenkins.service
-        dest: /etc/systemd/system/jenkins.service
+        src: files/etc/systemd/system/jenkins.service.d/override.conf
+        dest: /etc/systemd/system/jenkins.service.d/
         owner: root
         group: root
         mode: 'u=rw,g=,o='
-
-    - name: "Create jenkins systemd service start script"
-      copy:
-        src: files/var/lib/jenkins/jenkins-systemd-start.sh
-        dest: /var/lib/jenkins
-        owner: jenkins
-        group: jenkins
-        mode: 'u=rwx,g=rwx,o='
 
     - name: "Add service script for Jenkins to systemd (disabled - will enable after EFS attachment)"
       systemd:

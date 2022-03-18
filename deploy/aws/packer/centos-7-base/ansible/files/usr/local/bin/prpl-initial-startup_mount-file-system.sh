@@ -46,6 +46,7 @@ function reinstate_app_contents() {
         log "Moving file '${FILE}' onto fresh mount point ${FILE_SYSTEM_MOUNT_POINT}"
         mv ${FILE_SYSTEM_MOUNT_TARGET}_old/${FILE} ${FILE_SYSTEM_MOUNT_POINT}/
     done
+    chown -R ${FILE_SYSTEM_MOUNT_OWNER_USER}:${FILE_SYSTEM_MOUNT_OWNER_GROUP} ${FILE_SYSTEM_MOUNT_POINT}/
   fi
 }
 
