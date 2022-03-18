@@ -16,7 +16,7 @@ Building PRPL and installation
 
 - Build poco into prpl/src - follow instructions in section "Building Poco library framework"
 	cd prpl/src/external
-	git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git
+	git clone -b poco-1.7.8-release https://github.com/pocoproject/poco.git
 
 	# On Centos 7 :
 	sudo yum install gcc gcc-c++ mariadb mariadb-devel openssl-devel libtool-ltdl-devel
@@ -28,7 +28,7 @@ Building PRPL and installation
 	make install
 	
 cd prpl/src/external
-	git clone https://github.com/google/gumbo-parser
+	git clone -b v0.10.1 https://github.com/google/gumbo-parser
 	cd gumbo-parser
 	sudo yum install libtool
 	./autogen.sh
@@ -37,7 +37,7 @@ cd prpl/src/external
 	make install
 
 cd prpl/src/externals/
-	git clone https://github.com/htacg/tidy-html5
+	git clone -b 5.8.0 https://github.com/htacg/tidy-html5
 	cd tidy-html5
 	cd build/cmake
 	./build-me.sh
@@ -70,7 +70,7 @@ Building Poco library framework
 - if choosing to install from source
 
 	cd prpl/src/external/
-	git clone -b poco-1.7.8 https://github.com/pocoproject/poco.git
+	git clone -b poco-1.7.8-release https://github.com/pocoproject/poco.git
 
 	# On Centos 7 :
 	sudo yum install gcc gcc-c++ mariadb mariadb-devel openssl-devel libtool-ltdl-devel

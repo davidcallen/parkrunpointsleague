@@ -2,13 +2,14 @@
 # VPC  -  backbone VPC only needed for attaching ClientVPN to TGW
 # ---------------------------------------------------------------------------------------------------------------------
 module "vpc" {
-  source               = "github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v3.11.0"
-  name                 = "${var.environment.resource_name_prefix}-vpc"
-  cidr                 = var.vpc.cidr_block # Avoid overlaping cidrs within this account and our other org accounts
-  azs                  = module.global_variables.aws_zones
-  private_subnets      = var.vpc.private_subnets_cidr_blocks
-  public_subnets       = var.vpc.public_subnets_cidr_blocks
-  enable_nat_gateway   = (module.global_variables.route53_enabled && var.route53_testing_mode_enabled) # NAT not needed in backbone VPC cause vpc only needed for attaching ClientVPN to TGW  #COST-SAVING
+  source          = "github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v3.11.0"
+  name            = "${var.environment.resource_name_prefix}-vpc"
+  cidr            = var.vpc.cidr_block # Avoid overlaping cidrs within this account and our other org accounts
+  azs             = module.global_variables.aws_zones
+  private_subnets = var.vpc.private_subnets_cidr_blocks
+  public_subnets  = var.vpc.public_subnets_cidr_blocks
+  # NAT not needed in backbone VPC cause vpc only needed for attaching ClientVPN to TGW  #COST-SAVING
+  enable_nat_gateway   = (length(var.prpl_deploy_modes) > 0 || (module.global_variables.route53_enabled && var.route53_testing_mode_enabled))
   enable_vpn_gateway   = false # Using Transit Gateway instead
   enable_dns_hostnames = true
   enable_dns_support   = true

@@ -110,4 +110,4 @@ amis = {
     use_encrypted = true
   }
 }
-route53_testing_mode_enabled = true
+route53_testing_mode_enabled = false

@@ -15,7 +15,7 @@ variable "environment" {
     resource_name_prefix                         = ""
     resource_deletion_protection                 = true
     cloudwatch_alarms_sns_emails                 = []
-    cloudwatch_log_groups_default_retention_days = 10
+    cloudwatch_log_groups_default_retention_days = 2
     default_tags                                 = {}
   }
 }
@@ -79,4 +79,8 @@ variable "route53_testing_mode_enabled" {
   description = "True if want to test Route53"
   type        = bool
   default     = false
+}
+variable "prpl_deploy_modes" {
+  description = "Enabled modes for deployment of PRPL : ECS, EC2, EC2-HA, EKS"
+  type        = list(string)
 }

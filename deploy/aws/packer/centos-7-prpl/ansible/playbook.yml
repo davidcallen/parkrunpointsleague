@@ -60,6 +60,11 @@
         comment: PRPL User
         group: "{{ prpl_user_group }}"
 
+    - name: "yum install xml config tool"
+      yum:
+        name:
+          - xmlstarlet
+
     - name: "Create prpl systemd service"
       copy:
         src: files/etc/systemd/system/prpld.service

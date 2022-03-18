@@ -6,7 +6,7 @@ environment = {
   resource_name_prefix                         = "prpl-backbone"
   resource_deletion_protection                 = false
   cloudwatch_alarms_sns_emails                 = ["david.c.allen1971@gmail.com"] # ["devops@parkrunpointsleague.org"]
-  cloudwatch_log_groups_default_retention_days = 5
+  cloudwatch_log_groups_default_retention_days = 3
   default_tags = {
     Environment = "backbone"
   }
@@ -46,7 +46,7 @@ cross_account_access = {
       public_subnets_cidr_blocks  = ["10.7.101.0/24", "10.7.102.0/24"]
     },
     {
-      name                        = "prod"          # Environment Account IDs are used for giving permissions to those Accounts for resources such as AMIs
+      name                        = "prod"         # Environment Account IDs are used for giving permissions to those Accounts for resources such as AMIs
       account_id                  = "472687107726" # These cidrs are needed to setup SecurityGroup rules, and routes for cross-account access.
       cidr_block                  = "10.9.0.0/16"
       private_subnets_cidr_blocks = ["10.9.1.0/24", "10.9.2.0/24"]
@@ -72,8 +72,9 @@ client_vpn = {
   routing_to_account_cidrs = [
     # "10.5.0.0/16", # backbone not needed since this VPC already associated to Client VPN
     "10.6.0.0/16", # core
-    "10.7.0.0/16",  # dev
+    "10.7.0.0/16", # dev
     "10.9.0.0/16"  # prod
   ]
 }
-route53_testing_mode_enabled = true
+route53_testing_mode_enabled = false
+prpl_deploy_modes            = ["ECS"] # modes : ECS, EC2, EC2-HA, EKS

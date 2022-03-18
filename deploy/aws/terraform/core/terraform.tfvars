@@ -157,4 +157,4 @@ share_amis_with_asgs_in_accounts = [
 //    account_id = "472687107726"
 //  }
 ]
-route53_testing_mode_enabled = true
+route53_testing_mode_enabled = false
