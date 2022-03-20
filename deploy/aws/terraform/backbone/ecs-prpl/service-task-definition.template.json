@@ -4,21 +4,18 @@
     "image": "${image_repository_url}:${image_tag}",
     "essential": true,
     "cpu": 2,
-    "memory": 512,
-    "networkMode": "host",
+    "memory": 256,
     "portMappings": [
       {
-        "containerPort": 8080,
-        "hostPort":      8080
+        "containerPort": 8080
       },
       {
-        "containerPort": 8443,
-        "hostPort":      8443
+        "containerPort": 8443
       }
     ],
     "environment": [
       { "name" : "PRPL_HTTP_PORT", "value" : "8080" },
-      { "name" : "PRPL_DATABASE_HOST", "value" : "${task_name_prefix}-mariadb" },
+      { "name" : "PRPL_DATABASE_HOST", "value" : "mariadb" },
       { "name" : "PRPL_DATABASE_PORT", "value" : "3306" },
       { "name" : "PRPL_DATABASE_NAME", "value" : "PRPL" },
       { "name" : "PRPL_DATABASE_USER", "value" : "PRPL" },
@@ -41,12 +38,8 @@
         "awslogs-datetime-format": "{\"log\":\"%Y%m%d %H:%M:%S"
       }
     },
-    "mountPoints": [
-      {
-        "sourceVolume": "prpl",
-        "containerPath": "/prpl",
-        "readOnly": false
-      }
+    "links": [
+      "${task_name_prefix}-mariadb:mariadb"
     ]
   },
   {
@@ -54,16 +47,15 @@
     "image": "public.ecr.aws/docker/library/mariadb:latest",
     "essential": true,
     "cpu": 2,
-    "memory": 512,
-    "networkMode": "host",
+    "memory": 256,
     "portMappings": [
       {
-        "containerPort": 3306,
-        "hostPort":      3306
+        "containerPort": 3306
       }
     ],
     "environment": [
-      { "name" : "MARIADB_USER", "value" : "PRPL" }
+      { "name" : "MARIADB_USER", "value" : "PRPL" },
+      { "name" : "MARIADB_DATABASE", "value" : "PRPL" }
     ],
     "secrets": [
       { "name" : "MARIADB_PASSWORD", "valueFrom": "${secrets_param_base_uri}/prpl/database/user/prpl/password" },
@@ -84,6 +76,17 @@
         "containerPath": "/var/lib/mysql",
         "readOnly": false
       }
-    ]
+    ],
+    "healthCheck": {
+      "Command": [
+        "CMD-SHELL",
+        "mysqladmin",
+        "ping"
+      ],
+      "Interval": 10,
+      "Retries": 5,
+      "StartPeriod": 30,
+      "Timeout": 5
+    }
   }
 ]

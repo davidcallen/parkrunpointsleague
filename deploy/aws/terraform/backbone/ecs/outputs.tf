@@ -10,3 +10,6 @@ output "ecs_task_execution_role_arn" {
 output "ecs_cluster_efs_security_group_id" {
   value = aws_security_group.ecs-efs.id
 }
+output "ecs_cluster_service_registry_arn" {
+  value = aws_service_discovery_service.ecs.arn
+}

@@ -1,11 +1,12 @@
-# Variable Definitions and defaults.
-#
-# Only define what is needed in this module
-#
 variable "name" {
   description = "The Name of ECS cluster (and resources)"
   type        = string
   default     = ""
+}
+variable "org_domain_name" {
+  description = "Domain name for organisation e.g. parkrunpointsleague.org"
+  default     = ""
+  type        = string
 }
 variable "environment" {
   description = "Environment information e.g. account IDs, public/private subnet cidrs"
@@ -58,14 +59,6 @@ variable "cluster_node_ssh_key_name" {
   type        = string
   default     = ""
 }
-//variable "cluster_ingress_allowed_cidrs" {
-//  description = "Details for the qa-mail container service running in this ECS"
-//  type        = object({
-//    ssh               = list(string)
-//    http              = list(string)
-//  })
-//  # default     = {}
-//}
 variable "global_default_tags" {
   description = "Global default tags"
   type        = map(string)

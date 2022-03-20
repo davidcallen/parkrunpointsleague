@@ -20,12 +20,12 @@
 //  cidr_blocks     = ["0.0.0.0/0"]             # TODO - change to var.allowed_ingress_cidrs.ssh
 //  security_group_id = aws_security_group.ecs.id
 //}
-//# All ingress to port 80 (http)
-//resource "aws_security_group_rule" "allow-ingress-http" {
+//# All ingress to port 80 (https)
+//resource "aws_security_group_rule" "allow-ingress-https" {
 //  type            = "ingress"
-//  description     = "qa-mail http"
-//  from_port       = 80
-//  to_port         = 80
+//  description     = " https"
+//  from_port       = 443
+//  to_port         = 443
 //  protocol        = "tcp"
 //  cidr_blocks     = ["0.0.0.0/0"]             # TODO - change to var.allowed_ingress_cidrs.ssh
 //  security_group_id = aws_security_group.ecs.id

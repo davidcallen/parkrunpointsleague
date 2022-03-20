@@ -9,6 +9,7 @@ module "ecs-prpl" {
   vpc_private_subnet_cidrs          = module.vpc.private_subnets_cidr_blocks
   ecs_cluster_id                    = module.ecs[0].ecs_cluster_id
   ecs_cluster_name                  = module.ecs[0].ecs_cluster_name
+  ecs_cluster_service_registry_arn  = module.ecs[0].ecs_cluster_service_registry_arn
   ecs_cluster_efs_security_group_id = module.ecs[0].ecs_cluster_efs_security_group_id
   // ecs_task_execution_role_arn       = module.ecs[0].ecs_task_execution_role_arn
   ecr_repository_name = "${module.global_variables.org_domain_name}/prpl"
@@ -20,6 +21,7 @@ module "ecs-prpl" {
   //  }
   prpl_database_user_password  = local.secrets_primary.data["prpl-db-user.password"]
   prpl_database_admin_password = local.secrets_primary.data["prpl-db-admin.password"]
+  combined_service_enabled     = false
   global_default_tags          = module.global_variables.default_tags
 }
 

@@ -1,7 +1,3 @@
-# Variable Definitions and defaults.
-#
-# Only define what is needed in this module
-#
 //variable "name" {
 //  description = "The Name for modules resources"
 //  type        = string
@@ -61,6 +57,9 @@ variable "ecs_cluster_name" {
   type        = string
   default     = ""
 }
+variable "ecs_cluster_service_registry_arn" {
+  type = string
+}
 variable "ecs_cluster_efs_security_group_id" {
   type = string
 }
@@ -81,6 +80,11 @@ variable "prpl_database_user_password" {
 }
 variable "prpl_database_admin_password" {
   type = string
+}
+variable "combined_service_enabled" {
+  description = "A combined service contains both the application and database backend. This only to be used for QA/Dev deploys."
+  type    = bool
+  default = false
 }
 //variable "allowed_egress_cidrs" {
 //  type = object({
