@@ -137,6 +137,25 @@ resource "aws_route53_resolver_rule" "aws-cloud" {
   }
   tags = merge(var.default_tags, var.environment.default_tags)
 }
+
+# Outbound Endpoint Forward "amazonaws.com" requests back to the Inbound Endpoint
+#  ...this needed for EKS API Endpoint DNS resolution (and other services like ALB DNS endpoint)
+resource "aws_route53_resolver_rule" "aws-services" {
+  count                = (var.route53_use_endpoints) ? 1 : 0
+  domain_name          = "amazonaws.com"
+  name                 = "aws-services"
+  rule_type            = "FORWARD"
+  resolver_endpoint_id = aws_route53_resolver_endpoint.dns-endpoint-outbound[0].id
+  dynamic "target_ip" {
+    for_each = aws_route53_resolver_endpoint.dns-endpoint-inbound[0].ip_address
+    #     for_each = (module.global_variables.central_directory_enabled) ? toset([{ip = "10.6.1.209"}, {ip = "10.6.2.43"}]) : aws_route53_resolver_endpoint.dns-endpoint-inbound[0].ip_address
+    content {
+      ip = target_ip.value.ip
+    }
+  }
+  tags = merge(var.default_tags, var.environment.default_tags)
+}
+
 //resource "aws_route53_resolver_rule_association" "aws-cloud" {
 //  name             = "${var.org_short_name}-route53-dns-endpoint-inbound"
 //  resolver_rule_id = aws_route53_resolver_rule.aws-cloud[0].id
