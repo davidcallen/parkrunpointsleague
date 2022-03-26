@@ -38,8 +38,13 @@ FILENAMES[0]=tgw.tf
 FILENAMES[1]=vpc.tf
 FILENAMES[2]=client-vpn.tf
 FILENAMES[3]=dns.tf
-FILENAMES[4]=ecs.tf
+FILENAMES[4]=ecs-cluster.tf
 FILENAMES[5]=ecs-prpl.tf
+FILENAMES[6]=k8s-cluster-eks.tf
+FILENAMES[7]=k8s-dashboard.tf
+FILENAMES[8]=k8s-ingress.tf
+FILENAMES[9]=k8s-efs-csi.tf
+FILENAMES[10]=k8s-jenkins.tf
 # Temp testing of ALB and Route53 DNS validated ACM certs
 # FILENAMES[4]=application-load-balancer-public.tf
 # END : Temp testing ALB

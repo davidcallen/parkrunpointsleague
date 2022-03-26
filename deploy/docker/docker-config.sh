@@ -41,7 +41,7 @@ while (( "$#" )); do
 	shift
 done
 
-PRPL_DOCKER_ENVIRONMENT=
+PRPL_DOCKER_ENVIRONMENT=local
 if [ "${ARG_ENVIRONMENT}" != "" ] ; then
 	PRPL_DOCKER_ENVIRONMENT=${ARG_ENVIRONMENT}
 else
@@ -53,7 +53,7 @@ else
 	elif [ "${KUBECTL_CONTEXT:0:3}" == "gke" ] ; then
 		PRPL_DOCKER_ENVIRONMENT=gke
 	else
-		echo "ERROR : cannot detect environment (only minikube and GCP currently supported)."
+		echo "ERROR : cannot detect environment - assuming local"
 	fi
 fi
 export PRPL_DOCKER_ENVIRONMENT
@@ -74,5 +74,5 @@ else
 	echo "ERROR : cannot detect environment (only minikube and GCP currently supported)."
 fi
 
-echo "Using Docker environment ${PRPL_DOCKER_ENVIRONMENT} with Registry ${PRPL_DOCKER_REGISTRY}"
+echo "Using Docker environment '${PRPL_DOCKER_ENVIRONMENT}' with Registry '${PRPL_DOCKER_REGISTRY}'"
 echo

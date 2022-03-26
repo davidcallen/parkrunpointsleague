@@ -76,5 +76,5 @@ client_vpn = {
     "10.9.0.0/16"  # prod
   ]
 }
-route53_testing_mode_enabled = false
-prpl_deploy_modes            = ["ECS"] # modes : ECS, EC2, EC2-HA, EKS
+route53_testing_mode_enabled = true
+prpl_deploy_modes            = ["EKS"] # modes : ECS, EC2, EC2-HA, EKS

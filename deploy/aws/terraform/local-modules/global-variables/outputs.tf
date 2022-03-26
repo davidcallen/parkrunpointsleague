@@ -86,7 +86,7 @@ output "route53_direct_dns_update_enabled" {
   value = true
 }
 output "route53_use_endpoints" {
-  value = true
+  value = false     # COST-SAVING : normally this is true but if just working with backbone (and not core etc..) then can get away with setting to false
 }
 output "org_using_subdomains" {
   value = true

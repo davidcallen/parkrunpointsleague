@@ -232,7 +232,7 @@ resource "aws_cloudwatch_log_group" "prpl" {
 //      name = "elb"
 //    }
 //    target_group = {
-//      arn  = module.prpl.target_group_public_http[0].arn # module.glass-equi-gwy.target_group_glass[0].arn
+//      arn  = module.prpl.target_group_public_http[0].arn # module.prpl.target_group_prpl[0].arn
 //      name = module.global_variables.org_short_name
 //    }
 //    sns_topic_arn                = module.cloudwatch_alarms_sns_topic.sns_topic.arn # lookup for module.cloudwatch_alarms_sns_topic.sns_topic.arn

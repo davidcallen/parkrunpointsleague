@@ -11,8 +11,13 @@ export PRPL_AWS_ACCOUNT_PROFILE_NAME=prpl-core
 export PRPL_AWS_REGION=eu-west-1
 export PRPL_AWS_ACCOUNT_ID=228947135432
 export PRPL_AWS_ECR_DOCKER_REGISTRY=${PRPL_AWS_ACCOUNT_ID}.dkr.ecr.${PRPL_AWS_REGION}.amazonaws.com/parkrunpointsleague.org
+export PRPL_KUBECTL_VERSION="-v1.21.2"
 
 # Either unset PRPL_AMI_PREFIX_NAME and will then default automatically
 unset PRPL_AMI_PREFIX_NAME
 #   ... or override it to blank
 # export PRPL_AMI_PREFIX_NAME=
+
+# Set the versions of our tools for this environment using aliases (doesnt work with aws-vault though so probably waste of time)
+alias terraform='~/bin/terraform-v1.0.11'
+alias kubectl='~/bin/kubectl-v1.21.2'

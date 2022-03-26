@@ -64,17 +64,6 @@ resource "aws_acm_certificate" "client-vpn-server-cert" {
 # SECOND STAGE : This needs to be run after a creation/change of the Central Directory (AD) in Core
 # This Stage will attempt to associate the ClientVPN with DNS IPs for that Central Directory
 # ---------------------------------------------------------------------------------------------------------------------
-//locals {
-//  central_directory_dns_ips_filenames = fileset("${path.module}/..", "*/outputs/terraform-output-central-directory-dns-ips")
-//}
-//data "local_file" "central_directory_dns_ips" {
-//  for_each = local.central_directory_dns_ips_filenames
-//  filename = "${path.module}/../${each.value}"
-//}
-//locals {
-//  central_directory_dns_ips_str = (module.global_variables.central_directory_enabled && length(data.local_file.central_directory_dns_ips) > 0) ? data.local_file.central_directory_dns_ips["core/outputs/terraform-output-central-directory-dns-ips"].content : ""
-//  central_directory_dns_ips     = (length(local.central_directory_dns_ips_str) > 0) ? split(",", local.central_directory_dns_ips_str) : []
-//}
 locals {
   central_directory_dns_ips = (module.global_variables.route53_enabled && module.global_variables.central_directory_enabled) ? module.dns[0].central_directory_dns_server_ips : []
   client_vpn_dns_servers    = (module.global_variables.route53_enabled && module.global_variables.route53_use_endpoints) ? module.dns[0].route53_endpoint_inbound_ips : (length(local.central_directory_dns_ips) > 0) ? local.central_directory_dns_ips : [cidrhost(module.vpc.vpc_cidr_block, 2)]
@@ -143,7 +132,15 @@ resource "aws_cloudwatch_log_stream" "client-vpn" {
   name           = "client-vpn"
   log_group_name = aws_cloudwatch_log_group.client-vpn[0].name
 }
-# Use this DNS Name in your PC's openvpn client config for connecting to AWS
+
+# Use this DNS Name in your PC's openvpn client config for connecting to AWS.
+# (on Linux) If the ```tun0``` does not have "DNS Domain" set then try :
+#
+#   $ nmcli c modify prpl-aws-client-vpn ipv4.dns-search "parkrunpointsleague.org,amazonaws.com"
+#
+# Note : where "prpl-aws-client-vpn" is the name of the VPN in NetworkManager GUI.
+# Note 2: I add the additional DNS search domain of "amazonaws.com" because things like EKS endpoint are registered in
+#         our Route53 internal zone (not publicly by amazon) and will fail DNS query without it and cannot do kubectl etc...
 output "client_vpn_dns_name" {
   value = aws_ec2_client_vpn_endpoint.client-vpn[0].dns_name
 }

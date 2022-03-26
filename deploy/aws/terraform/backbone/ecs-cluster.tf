@@ -1,4 +1,6 @@
-# Create the ECS Cluster
+# ---------------------------------------------------------------------------------------------------------------------
+# ECS : Create the ECS Cluster
+# ---------------------------------------------------------------------------------------------------------------------
 module "ecs" {
   count                         = contains(var.prpl_deploy_modes, "ECS") ? 1 : 0
   source                        = "../../../../../terraform-modules/terraform-module-aws-ecs-cluster"
