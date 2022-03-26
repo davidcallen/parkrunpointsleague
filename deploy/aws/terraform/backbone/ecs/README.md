@@ -1,1 +1,0 @@
-ECS Cluster on EC2

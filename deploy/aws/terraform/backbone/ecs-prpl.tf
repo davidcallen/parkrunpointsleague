@@ -1,6 +1,7 @@
 module "ecs-prpl" {
   count                             = contains(var.prpl_deploy_modes, "ECS") ? 1 : 0
-  source                            = "./ecs-prpl"
+  source                            = "../../../../../terraform-modules/terraform-module-aws-ecs-prpl"
+  # source                          = "git@github.com:davidcallen/terraform-module-aws-ecs-prpl.git?ref=1.0.0"
   aws_region                        = module.global_variables.aws_region
   name_suffix                       = ""
   environment                       = var.environment

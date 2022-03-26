@@ -1,7 +1,8 @@
 # Create the ECS Cluster
 module "ecs" {
   count                         = contains(var.prpl_deploy_modes, "ECS") ? 1 : 0
-  source                        = "./ecs"
+  source                        = "../../../../../terraform-modules/terraform-module-aws-ecs-cluster"
+  # source                      = "git@github.com:davidcallen/terraform-module-aws-ecs-cluster.git?ref=1.0.0"
   name                          = var.environment.resource_name_prefix
   environment                   = var.environment
   vpc_id                        = module.vpc.vpc_id
