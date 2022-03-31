@@ -17,7 +17,7 @@ module "k8s-jenkins" {
   vpc_public_subnet_cidrs       = module.vpc.public_subnets_cidr_blocks
   vpc_private_subnet_ids        = module.vpc.private_subnets
   vpc_private_subnet_cidrs      = module.vpc.private_subnets_cidr_blocks
-  cluster_name                  = module.k8s[0].k8s_cluster_name
+  cluster_name                  = module.k8s-cluster-eks[0].k8s_cluster_name
   cluster_security_group_efs_id = module.k8s-efs-csi[0].security_group_efs_id
   cluster_ingress_allowed_cidrs = concat(
     module.vpc.private_subnets_cidr_blocks,
@@ -66,8 +66,12 @@ module "k8s-jenkins" {
   }
   jenkins_admin_password = local.secrets_primary.data["jenkins-admin.password"]
   global_default_tags    = module.global_variables.default_tags
-  depends_on             = [module.k8s, module.k8s-efs-csi, module.alb_ingress_controller]
+  depends_on             = [
+    module.k8s-cluster-eks,
+    module.k8s-efs-csi,
+    module.alb_ingress_controller
+  ]
 }
 output "jenkins_pvc_id" {
-  value = module.k8s-jenkins[0].pvc_id
+  value = contains(var.prpl_deploy_modes, "EKS") ? module.k8s-jenkins[0].pvc_id : ""
 }

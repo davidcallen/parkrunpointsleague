@@ -11,4 +11,7 @@ _archive/
 
 */secrets.yml
 
+# Kube config files
+*/kube_config_*.yaml
+
 TODO.md

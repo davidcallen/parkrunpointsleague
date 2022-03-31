@@ -112,7 +112,7 @@ resource "aws_iam_role_policy_attachment" "route53" {
 
 resource "aws_iam_instance_profile" "test" {
   count = (var.route53_testing_mode_enabled) ? 1 : 0
-  name  = "test"
+  name  = "${var.environment.resource_name_prefix}-test"
   role  = aws_iam_role.test[0].name
 }
 
@@ -120,7 +120,7 @@ resource "aws_iam_instance_profile" "test" {
 # Security Groups and Rules
 # ---------------------------------------------------------------------------------------------------------------------
 resource "aws_security_group" "test" {
-  name        = "test"
+  name        = "${var.environment.resource_name_prefix}-test"
   description = "test"
   vpc_id      = var.vpc.vpc_id
   tags = {

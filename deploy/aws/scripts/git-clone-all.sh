@@ -51,20 +51,35 @@ function terraform_modules_git_clone() {
 }
 terraform_modules_git_clone terraform-module-aws-active-directory-security-group-for-linux
 terraform_modules_git_clone terraform-module-aws-asm-secret
+terraform_modules_git_clone terraform-module-aws-cloudwatch-alarms-load-balancer
+terraform_modules_git_clone terraform-module-aws-cloudwatch-logs-windows
+terraform_modules_git_clone terraform-module-aws-ecs-cluster
+terraform_modules_git_clone terraform-module-aws-ecs-prpl
 terraform_modules_git_clone terraform-module-aws-jenkins-controller
+terraform_modules_git_clone terraform-module-aws-k8s-cluster-eks
+terraform_modules_git_clone terraform-module-aws-k8s-efs-csi
+terraform_modules_git_clone terraform-module-aws-k8s-jenkins
+terraform_modules_git_clone terraform-module-aws-k8s-prpl
+terraform_modules_git_clone terraform-module-aws-k8s-rancher-managed-cluster
+terraform_modules_git_clone terraform-module-aws-k8s-rancher-server-infra
+terraform_modules_git_clone terraform-module-aws-k8s-rancher-server-deploy
 terraform_modules_git_clone terraform-module-aws-load-balancer-application
 terraform_modules_git_clone terraform-module-aws-nexus
+terraform_modules_git_clone terraform-module-aws-prpl
 terraform_modules_git_clone terraform-module-aws-simple-ad-admin-linux
+terraform_modules_git_clone terraform-module-iam-simple-ad-admin-win
 terraform_modules_git_clone terraform-module-aws-vpc-flow-logs-s3
 terraform_modules_git_clone terraform-module-iam-jenkins
 terraform_modules_git_clone terraform-module-iam-nexus
-terraform_modules_git_clone terraform-module-iam-simple-ad-admin
 terraform_modules_git_clone terraform-module-iam-packer-build
+terraform_modules_git_clone terraform-module-iam-prpl
 terraform_modules_git_clone terraform-module-iam-s3-bucket-policy-for-users
+terraform_modules_git_clone terraform-module-iam-simple-ad-admin
+terraform_modules_git_clone terraform-module-k8s-dashboard
+terraform_modules_git_clone terraform-module-k8s-rancher-server-deploy
 terraform_modules_git_clone terraform-module-route53-resolver-rules-sharing-cross-accounts
 terraform_modules_git_clone terraform-module-sns-topic-subs
 terraform_modules_git_clone terraform-module-tgw-sharing-cross-accounts
-
 
 cd ${START_PATH}
 echo "Finished cloning repositories : OK"

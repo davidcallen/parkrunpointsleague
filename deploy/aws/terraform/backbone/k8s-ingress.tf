@@ -10,8 +10,8 @@ module "alb_ingress_controller" {
   k8s_cluster_type          = "eks"
   k8s_namespace             = "kube-system"
   aws_region_name           = module.global_variables.aws_region
-  k8s_cluster_name          = module.k8s[0].k8s_cluster_name
+  k8s_cluster_name          = module.k8s-cluster-eks[0].k8s_cluster_name
   aws_vpc_id                = module.vpc.vpc_id
   alb_controller_depends_on = []
-  depends_on                = [module.k8s]
+  depends_on          = [module.k8s-cluster-eks]
 }

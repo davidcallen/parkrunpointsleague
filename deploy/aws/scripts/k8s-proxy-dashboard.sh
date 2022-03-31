@@ -14,7 +14,7 @@ SECRET_NAME=kubernetes-dashboard-token
 if [ "${FULL_CONTROL_ENABLED}" == "TRUE" ] ; then
   # Full control of the cluster
   NAMESPACE=kube-system
-  SECRET_NAME=eks-admin
+  SECRET_NAME=dashboard-admin
 fi
 EKS_ADMIN_TOKEN_SECRET_NAME=$(kubectl${PRPL_KUBECTL_VERSION} -n ${NAMESPACE} get secret | grep ${SECRET_NAME} | awk '{print $1}')
 kubectl${PRPL_KUBECTL_VERSION} -n ${NAMESPACE} describe secret ${EKS_ADMIN_TOKEN_SECRET_NAME}

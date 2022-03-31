@@ -103,3 +103,27 @@ provider "registry.terraform.io/hashicorp/tls" {
     "h1:fUJX8Zxx38e2kBln+zWr1Tl41X+OuiE++REjrEyiOM4=",
   ]
 }
+
+provider "registry.terraform.io/loafoe/ssh" {
+  version     = "1.0.1"
+  constraints = "1.0.1"
+  hashes = [
+    "h1:Wz0Z5utsnd6FBy0olYnuMOtjxqt7cIqXOdGCuG/NXG0=",
+  ]
+}
+
+provider "registry.terraform.io/rancher/rancher2" {
+  version     = "1.22.2"
+  constraints = "1.22.2"
+  hashes = [
+    "h1:wgu+Z+QtPg+V6XG1JKMIBnAx60+SW6Kuw68tmGMabpk=",
+  ]
+}
+
+provider "registry.terraform.io/rancher/rke" {
+  version     = "1.3.0"
+  constraints = "1.3.0"
+  hashes = [
+    "h1:8Xz+agv4LCmYZsEMp0ByP3B9FilTH81pgpoVG4CdW1Q=",
+  ]
+}

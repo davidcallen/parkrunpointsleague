@@ -123,7 +123,6 @@ if [ ${INSTALL_PACKER} == true ] ; then
 fi
 
 # ------------------------------------------  Terraform v0.15.4  -------------------------------------------------------
-set -x
 TERRAFORM_VERSIONS=(0.15.4 1.0.11)
 for TERRAFORM_VERSION in "${TERRAFORM_VERSIONS[@]}" ; do
   INSTALL_TERRAFORM=false
@@ -225,6 +224,35 @@ if [ ${INSTALL_HELM} == true ] ; then
   rm -f ./get_helm.sh
 fi
 
+# ------------------------------------------  rancher  -------------------------------------------------------
+# rancher for rancher cluster v1.22
+RANCHER_VERSION=2.6.4
+INSTALL_RANCHER=false
+if [ ! -f ~/bin/rancher-v${RANCHER_VERSION} ] ; then
+  INSTALL_RANCHER=true
+  echo "Installing rancher v${RANCHER_VERSION}..."
+else
+  INSTALLED_RANCHER_VERSION=$(~/bin/rancher-v${RANCHER_VERSION} version --short --client=true | grep -o -E 'v[0-9]+\.[0-9]+\.[0-9]+')
+  if [ "${INSTALLED_RANCHER_VERSION}" != "v${RANCHER_VERSION}" ] ; then
+    echo "Upgrading rancher ${INSTALLED_RANCHER_VERSION} -> v${RANCHER_VERSION} ..."
+    INSTALL_RANCHER=true
+  fi
+fi
+if [ ${INSTALL_RANCHER} == true ] ; then
+  echo
+  if [ "${OS_NAME}" == "windows" ] ; then
+    curl --silent --fail --location --remote-name https://github.com/rancher/cli/releases/download/v${RANCHER_VERSION}/rancher-${OS_NAME}-amd64-v${RANCHER_VERSION}.zip
+    unzip rancher-${OS_NAME}-amd64-v${RANCHER_VERSION}.zip
+  else
+    curl --silent --fail --location --remote-name https://github.com/rancher/cli/releases/download/v${RANCHER_VERSION}/rancher-${OS_NAME}-amd64-v${RANCHER_VERSION}.tar.xz
+    tar xvf rancher-${OS_NAME}-amd64-v${RANCHER_VERSION}.tar.xz
+  fi
+  [ ! -d ~/bin ] && mkdir ~/bin
+  mv ./rancher-v${RANCHER_VERSION}/rancher ~/bin/rancher-v${RANCHER_VERSION}
+  chmod +x ~/bin/rancher-v${RANCHER_VERSION}
+  ln -s ~/bin/rancher-v${RANCHER_VERSION} ~/bin/rancher
+  rm -rf ./rancher
+fi
 
 # ------------------------------------------  sops  -------------------------------------------------------
 # Mozilla sops for file decrypt+edit+encrypt
@@ -234,7 +262,7 @@ if [ ! -f ~/bin/sops ] ; then
   INSTALL_SOPS=true
   echo "Installing SOPS..."
 else
-  INSTALLED_SOPS_VERSION=$(~/bin/sops version | grep -o -E 'v[0-9]+\.[0-9]+\.[0-9]+')
+  INSTALLED_SOPS_VERSION=$(~/bin/sops --version | grep -o -E 'v[0-9]+\.[0-9]+\.[0-9]+')
   if [ "${INSTALLED_SOPS_VERSION}" != "${SOPS_VERSION}" ] ; then
     echo "Upgrading sops ${INSTALLED_SOPS_VERSION} -> ${SOPS_VERSION} ..."
     INSTALL_SOPS=true

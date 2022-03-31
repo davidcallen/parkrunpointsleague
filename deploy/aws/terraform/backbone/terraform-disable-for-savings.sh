@@ -45,6 +45,7 @@ FILENAMES[7]=k8s-dashboard.tf
 FILENAMES[8]=k8s-ingress.tf
 FILENAMES[9]=k8s-efs-csi.tf
 FILENAMES[10]=k8s-jenkins.tf
+FILENAMES[11]=k8s-cluster-rancher.tf
 # Temp testing of ALB and Route53 DNS validated ACM certs
 # FILENAMES[4]=application-load-balancer-public.tf
 # END : Temp testing ALB

@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # Kubernetes : Create the k8s EKS cluster  (currently using Fargate Nodes)
 # ---------------------------------------------------------------------------------------------------------------------
-module "k8s" {
+module "k8s-cluster-eks" {
   count  = contains(var.prpl_deploy_modes, "EKS") ? 1 : 0
   source = "../../../../../terraform-modules/terraform-module-aws-k8s-cluster-eks"
   # source                  = "git@github.com:davidcallen/terraform-module-aws-k8s-cluster-eks.git?ref=1.0.0"
@@ -21,18 +21,21 @@ module "k8s" {
   )
   global_default_tags = module.global_variables.default_tags
 }
+
 provider "kubernetes" {
-  host                   = module.k8s[0].k8s_cluster_endpoint
-  cluster_ca_certificate = base64decode(module.k8s[0].k8s_cluster_certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.aws_iam_authenticator.token
+  host                   = module.k8s-cluster-eks[0].k8s_cluster_endpoint
+  cluster_ca_certificate = base64decode(module.k8s-cluster-eks[0].k8s_cluster_certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.aws_iam_authenticator[0].token
 }
 provider "helm" {
   kubernetes {
-    host                   = module.k8s[0].k8s_cluster_endpoint
-    token                  = data.aws_eks_cluster_auth.aws_iam_authenticator.token
-    cluster_ca_certificate = base64decode(module.k8s[0].k8s_cluster_certificate_authority[0].data)
+    host                   = module.k8s-cluster-eks[0].k8s_cluster_endpoint
+    token                  = data.aws_eks_cluster_auth.aws_iam_authenticator[0].token
+    cluster_ca_certificate = base64decode(module.k8s-cluster-eks[0].k8s_cluster_certificate_authority[0].data)
   }
 }
+
 data "aws_eks_cluster_auth" "aws_iam_authenticator" {
-  name = module.k8s[0].k8s_cluster_name
+  count  = contains(var.prpl_deploy_modes, "EKS") ? 1 : 0
+  name = module.k8s-cluster-eks[0].k8s_cluster_name
 }

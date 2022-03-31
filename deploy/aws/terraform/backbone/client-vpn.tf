@@ -136,7 +136,7 @@ resource "aws_cloudwatch_log_stream" "client-vpn" {
 # Use this DNS Name in your PC's openvpn client config for connecting to AWS.
 # (on Linux) If the ```tun0``` does not have "DNS Domain" set then try :
 #
-#   $ nmcli c modify prpl-aws-client-vpn ipv4.dns-search "parkrunpointsleague.org,amazonaws.com"
+#   $ nmcli c modify prpl-aws-client-vpn ipv4.dns-search "parkrunpointsleague.org amazonaws.com"
 #
 # Note : where "prpl-aws-client-vpn" is the name of the VPN in NetworkManager GUI.
 # Note 2: I add the additional DNS search domain of "amazonaws.com" because things like EKS endpoint are registered in
