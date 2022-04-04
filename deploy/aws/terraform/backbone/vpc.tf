@@ -100,8 +100,9 @@ module "endpoints" {
 # Shared Transit Gateway : attach VPC
 # ---------------------------------------------------------------------------------------------------------------------
 resource "aws_ec2_transit_gateway_vpc_attachment" "cross-account" {
+  count              = (var.backbone_only_account_mode == false) ? 1 : 0
   subnet_ids         = module.vpc.private_subnets
-  transit_gateway_id = aws_ec2_transit_gateway.tgw.id
+  transit_gateway_id = aws_ec2_transit_gateway.tgw[0].id
   vpc_id             = module.vpc.vpc_id
   tags = merge(module.global_variables.default_tags, var.environment.default_tags, {
     Name = "${var.environment.resource_name_prefix}-tgw-vpc-attachment"
@@ -115,10 +116,10 @@ locals {
   route_table_account_cidr_combination_pairs = setproduct(module.vpc.private_route_table_ids, var.cross_account_access.accounts[*].cidr_block)
 }
 resource "aws_route" "route-cross-account-shared-tgw" {
-  count                  = length(local.route_table_account_cidr_combination_pairs)
+  count                  = (var.backbone_only_account_mode == false) ? length(local.route_table_account_cidr_combination_pairs) : 0
   route_table_id         = element(local.route_table_account_cidr_combination_pairs, count.index)[0]
   destination_cidr_block = element(local.route_table_account_cidr_combination_pairs, count.index)[1]
-  transit_gateway_id     = aws_ec2_transit_gateway_vpc_attachment.cross-account.transit_gateway_id
+  transit_gateway_id     = aws_ec2_transit_gateway_vpc_attachment.cross-account[0].transit_gateway_id
 }
 //
 //# ---------------------------------------------------------------------------------------------------------------------
@@ -142,10 +143,10 @@ locals {
   route_table_external_networks_cidr_combination_pairs = setproduct(module.vpc.private_route_table_ids, module.global_variables.allowed_org_private_network_cidrs)
 }
 resource "aws_route" "route-external-networks-shared-tgw" {
-  count                  = length(local.route_table_external_networks_cidr_combination_pairs)
+  count                  = (var.backbone_only_account_mode == false) ? length(local.route_table_external_networks_cidr_combination_pairs) : 0
   route_table_id         = element(local.route_table_external_networks_cidr_combination_pairs, count.index)[0]
   destination_cidr_block = element(local.route_table_external_networks_cidr_combination_pairs, count.index)[1]
-  transit_gateway_id     = aws_ec2_transit_gateway_vpc_attachment.cross-account.transit_gateway_id
+  transit_gateway_id     = aws_ec2_transit_gateway_vpc_attachment.cross-account[0].transit_gateway_id
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

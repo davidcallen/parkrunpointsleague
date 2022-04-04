@@ -80,6 +80,11 @@ variable "route53_testing_mode_enabled" {
   type        = bool
   default     = false
 }
+variable "backbone_only_account_mode" {
+  description = "True if only want backbone account - for simple testing and cheapness"
+  type        = bool
+  default     = false
+}
 variable "prpl_deploy_modes" {
   description = "Enabled modes for deployment of PRPL : ECS, EC2, EC2-HA, EKS"
   type        = list(string)

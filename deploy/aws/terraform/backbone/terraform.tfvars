@@ -78,3 +78,4 @@ client_vpn = {
 }
 route53_testing_mode_enabled = false
 prpl_deploy_modes            = ["RKE"] # modes : ECS, EC2, EC2-HA, EKS, RKE
+backbone_only_account_mode   = true
