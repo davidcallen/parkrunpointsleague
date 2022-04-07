@@ -232,7 +232,7 @@ if [ ! -f ~/bin/rancher-v${RANCHER_VERSION} ] ; then
   INSTALL_RANCHER=true
   echo "Installing rancher v${RANCHER_VERSION}..."
 else
-  INSTALLED_RANCHER_VERSION=$(~/bin/rancher-v${RANCHER_VERSION} version --short --client=true | grep -o -E 'v[0-9]+\.[0-9]+\.[0-9]+')
+  INSTALLED_RANCHER_VERSION=$(~/bin/rancher-v${RANCHER_VERSION} --version | grep -o -E 'v[0-9]+\.[0-9]+\.[0-9]+')
   if [ "${INSTALLED_RANCHER_VERSION}" != "v${RANCHER_VERSION}" ] ; then
     echo "Upgrading rancher ${INSTALLED_RANCHER_VERSION} -> v${RANCHER_VERSION} ..."
     INSTALL_RANCHER=true
@@ -262,7 +262,8 @@ if [ ! -f ~/bin/sops ] ; then
   INSTALL_SOPS=true
   echo "Installing SOPS..."
 else
-  INSTALLED_SOPS_VERSION=$(~/bin/sops --version | grep -o -E 'v[0-9]+\.[0-9]+\.[0-9]+')
+  # Note use head to ignore any following lines about upgrade to newer version
+  INSTALLED_SOPS_VERSION=$(~/bin/sops --version | head -n 1 | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
   if [ "${INSTALLED_SOPS_VERSION}" != "${SOPS_VERSION}" ] ; then
     echo "Upgrading sops ${INSTALLED_SOPS_VERSION} -> ${SOPS_VERSION} ..."
     INSTALL_SOPS=true
