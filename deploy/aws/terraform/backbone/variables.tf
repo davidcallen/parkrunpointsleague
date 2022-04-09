@@ -86,6 +86,6 @@ variable "backbone_only_account_mode" {
   default     = false
 }
 variable "prpl_deploy_modes" {
-  description = "Enabled modes for deployment of PRPL : ECS, EC2, EC2-HA, EKS"
+  description = "Enabled modes for deployment of PRPL : ECS, EC2, EC2-HA, EKS, RANCH"
   type        = list(string)
 }
