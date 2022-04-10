@@ -1,5 +1,9 @@
 locals {
-  use_lets_encrypt_staging_for_testing = true
+  use_lets_encrypt_staging_for_testing = false
+  # lets_encrypt_url                     = local.use_lets_encrypt_staging_for_testing ? "https://acme-staging-v02.api.letsencrypt.org/directory" : "https://acme-v02.api.letsencrypt.org/directory"
+  ingress_nginx_in_use = true
+  ingress_class        = local.ingress_nginx_in_use ? "nginx" : "traefik"
+  cluster_issuer       = local.use_lets_encrypt_staging_for_testing ? "letsencrypt-staging" : "letsencrypt-prod"
 }
 # ---------------------------------------------------------------------------------------------------------------------
 # IAM
@@ -99,17 +103,54 @@ resource "helm_release" "cert-manager" {
   # We need to use the podDnsConfig.nameservers so cert-manager is using a public DNS not our private Route53 DNS zone.
   # Because the acme TXT records will be created by cert-manager in our Route53 public zone.
   set {
-    name = "podDnsConfig.nameservers[0]"
-    value ="8.8.8.8"
+    name  = "podDnsConfig.nameservers[0]"
+    value = "8.8.8.8"
   }
   set {
-    name = "podDnsConfig.nameservers[1]"
-    value ="1.1.1.1"
+    name  = "podDnsConfig.nameservers[1]"
+    value = "1.1.1.1"
   }
 }
-resource "kubectl_manifest" "cluster-issuer" {
+
+resource "kubectl_manifest" "cluster-issuer-staging" {
   validate_schema = false
-  yaml_body = <<EOF
+  yaml_body       = <<EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  namespace: cert-manager
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: david.c.allen1971@gmail.com
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    # Enable the DNS challenge provider
+    solvers:
+    - selector:
+        dnsZones:
+          - 'backbone.parkrunpointsleague.org'
+          - 'parkrunpointsleague.org'
+      dns01:
+        # Valid values are None and Follow
+        cnameStrategy: Follow
+        route53:
+          region: eu-west-1
+          accessKeyID:
+          hostedZoneID: ${module.dns[0].route53_private_hosted_zone_id}
+          secretAccessKeySecretRef:
+            name: cert-manager-aws-secret-key
+            key: secret-access-key
+EOF
+  depends_on      = [kubectl_manifest.cert-manager-aws-secret-key]
+}
+resource "kubectl_manifest" "cluster-issuer-prod" {
+  validate_schema = false
+  yaml_body       = <<EOF
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -118,7 +159,7 @@ metadata:
 spec:
   acme:
     # The ACME server URL
-    server: ${local.use_lets_encrypt_staging_for_testing} ? "https://acme-staging-v02.api.letsencrypt.org/directory" : "https://acme-v02.api.letsencrypt.org/directory"
+    server: https://acme-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
     email: david.c.allen1971@gmail.com
     # Name of a secret used to store the ACME account private key
@@ -141,15 +182,15 @@ spec:
             name: cert-manager-aws-secret-key
             key: secret-access-key
 EOF
-  depends_on = [kubectl_manifest.cert-manager-aws-secret-key]
+  depends_on      = [kubectl_manifest.cert-manager-aws-secret-key]
 }
 resource "kubectl_manifest" "cert-manager-aws-secret-key" {
-//resource "kubernetes_secret" "cert-manager-aws-secret-key" {
-//  metadata {
-//    name = cert-manager-aws-secret-key
-//  }
+  //resource "kubernetes_secret" "cert-manager-aws-secret-key" {
+  //  metadata {
+  //    name = cert-manager-aws-secret-key
+  //  }
   validate_schema = false
-  yaml_body = <<EOF
+  yaml_body       = <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
@@ -161,12 +202,13 @@ stringData:
 EOF
 }
 
+
 # ---------------------------------------------------------------------------------------------------------------------
 # certificate requests and ingress
 # ---------------------------------------------------------------------------------------------------------------------
 resource "kubectl_manifest" "certificate-kube-backbone" {
   validate_schema = false
-  yaml_body = <<EOF
+  yaml_body       = <<EOF
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -175,24 +217,24 @@ metadata:
 spec:
   secretName: kube-backbone-prpl-tls
   issuerRef:
-    name: letsencrypt-prod
+    name: ${local.cluster_issuer}
     kind: ClusterIssuer
   commonName: 'kube.backbone.parkrunpointsleague.org'
   dnsNames:
     - 'kube.backbone.parkrunpointsleague.org'
 EOF
-  depends_on = [kubectl_manifest.cluster-issuer]
+  depends_on      = [kubectl_manifest.cluster-issuer-staging, kubectl_manifest.cluster-issuer-prod]
 }
 resource "kubectl_manifest" "ingress-kube-backbone" {
   validate_schema = false
-  yaml_body = <<EOF
+  yaml_body       = <<EOF
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: demo
   annotations:
-    kubernetes.io/ingress.class: traefik
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: ${local.ingress_class}
+    cert-manager.io/cluster-issuer: ${local.cluster_issuer}
   labels:
     app: demo
 spec:
@@ -212,7 +254,7 @@ spec:
         - kube.backbone.parkrunpointsleague.org
       secretName: kube-backbone-prpl-tls
 EOF
-  depends_on = [kubectl_manifest.cluster-issuer]
+  depends_on      = [kubectl_manifest.cluster-issuer-staging, kubectl_manifest.cluster-issuer-prod]
 }
 
 

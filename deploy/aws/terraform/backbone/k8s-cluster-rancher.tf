@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # Kubernetes : Create the k8s Rancher Server cluster and Managed Cluster (and register it with the Rancher Server)
 # Note : to conveniently destroy these resources and dodge the provider issue use :
-#   aws-vault exec prpl-$(basename $(realpath .)) -- terraform destroy --target module.k8s-rancher-managed-cluster
+#   aws-vault exec prpl-$(basename $(realpath .)) -- terraform destroy --target module.k8s-rancher-managed-cluster --target module.k8s-rancher-self-provisioned-managed-cluster
 # and then
 #   aws-vault exec prpl-$(basename $(realpath .)) -- terraform destroy --target module.k8s-rancher-server-infra --target module.k8s-rancher-server-deploy
 # ---------------------------------------------------------------------------------------------------------------------
@@ -30,11 +30,12 @@ module "k8s-rancher-server-infra" {
     module.global_variables.allowed_org_private_network_cidrs,
     module.global_variables.allowed_org_vpn_cidrs
   )
-  ec2_instance_type   = "t3a.medium"
+  ec2_instance_type   = "t3a.small"
   global_default_tags = merge(module.global_variables.default_tags, var.environment.default_tags)
 }
 # Helm provider
 provider "helm" {
+  alias = "rancher-server"
   kubernetes {
     config_path = module.k8s-rancher-server-deploy.kube_config_yaml_filename
   }
@@ -52,7 +53,7 @@ provider "rancher2" {
 module "k8s-rancher-server-deploy" {
   # count  = contains(var.prpl_deploy_modes, "RANCHER") ? 1 : 0
   source = "../../../../../terraform-modules/terraform-module-k8s-rancher-server-deploy"
-  # source                         = "git@github.com:davidcallen/terraform-module-k8s-rancher-server-deploy.git?ref=1.0.0"
+  # source                                = "git@github.com:davidcallen/terraform-module-k8s-rancher-server-deploy.git?ref=1.0.0"
   aws_region                              = module.global_variables.aws_region
   node_public_ip                          = (module.k8s-rancher-server-infra[0].rancher_server_public_ip != "") ? module.k8s-rancher-server-infra[0].rancher_server_public_ip : module.k8s-rancher-server-infra[0].rancher_server_private_ip
   node_internal_ip                        = module.k8s-rancher-server-infra[0].rancher_server_private_ip
@@ -64,10 +65,11 @@ module "k8s-rancher-server-deploy" {
   rancher_server_bootstrap_admin_password = local.rancher_server_admin_password
   rancher_server_use_self_signed_certs    = true
   cert_manager_version                    = "1.5.3"
-//  aws_user_credential_access_key          = local.rancher_server_aws_user_access_key
-//  aws_user_credential_secret_key          = local.rancher_server_aws_user_secret_key
+  //  aws_user_credential_access_key          = local.rancher_server_aws_user_access_key
+  //  aws_user_credential_secret_key          = local.rancher_server_aws_user_secret_key
   providers = {
     rancher2.bootstrap = rancher2.bootstrap
+    helm               = helm.rancher-server
   }
 }
 # Rancher2 administration provider
@@ -138,21 +140,42 @@ module "k8s-rancher-self-provisioned-managed-cluster" {
     module.global_variables.allowed_org_private_network_cidrs,
     module.global_variables.allowed_org_vpn_cidrs
   )
-  ec2_instance_type                        = "t3a.medium"
-  docker_version                           = "20.10" # Note: this version will need to be compatible with the AMI
-  windows_prefered_cluster                 = false
-  kubernetes_distribution                  = "RKE"
-  kubernetes_version                       = "v1.22.7-rancher1-2" # or "v1.21.8+k3s1" for k3s install on managed-cluster
-  rancher_server_use_self_signed_certs     = true
+  ec2_instance_type                    = "t3a.medium"
+  docker_version                       = "20.10" # Note: this version will need to be compatible with the AMI
+  windows_prefered_cluster             = false
+  kubernetes_distribution              = "RKE"
+  kubernetes_version                   = "v1.22.7-rancher1-2" # or "v1.21.8+k3s1" for k3s install on managed-cluster
+  rancher_server_use_self_signed_certs = true
   # rancher_server_aws_cloud_credential_name = module.k8s-rancher-server-deploy.rancher_server_aws_cloud_credential_name
-  k3s_deploy_traefik                       = false
-  install_nginx_ingress                    = true
-  aws_region                               = module.global_variables.aws_region
-  aws_zone                                 = module.global_variables.aws_zones[module.global_variables.aws_zone_preferred_placement_index] # Currently limited to single-zone
-  aws_user_credential_access_key          = local.rancher_server_aws_user_access_key
-  aws_user_credential_secret_key          = local.rancher_server_aws_user_secret_key
-  global_default_tags                      = module.global_variables.default_tags
+  k3s_deploy_traefik             = false
+  install_nginx_ingress          = true
+  aws_region                     = module.global_variables.aws_region
+  aws_zone                       = module.global_variables.aws_zones[module.global_variables.aws_zone_preferred_placement_index] # Currently limited to single-zone
+  aws_user_credential_access_key = local.rancher_server_aws_user_access_key
+  aws_user_credential_secret_key = local.rancher_server_aws_user_secret_key
+  global_default_tags            = module.global_variables.default_tags
   providers = {
     rancher2.admin = rancher2.admin
   }
+}
+# Helm provider for our managed workload cluster
+provider "helm" {
+  kubernetes {
+    host                   = module.k8s-rancher-self-provisioned-managed-cluster.cluster_host
+    cluster_ca_certificate = base64decode(module.k8s-rancher-self-provisioned-managed-cluster.cluster_ca_certificate)
+    token                  = module.k8s-rancher-self-provisioned-managed-cluster.token
+  }
+}
+# Kubernetes provider for our managed workload cluster
+provider "kubernetes" {
+  host                   = module.k8s-rancher-self-provisioned-managed-cluster.cluster_host
+  cluster_ca_certificate = base64decode(module.k8s-rancher-self-provisioned-managed-cluster.cluster_ca_certificate)
+  token                  = module.k8s-rancher-self-provisioned-managed-cluster.token
+}
+# Kubectl provider for our managed workload cluster
+provider "kubectl" {
+  host                   = module.k8s-rancher-self-provisioned-managed-cluster.cluster_host
+  cluster_ca_certificate = base64decode(module.k8s-rancher-self-provisioned-managed-cluster.cluster_ca_certificate)
+  token                  = module.k8s-rancher-self-provisioned-managed-cluster.token
+  load_config_file = false
 }
