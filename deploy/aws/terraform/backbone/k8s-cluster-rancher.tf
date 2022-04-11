@@ -30,7 +30,7 @@ module "k8s-rancher-server-infra" {
     module.global_variables.allowed_org_private_network_cidrs,
     module.global_variables.allowed_org_vpn_cidrs
   )
-  ec2_instance_type   = "t3a.small"
+  ec2_instance_type   = "t3a.medium"
   global_default_tags = merge(module.global_variables.default_tags, var.environment.default_tags)
 }
 # Helm provider

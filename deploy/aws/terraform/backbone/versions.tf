@@ -32,6 +32,10 @@ terraform {
       source  = "hashicorp/helm"
       version = "= 2.4.1"
     }
+    kubectl = {
+      source = "gavinbunney/kubectl"
+      version = "1.14.0"
+    }
     rke = {
       source  = "rancher/rke"
       version = "= 1.3.0"
