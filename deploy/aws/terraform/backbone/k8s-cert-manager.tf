@@ -6,6 +6,7 @@ locals {
   ingress_nginx_in_use                 = true
   ingress_class                        = local.ingress_nginx_in_use ? "nginx" : "traefik"
   cluster_issuer                       = local.use_lets_encrypt_staging_for_testing ? "letsencrypt-staging" : "letsencrypt-prod"
+  use_kube2iam                         = true
 }
 # TODO : Try this module instead of mine. https://registry.terraform.io/modules/terraform-iaac/cert-manager/kubernetes/latest
 module "k8s-cert-manager" {
@@ -19,21 +20,26 @@ module "k8s-cert-manager" {
   use_lets_encrypt_staging_for_testing = local.use_lets_encrypt_staging_for_testing
   ingress_nginx_in_use                 = local.ingress_nginx_in_use
   letsencrypt_contact_email            = "david.c.allen1971@gmail.com"
-  cert_manager_aws_user_access_key     = local.secrets_primary.data["cert-manager-aws-user.access-key"]
-  cert_manager_aws_user_secret_key     = local.secrets_primary.data["cert-manager-aws-user.secret-key"]
   dns_zones = [
     "${var.environment.name}-${module.global_variables.org_domain_name}",
     module.global_variables.org_domain_name
   ]
+  # Leave AWS User credentials blank since Kube2iam will
+  cert_manager_aws_user_access_key     = (local.use_kube2iam) ? "" : local.secrets_primary.data["cert-manager-aws-user.access-key"]
+  cert_manager_aws_user_secret_key     = (local.use_kube2iam) ? "" : local.secrets_primary.data["cert-manager-aws-user.secret-key"]
+  iam_config = {
+    use_instance_profile_role  = local.use_kube2iam
+    instance_profile_role_name = module.k8s-rancher-self-provisioned-managed-cluster.instance_profile_role_name
+  }
   global_default_tags = module.global_variables.default_tags
-  depends_on          = [module.k8s-rancher-self-provisioned-managed-cluster]
+  depends_on          = [module.k8s-rancher-self-provisioned-managed-cluster, helm_release.kube2iam]
 }
 data "aws_route53_zone" "public" {
   name = "${var.environment.name}.${module.global_variables.org_domain_name}"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Certificate requests and ingress for demo
+# Certificate requests and ingress for demo app
 # ---------------------------------------------------------------------------------------------------------------------
 resource "kubectl_manifest" "certificate-kube-backbone" {
   validate_schema = false
