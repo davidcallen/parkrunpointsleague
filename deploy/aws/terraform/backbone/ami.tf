@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
   ami_owner_centos_org = "679593333241"
+  ami_owner_canonical = "099720109477"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -41,4 +42,25 @@ data "aws_ami" "centos-7" {
     values = ["hvm"]
   }
   owners = [local.ami_owner_centos_org]
+}
+
+data "aws_ami" "ubuntu_20_04" {
+  most_recent = true
+  owners      = [local.ami_owner_canonical]
+  filter {
+    name   = "name"
+    values = ["ubuntu-minimal/images/*/ubuntu-focal-20.04-*"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 }

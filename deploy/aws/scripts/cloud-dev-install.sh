@@ -37,7 +37,6 @@ if [ "${OS_NAME}" == "linux" ] ; then
 fi
 
 
-HELM_VERSION=v3.7.1
 
 # TODO : convert this script to ansible ...
 
@@ -203,6 +202,7 @@ fi
 
 # ------------------------------------------  Helm  -------------------------------------------------------
 # Helm for kubernetes
+HELM_VERSION=v3.7.1
 INSTALL_HELM=false
 if [ ! -f ~/bin/helm ] ; then
   INSTALL_HELM=true
@@ -275,6 +275,15 @@ if [ ${INSTALL_SOPS} == true ] ; then
   chmod +x sops-v${SOPS_VERSION}.linux
   mv sops-v${SOPS_VERSION}.linux ~/bin
   ln -s ~/bin/sops-v${SOPS_VERSION}.linux ~/bin/sops
+fi
+
+# ------------------------------------------  teleport  -------------------------------------------------------
+
+TELEPORT_VERSION=9.0.4
+if [ "${OS_NAME}" == "linux" ] ; then
+  sudo yum install -y https://get.gravitational.com/teleport-${TELEPORT_VERSION}-1.x86_64.rpm
+else
+  err "Havent implemented windows install for teleport yet"
 fi
 
 # ------------------------------------------  cmctl  -------------------------------------------------------
