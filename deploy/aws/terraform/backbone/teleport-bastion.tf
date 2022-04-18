@@ -1,3 +1,6 @@
+# ---------------------------------------------------------------------------------------------------------------------
+# Deploy a Teleport server (all-in-one, non-HA) and a test ec2 instance to join the teleport cluster
+# ---------------------------------------------------------------------------------------------------------------------
 module "teleport-bastion" {
   source = "../../../../../terraform-modules/terraform-module-aws-teleport"
   # source                    = "git@github.com:davidcallen/terraform-module-aws-teleport.git?ref=1.0.0"
@@ -41,6 +44,9 @@ module "teleport-bastion" {
   default_tags = merge(module.global_variables.default_tags, var.environment.default_tags)
 }
 
+# ---------------------------------------------------------------------------------------------------------------------
+# Teleport test ec2 instance to join the teleport cluster
+# ---------------------------------------------------------------------------------------------------------------------
 resource "aws_instance" "teleport-bastion-test" {
   ami           = data.aws_ami.centos-7.id
   instance_type = "t3a.nano"
@@ -201,7 +207,6 @@ resource "aws_iam_role_policy_attachment" "teleport-test-route53" {
   role       = aws_iam_role.teleport-test.name
   policy_arn = aws_iam_policy.teleport-test-route53.arn
 }
-
 resource "aws_iam_instance_profile" "teleport-test" {
   name  = "${var.environment.resource_name_prefix}-teleport-test"
   role  = aws_iam_role.teleport-test.name
