@@ -48,7 +48,7 @@ output "resource_deletion_protection" {
 # Allowed Organisation's Public (over internet) network CIDRs
 output "allowed_org_public_network_cidrs" {
   value = [
-    "90.250.8.71/32" # Home
+    "86.2.50.11/32" # Home
   ]
 }
 # Allowed Organisation's Private (over VPN) network CIDRs.
